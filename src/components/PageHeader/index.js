@@ -113,17 +113,17 @@ export default class PageHeader extends PureComponent {
       ) : null;
     });
     // Add home breadcrumbs to your head
-    extraBreadcrumbItems.unshift(
-      <Breadcrumb.Item key="home">
-        {createElement(
-          linkElement,
-          {
-            [linkElement === 'a' ? 'href' : 'to']: '/',
-          },
-          '首页'
-        )}
-      </Breadcrumb.Item>
-    );
+    // extraBreadcrumbItems.unshift(
+    //   <Breadcrumb.Item key="home">
+    //     {createElement(
+    //       linkElement,
+    //       {
+    //         [linkElement === 'a' ? 'href' : 'to']: '/',
+    //       },
+    //       '首页'
+    //     )}
+    //   </Breadcrumb.Item>
+    // );
     return (
       <Breadcrumb className={styles.breadcrumb} separator={breadcrumbSeparator}>
         {extraBreadcrumbItems}

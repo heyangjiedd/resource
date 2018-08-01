@@ -125,7 +125,7 @@ class BasicLayout extends React.PureComponent {
   getPageTitle() {
     const { routerData, location } = this.props;
     const { pathname } = location;
-    let title = 'Ant Design Pro';
+    let title = '政务信息资源中心';
     let currRouterData = null;
     // match params path
     Object.keys(routerData).forEach(key => {
@@ -134,7 +134,7 @@ class BasicLayout extends React.PureComponent {
       }
     });
     if (currRouterData && currRouterData.name) {
-      title = `${currRouterData.name} - Ant Design Pro`;
+      title = `${currRouterData.name} - 政务信息资源中心`;
     }
     return title;
   }
@@ -261,29 +261,29 @@ class BasicLayout extends React.PureComponent {
           </Content>
           <Footer style={{ padding: 0 }}>
             <GlobalFooter
-              links={[
-                {
-                  key: 'Pro 首页',
-                  title: 'Pro 首页',
-                  href: 'http://pro.ant.design',
-                  blankTarget: true,
-                },
-                {
-                  key: 'github',
-                  title: <Icon type="github" />,
-                  href: 'https://github.com/ant-design/ant-design-pro',
-                  blankTarget: true,
-                },
-                {
-                  key: 'Ant Design',
-                  title: 'Ant Design',
-                  href: 'http://ant.design',
-                  blankTarget: true,
-                },
-              ]}
+              // links={[
+              //   {
+              //     key: 'Pro 首页',
+              //     title: 'Pro 首页',
+              //     href: 'http://pro.ant.design',
+              //     blankTarget: true,
+              //   },
+              //   {
+              //     key: 'github',
+              //     title: <Icon type="github" />,
+              //     href: 'https://github.com/ant-design/ant-design-pro',
+              //     blankTarget: true,
+              //   },
+              //   {
+              //     key: 'Ant Design',
+              //     title: 'Ant Design',
+              //     href: 'http://ant.design',
+              //     blankTarget: true,
+              //   },
+              // ]}
               copyright={
                 <Fragment>
-                  Copyright <Icon type="copyright" /> 2018 蚂蚁金服体验技术部出品
+                  Copyright <Icon type="copyright" /> 2018 智勤数码科技有限股份有限公司出品
                 </Fragment>
               }
             />

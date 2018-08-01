@@ -2,6 +2,68 @@ import { isUrl } from '../utils/utils';
 
 const menuData = [
   {
+    name: '系统首页',
+    icon: 'home',
+    path: 'main',
+  },
+  {
+    name: '基础配置',
+    icon: 'setting',
+    path: 'base',
+    children: [
+      {
+        name: '资源分类管理',
+        path: 'resourceClassify',
+      },
+      {
+        name: '中心数据源管理',
+        path: 'centralDataSource',
+      },
+    ],
+  },
+  {
+    name: '目录库',
+    icon: 'database',
+    path: 'content',
+  },
+  {
+    name: '资源库',
+    icon: 'laptop',
+    path: 'resource',
+    children: [
+      {
+        name: '数据库资源',
+        path: 'projects',
+      },
+      {
+        name: '文件资源',
+        path: 'projects1',
+      },
+      {
+        name: '服务资源',
+        authority: 'admin',
+        path: 'projects2',
+      },
+    ],
+  },
+  {
+    name: '衍生库',
+    icon: 'appstore-o',
+    path: 'derivation',
+    children: [
+      {
+        name: '衍生资源分类管理',
+        path: 'projects',
+      },
+      {
+        name: '衍生资源库管理',
+        path: 'projects1',
+      }
+    ],
+  },
+
+
+  {
     name: 'dashboard',
     icon: 'dashboard',
     path: 'dashboard',

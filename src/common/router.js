@@ -74,6 +74,34 @@ export const getRouterData = app => {
     '/': {
       component: dynamicWrapper(app, ['user', 'login'], () => import('../layouts/BasicLayout')),
     },
+    '/main': {
+      component: dynamicWrapper(app, ['list'], () => import('../routes/List/TableList')),
+    },
+    '/base/resourceClassify': {
+      component: dynamicWrapper(app, ['list'], () => import('../routes/Base/resourceClassify')),
+    },
+    '/base/centralDataSource': {
+      component: dynamicWrapper(app, ['list'], () => import('../routes/Base/centralDataSource')),
+    },
+    '/content': {
+      component: dynamicWrapper(app, ['list'], () => import('../routes/List/TableList')),
+    },
+    '/resource/projects': {
+      component: dynamicWrapper(app, ['list'], () => import('../routes/List/TableList')),
+    },
+    '/resource/projects1': {
+      component: dynamicWrapper(app, ['list'], () => import('../routes/List/TableList')),
+    },
+    '/resource/projects2': {
+      component: dynamicWrapper(app, ['list'], () => import('../routes/List/TableList')),
+    },
+    '/derivation/projects': {
+      component: dynamicWrapper(app, ['list'], () => import('../routes/List/TableList')),
+    },
+    '/derivation/projects1': {
+      component: dynamicWrapper(app, ['list'], () => import('../routes/List/TableList')),
+    },
+
     '/dashboard/analysis': {
       component: dynamicWrapper(app, ['chart'], () => import('../routes/Dashboard/Analysis')),
     },

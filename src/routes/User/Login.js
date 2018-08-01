@@ -76,15 +76,15 @@ export default class LoginPage extends Component {
             </a>
           </div>
           <Submit loading={submitting}>登录</Submit>
-          <div className={styles.other}>
-            其他登录方式
-            <Icon className={styles.icon} type="alipay-circle" />
-            <Icon className={styles.icon} type="taobao-circle" />
-            <Icon className={styles.icon} type="weibo-circle" />
-            <Link className={styles.register} to="/user/register">
-              注册账户
-            </Link>
-          </div>
+          {/*<div className={styles.other}>*/}
+            {/*其他登录方式*/}
+            {/*<Icon className={styles.icon} type="alipay-circle" />*/}
+            {/*<Icon className={styles.icon} type="taobao-circle" />*/}
+            {/*<Icon className={styles.icon} type="weibo-circle" />*/}
+            {/*<Link className={styles.register} to="/user/register">*/}
+              {/*注册账户*/}
+            {/*</Link>*/}
+          {/*</div>*/}
         </Login>
       </div>
     );
