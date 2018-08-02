@@ -397,31 +397,29 @@ export default class ResourceClassify extends PureComponent {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
     };
-    console.log(columns);
     return (
       <PageHeaderLayout>
-        <Col xl={6} lg={6} md={6} sm={6} xs={6} style={{ marginBottom: 24 }}>
-            <SimpleTree
-              selectedRows={selectedRows}
-              loading={loading}
-              data={data}
-              columns={columns}
-              onSelectRow={this.handleSelectRows}
-              onChange={this.handleStandardTableChange}
-            />
-        </Col>
-        <Col xl={18} lg={16} md={16} sm={16} xs={16} style={{ marginBottom: 24 }}>
-          <Card bordered={false}>
+        {/*<Col xl={6} lg={6} md={6} sm={6} xs={6} style={{ marginBottom: 24 }}>*/}
+        <div className={styles.flexMain}>
+          <SimpleTree
+            selectedRows={selectedRows}
+            loading={loading}
+            data={data}
+            columns={columns}
+            onSelectRow={this.handleSelectRows}
+            onChange={this.handleStandardTableChange}
+          />
+          <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
               {/*<div className={styles.tableListForm}>{this.renderForm()}</div>*/}
               <div className={styles.tableListOperator}>
                 <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
                   添加同级
                 </Button>
-                <Button icon="plus" type="primary" onClick={() => this.handleModalVisible1(true)}>
+                <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
                   添加下级
                 </Button>
-                <Button icon="remove" onClick={() => this.handleModalVisible2(true)}>
+                <Button icon="remove" onClick={() => this.handleModalVisible(true)}>
                   批量删除
                 </Button>
                 {selectedRows.length > 0 && (
@@ -445,7 +443,11 @@ export default class ResourceClassify extends PureComponent {
               />
             </div>
           </Card>
-        </Col>
+        </div>
+        {/*</Col>*/}
+        {/*<Col xl={18} lg={16} md={16} sm={16} xs={16} style={{ marginBottom: 24 }}>*/}
+
+        {/*</Col>*/}
         <CreateForm {...parentMethods} modalVisible={modalVisible}/>
       </PageHeaderLayout>
     );

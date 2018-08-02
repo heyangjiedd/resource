@@ -1,37 +1,121 @@
 import React, { PureComponent, Fragment } from 'react';
-import { Tree  } from 'antd';
+import { Tree ,Input } from 'antd';
 import styles from './index.less';
+
+
 const TreeNode = Tree.TreeNode;
+const Search = Input.Search;
+
+const x = 3;
+const y = 2;
+const z = 1;
+const gData = [];
+
+const generateData = (_level, _preKey, _tns) => {
+  const preKey = _preKey || '0';
+  const tns = _tns || gData;
+
+  const children = [];
+  for (let i = 0; i < x; i++) {
+    const key = `${preKey}-${i}`;
+    tns.push({ title: key, key });
+    if (i < y) {
+      children.push(key);
+    }
+  }
+  if (_level < 0) {
+    return tns;
+  }
+  const level = _level - 1;
+  children.forEach((key, index) => {
+    tns[index].children = [];
+    return generateData(level, key, tns[index].children);
+  });
+};
+generateData(z);
+
+const dataList = [];
+const generateList = (data) => {
+  for (let i = 0; i < data.length; i++) {
+    const node = data[i];
+    const key = node.key;
+    dataList.push({ key, title: key });
+    if (node.children) {
+      generateList(node.children, node.key);
+    }
+  }
+};
+generateList(gData);
+
+const getParentKey = (key, tree) => {
+  let parentKey;
+  for (let i = 0; i < tree.length; i++) {
+    const node = tree[i];
+    if (node.children) {
+      if (node.children.some(item => item.key === key)) {
+        parentKey = node.key;
+      } else if (getParentKey(key, node.children)) {
+        parentKey = getParentKey(key, node.children);
+      }
+    }
+  }
+  return parentKey;
+};
 
 class SimpleTree extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {};
+  state = {
+    expandedKeys: [],
+    searchValue: '',
+    autoExpandParent: true,
+    ss:{width:'220px'},
   }
 
-  componentWillReceiveProps(nextProps) {
-    // clean state
-
+  onExpand = (expandedKeys) => {
+    this.setState({
+      expandedKeys,
+      autoExpandParent: false,
+    });
+  }
+  onclickss = ()=>{
+    this.setState({
+      ss:{transform: 'translate(50px)'},
+    });
   }
   render() {
+    const { searchValue, expandedKeys, autoExpandParent,ss } = this.state;
+    const loop = data => data.map((item) => {
+      const index = item.title.indexOf(searchValue);
+      const beforeStr = item.title.substr(0, index);
+      const afterStr = item.title.substr(index + searchValue.length);
+      const title = index > -1 ? (
+        <span>
+          {beforeStr}
+          <span style={{ color: '#f50' }}>{searchValue}</span>
+          {afterStr}
+        </span>
+      ) : <span>{item.title}</span>;
+      if (item.children) {
+        return (
+          <TreeNode key={item.key} title={title}>
+            {loop(item.children)}
+          </TreeNode>
+        );
+      }
+      return <TreeNode key={item.key} title={title} />;
+    });
     return (
-      <Tree className={styles.tree_back_ground}
-        defaultExpandedKeys={['0-0-0', '0-0-1']}
-        defaultSelectedKeys={['0-0-0', '0-0-1']}
-        defaultCheckedKeys={['0-0-0', '0-0-1']}
-        onSelect={this.onSelect}
-        onCheck={this.onCheck}
-      >
-        <TreeNode title="parent 1" key="0-0">
-          <TreeNode title="parent 1-0" key="0-0-0" disabled>
-            <TreeNode title="leaf" key="0-0-0-0" disableCheckbox />
-            <TreeNode title="leaf" key="0-0-0-1" />
-          </TreeNode>
-          <TreeNode title="parent 1-1" key="0-0-1">
-            <TreeNode title={<span style={{ color: '#1890ff' }}>sss</span>} key="0-0-1-0" />
-          </TreeNode>
-        </TreeNode>
-      </Tree>
+      <div className={styles.tree_back_ground} style={ss}>
+        <button onClick={ this.onclickss}>收缩</button>
+        {/*<Search style={{ marginBottom: 8 }} placeholder="Search" onChange={this.onChange} />*/}
+        <Tree
+
+          onExpand={this.onExpand}
+          expandedKeys={expandedKeys}
+          autoExpandParent={autoExpandParent}
+        >
+          {loop(gData)}
+        </Tree>
+      </div>
     );
   }
 }
