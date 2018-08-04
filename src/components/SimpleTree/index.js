@@ -1,5 +1,5 @@
 import React, { PureComponent, Fragment } from 'react';
-import { Tree ,Input } from 'antd';
+import { Tree ,Input ,Icon } from 'antd';
 import styles from './index.less';
 
 
@@ -63,11 +63,16 @@ const getParentKey = (key, tree) => {
 };
 
 class SimpleTree extends PureComponent {
-  state = {
-    expandedKeys: [],
-    searchValue: '',
-    autoExpandParent: true,
-    ss:{width:'220px'},
+  constructor(props) {
+    super(props);
+    const { title } = props;
+    this.state = {
+      title,
+      expandedKeys: [],
+      searchValue: '',
+      autoExpandParent: true,
+      ss:{width:'220px'},
+    };
   }
 
   onExpand = (expandedKeys) => {
@@ -76,13 +81,13 @@ class SimpleTree extends PureComponent {
       autoExpandParent: false,
     });
   }
-  onclickss = ()=>{
+  toggle = ()=>{
     this.setState({
       ss:{transform: 'translate(50px)'},
     });
   }
   render() {
-    const { searchValue, expandedKeys, autoExpandParent,ss } = this.state;
+    const { searchValue, expandedKeys, autoExpandParent,ss,title } = this.state;
     const loop = data => data.map((item) => {
       const index = item.title.indexOf(searchValue);
       const beforeStr = item.title.substr(0, index);
@@ -105,7 +110,12 @@ class SimpleTree extends PureComponent {
     });
     return (
       <div className={styles.tree_back_ground} style={ss}>
-        <button onClick={ this.onclickss}>收缩</button>
+        <div className={styles.tree_title}>{title}
+        <Icon
+          className={styles.trigger}
+          type={'menu-fold'}
+          onClick={this.toggle}
+        /></div>
         {/*<Search style={{ marginBottom: 8 }} placeholder="Search" onChange={this.onChange} />*/}
         <Tree
 

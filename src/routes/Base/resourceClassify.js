@@ -27,6 +27,7 @@ import styles from './resourceClassify.less';
 
 const FormItem = Form.Item;
 const { Option } = Select;
+const { TextArea } = Input;
 const getValue = obj =>
   Object.keys(obj)
     .map(key => obj[key])
@@ -35,7 +36,7 @@ const statusMap = ['default', 'processing', 'success', 'error'];
 const status = ['关闭', '运行中', '已上线', '异常'];
 
 const CreateForm = Form.create()(props => {
-  const { modalVisible, form, handleAdd, handleModalVisible } = props;
+  const { modalVisible, form, handleAdd, handleModalVisible,listItemData } = props;
   const okHandle = () => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
@@ -43,17 +44,64 @@ const CreateForm = Form.create()(props => {
       handleAdd(fieldsValue);
     });
   };
+  const formItemLayout = {
+    labelCol: {
+      xs: { span: 24 },
+      sm: { span: 7 },
+    },
+    wrapperCol: {
+      xs: { span: 24 },
+      sm: { span: 17 },
+      md: { span: 17 },
+    },
+  };
+  const normalizeAll = (value, prevValue = []) => {
+    debugger
+    if (value.indexOf('All') >= 0 && prevValue.indexOf('All') < 0) {
+      return ['All', 'Apple', 'Pear', 'Orange'];
+    }
+    if (value.indexOf('All') < 0 && prevValue.indexOf('All') >= 0) {
+      return [];
+    }
+    return value;
+  };
   return (
     <Modal
-      title="新建规则"
+      title="编辑分类"
       visible={modalVisible}
       onOk={okHandle}
       onCancel={() => handleModalVisible()}
     >
-      <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="描述">
-        {form.getFieldDecorator('desc', {
-          rules: [{ required: true, message: 'Please input some description...' }],
+      <FormItem {...formItemLayout} label="父级分类名称">
+        {form.getFieldDecorator('fjflmc', {
+          rules: [{ required: true, message: 'Please input some description...' }],initialValue:listItemData.owner
         })(<Input placeholder="请输入"/>)}
+      </FormItem>
+      <FormItem {...formItemLayout} label="分类名称">
+        {form.getFieldDecorator('flmc', {
+          rules: [{ required: true, message: 'Please input some description...' }],initialValue:listItemData.owner
+        })(<Input defaultValue={listItemData.owner} placeholder="请输入"/>)}
+      </FormItem>
+      <FormItem {...formItemLayout} label="排序号">
+        {form.getFieldDecorator('pxh', {
+          rules: [{ required: true, message: 'Please input some description...' }],initialValue:listItemData.owner
+        })(<Input placeholder="请输入"/>)}
+      </FormItem>
+      <FormItem {...formItemLayout} label="分类描述">
+        {form.getFieldDecorator('flms', {
+          rules: [
+            {
+              required: true,
+              message: '请输入分类描述',
+            },
+          ],initialValue:listItemData.owner
+        })(
+          <TextArea
+            style={{ minHeight: 32 }}
+            placeholder="请输入你的分类描述"
+            rows={4}
+          />
+        )}
       </FormItem>
     </Modal>
   );
@@ -70,6 +118,7 @@ export default class ResourceClassify extends PureComponent {
     expandForm: false,
     selectedRows: [],
     formValues: {},
+    listItemData:{},
   };
 
   componentDidMount() {
@@ -322,67 +371,54 @@ export default class ResourceClassify extends PureComponent {
       rule: { data },
       loading,
     } = this.props;
-    const { selectedRows, modalVisible } = this.state;
-
+    const { selectedRows, modalVisible,listItemData } = this.state;
+    const parentMethods = {
+      handleAdd: this.handleAdd,
+      handleModalVisible: this.handleModalVisible,
+    };
     const columns = [
       {
-        title: '规则编号',
+        title: '序号',
         dataIndex: 'no',
       },
       {
-        title: '描述',
+        title: '分类名称',
         dataIndex: 'description',
       },
       {
-        title: '次数',
+        title: '下级分类',
         dataIndex: 'callNo',
         sorter: true,
-        align: 'right',
-        render: val => `${val} 万`,
-        // mark to display a total number
-        needTotal: true,
       },
       {
-        title: '状态',
+        title: '分类结构',
         dataIndex: 'status',
-        filters: [
-          {
-            text: status[0],
-            value: 0,
-          },
-          {
-            text: status[1],
-            value: 1,
-          },
-          {
-            text: status[2],
-            value: 2,
-          },
-          {
-            text: status[3],
-            value: 3,
-          },
-        ],
-        onFilter: (value, record) => record.status.toString() === value,
-        render(val) {
-          return <Badge status={statusMap[val]} text={status[val]}/>;
-        },
       },
       {
-        title: '更新时间',
+        title: '分类描述',
         dataIndex: 'updatedAt',
-        sorter: true,
-        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
       },
       {
         title: '操作',
-        render: () => (
-          <Fragment>
-            <a href="">配置</a>
-            <Divider type="vertical"/>
-            <a href="">订阅警报</a>
-          </Fragment>
-        ),
+        render: (text, record, index) => {
+          return (
+            <Fragment>
+              <a onClick={() => {
+                this.handleModalVisible(true);
+                this.setState({
+                  listItemData: text
+                });
+              }}>查看</a>
+              <Divider type="vertical"/>
+              <a onClick={() => {
+                this.handleModalVisible(true);
+                this.setState({
+                  listItemData: text
+                });
+              }}>编辑</a>
+            </Fragment>
+          )
+        }
       },
     ];
 
@@ -393,10 +429,6 @@ export default class ResourceClassify extends PureComponent {
       </Menu>
     );
 
-    const parentMethods = {
-      handleAdd: this.handleAdd,
-      handleModalVisible: this.handleModalVisible,
-    };
     return (
       <PageHeaderLayout>
         {/*<Col xl={6} lg={6} md={6} sm={6} xs={6} style={{ marginBottom: 24 }}>*/}
@@ -405,6 +437,7 @@ export default class ResourceClassify extends PureComponent {
             selectedRows={selectedRows}
             loading={loading}
             data={data}
+            title={'资源分类'}
             columns={columns}
             onSelectRow={this.handleSelectRows}
             onChange={this.handleStandardTableChange}
@@ -413,7 +446,11 @@ export default class ResourceClassify extends PureComponent {
             <div className={styles.tableList}>
               {/*<div className={styles.tableListForm}>{this.renderForm()}</div>*/}
               <div className={styles.tableListOperator}>
-                <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
+                <Button icon="plus" type="primary" onClick={() => {
+                  this.setState({
+                    listItemData: {}
+                  });
+                  this.handleModalVisible(true)}}>
                   添加同级
                 </Button>
                 <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
@@ -422,16 +459,6 @@ export default class ResourceClassify extends PureComponent {
                 <Button icon="remove" onClick={() => this.handleModalVisible(true)}>
                   批量删除
                 </Button>
-                {selectedRows.length > 0 && (
-                  <span>
-                  <Button>批量操作</Button>
-                  <Dropdown overlay={menu}>
-                    <Button>
-                      更多操作 <Icon type="down"/>
-                    </Button>
-                  </Dropdown>
-                </span>
-                )}
               </div>
               <StandardTable
                 selectedRows={selectedRows}
@@ -448,7 +475,7 @@ export default class ResourceClassify extends PureComponent {
         {/*<Col xl={18} lg={16} md={16} sm={16} xs={16} style={{ marginBottom: 24 }}>*/}
 
         {/*</Col>*/}
-        <CreateForm {...parentMethods} modalVisible={modalVisible}/>
+        <CreateForm {...parentMethods} modalVisible={modalVisible} listItemData={listItemData} />
       </PageHeaderLayout>
     );
   }
