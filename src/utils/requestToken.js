@@ -2,7 +2,6 @@ import fetch from 'dva/fetch';
 import { notification } from 'antd';
 import { routerRedux } from 'dva/router';
 import store from '../index';
-import { stringify } from 'qs';
 
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
@@ -47,8 +46,7 @@ export default function request(url, options) {
   const defaultOptions = {
     credentials: 'include',
   };
-  const newOptions = { ...defaultOptions, ...options};
-  newOptions.headers={Authorization:localStorage.getItem('token_str')};
+  const newOptions = { ...defaultOptions, ...options };
   if (
     newOptions.method === 'POST' ||
     newOptions.method === 'PUT' ||
@@ -56,11 +54,11 @@ export default function request(url, options) {
   ) {
     if (!(newOptions.body instanceof FormData)) {
       newOptions.headers = {
-        Accept: 'application/json',
-        'Content-Type': 'application/json; charset=utf-8',
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
         ...newOptions.headers,
       };
-      newOptions.body = JSON.stringify(newOptions.body);
+      var str =  'client_id=msl&client_secret=123456&grant_type=password&username='+newOptions.body.username+'&password='+newOptions.body.password;
+      newOptions.body = str;
     } else {
       // newOptions.body is FormData
       newOptions.headers = {
@@ -69,8 +67,9 @@ export default function request(url, options) {
       };
     }
   }
-  debugger
+
   return fetch(url, newOptions)
+    .then(checkStatus)
     .then(response => {
       if (newOptions.method === 'DELETE' || response.status === 204) {
         return response.text();

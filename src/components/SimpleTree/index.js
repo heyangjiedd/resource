@@ -61,7 +61,6 @@ const getParentKey = (key, tree) => {
   }
   return parentKey;
 };
-
 class SimpleTree extends PureComponent {
   constructor(props) {
     super(props);
@@ -88,6 +87,8 @@ class SimpleTree extends PureComponent {
   }
   render() {
     const { searchValue, expandedKeys, autoExpandParent,ss,title } = this.state;
+    const {handleTree} = this.props;
+    window.console.log(this.props);
     const loop = data => data.map((item) => {
       const index = item.title.indexOf(searchValue);
       const beforeStr = item.title.substr(0, index);
@@ -118,7 +119,7 @@ class SimpleTree extends PureComponent {
         /></div>
         {/*<Search style={{ marginBottom: 8 }} placeholder="Search" onChange={this.onChange} />*/}
         <Tree
-
+          onSelect={handleTree}
           onExpand={this.onExpand}
           expandedKeys={expandedKeys}
           autoExpandParent={autoExpandParent}

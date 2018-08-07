@@ -1,5 +1,10 @@
 import { stringify } from 'qs';
 import request from '../utils/request';
+import requestToken from '../utils/requestToken';
+
+export async function datasourceList(params) {
+  return request(`/datasource/list${stringify(params)}`);
+}
 
 export async function queryProjectNotice() {
   return request('/api/project/notice');
@@ -61,7 +66,11 @@ export async function queryFakeList(params) {
 }
 
 export async function fakeAccountLogin(params) {
-  return request('/api/login/account', {
+  // return request('/api/login/account', {
+  //   method: 'POST',
+  //   body: params,
+  // });
+  return requestToken('http://120.77.155.17:8010/oauth/token', {
     method: 'POST',
     body: params,
   });

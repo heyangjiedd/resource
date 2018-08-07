@@ -24,6 +24,12 @@ export default class LoginPage extends Component {
   handleSubmit = (err, values) => {
     const { type } = this.state;
     const { dispatch } = this.props;
+    values = {
+      client_id:'msl',
+      client_secret:'123456',
+      grant_type:'password',
+      ...values
+    };
     if (!err) {
       dispatch({
         type: 'login/login',
@@ -56,7 +62,7 @@ export default class LoginPage extends Component {
               login.type === 'account' &&
               !submitting &&
               this.renderMessage('账户或密码错误（admin/888888）')}
-            <UserName name="userName" placeholder="admin/user" />
+            <UserName name="username" placeholder="admin/user" />
             <Password name="password" placeholder="888888/123456" />
           </Tab>
           <Tab key="mobile" tab="手机号登录">

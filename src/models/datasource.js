@@ -1,7 +1,7 @@
-import { queryRule, removeRule, addRule,datasourceList } from '../services/api';
+import { datasourceList } from '../services/api';
 
 export default {
-  namespace: 'rule',
+  namespace: 'datasource',
 
   state: {
     data: {
@@ -11,6 +11,7 @@ export default {
   },
 
   effects: {
+    //取数据源列表
     *fetch({ payload }, { call, put }) {
       const response = yield call(datasourceList, payload);
       yield put({
@@ -19,7 +20,7 @@ export default {
       });
     },
     *add({ payload, callback }, { call, put }) {
-      const response = yield call(addRule, payload);
+      const response = yield call(datasourceList, payload);
       yield put({
         type: 'save',
         payload: response,
@@ -27,7 +28,7 @@ export default {
       if (callback) callback();
     },
     *remove({ payload, callback }, { call, put }) {
-      const response = yield call(removeRule, payload);
+      const response = yield call(datasourceList, payload);
       yield put({
         type: 'save',
         payload: response,

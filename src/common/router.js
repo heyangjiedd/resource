@@ -72,34 +72,34 @@ function getFlatMenuData(menus) {
 export const getRouterData = app => {
   const routerConfig = {
     '/': {
-      component: dynamicWrapper(app, ['user', 'login'], () => import('../layouts/BasicLayout')),
+      component: dynamicWrapper(app, [], () => import('../layouts/BasicLayout')),
     },
     '/main': {
-      component: dynamicWrapper(app, ['list'], () => import('../routes/List/TableList')),
+      component: dynamicWrapper(app,[], () => import('../routes/Base/resourceClassify')),
     },
     '/base/resourceClassify': {
-      component: dynamicWrapper(app, ['list'], () => import('../routes/Base/resourceClassify')),
+      component: dynamicWrapper(app,[], () => import('../routes/Base/resourceClassify')),
     },
     '/base/centralDataSource': {
-      component: dynamicWrapper(app, ['list'], () => import('../routes/Base/centralDataSource')),
+      component: dynamicWrapper(app, [], () => import('../routes/Base/centralDataSource')),
     },
     '/content': {
-      component: dynamicWrapper(app, ['list'], () => import('../routes/List/TableList')),
+      component: dynamicWrapper(app, [], () => import('../routes/List/TableList')),
     },
     '/resource/projects': {
-      component: dynamicWrapper(app, ['list'], () => import('../routes/List/TableList')),
+      component: dynamicWrapper(app, [], () => import('../routes/List/TableList')),
     },
     '/resource/projects1': {
-      component: dynamicWrapper(app, ['list'], () => import('../routes/List/TableList')),
+      component: dynamicWrapper(app, [], () => import('../routes/List/TableList')),
     },
     '/resource/projects2': {
-      component: dynamicWrapper(app, ['list'], () => import('../routes/List/TableList')),
+      component: dynamicWrapper(app, [], () => import('../routes/List/TableList')),
     },
     '/derivation/projects': {
-      component: dynamicWrapper(app, ['list'], () => import('../routes/List/TableList')),
+      component: dynamicWrapper(app, [], () => import('../routes/List/TableList')),
     },
     '/derivation/projects1': {
-      component: dynamicWrapper(app, ['list'], () => import('../routes/List/TableList')),
+      component: dynamicWrapper(app, [], () => import('../routes/List/TableList')),
     },
 
     '/dashboard/analysis': {

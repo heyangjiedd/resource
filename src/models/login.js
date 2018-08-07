@@ -4,6 +4,7 @@ import { fakeAccountLogin } from '../services/api';
 import { setAuthority } from '../utils/authority';
 import { reloadAuthorized } from '../utils/Authorized';
 import { getPageQuery } from '../utils/utils';
+import store from '../index';
 
 export default {
   namespace: 'login',
@@ -15,11 +16,19 @@ export default {
   effects: {
     *login({ payload }, { call, put }) {
       const response = yield call(fakeAccountLogin, payload);
+      const {dispatch } = store
       yield put({
         type: 'changeLoginStatus',
         payload: response,
       });
       // Login successfully
+      if (response){
+        // reloadAuthorized();
+        localStorage.setItem('antd-pro-authority','admin');
+        localStorage.setItem('token_str', response.token_type+response.access_token);
+        dispatch(routerRedux.push('/base/resourceClassify'));
+      }
+      return
       if (response.status === 'ok') {
         reloadAuthorized();
         const urlParams = new URL(window.location.href);

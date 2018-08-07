@@ -56,7 +56,6 @@ const CreateForm = Form.create()(props => {
     },
   };
   const normalizeAll = (value, prevValue = []) => {
-    debugger
     if (value.indexOf('All') >= 0 && prevValue.indexOf('All') < 0) {
       return ['All', 'Apple', 'Pear', 'Orange'];
     }
@@ -80,7 +79,7 @@ const CreateForm = Form.create()(props => {
       <FormItem {...formItemLayout} label="分类名称">
         {form.getFieldDecorator('flmc', {
           rules: [{ required: true, message: 'Please input some description...' }],initialValue:listItemData.owner
-        })(<Input defaultValue={listItemData.owner} placeholder="请输入"/>)}
+        })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="排序号">
         {form.getFieldDecorator('pxh', {
@@ -161,7 +160,7 @@ export default class ResourceClassify extends PureComponent {
       formValues: {},
     });
     dispatch({
-      type: 'rule/fetch',
+      type: 'datasource/fetch',
       payload: {},
     });
   };
@@ -221,10 +220,10 @@ export default class ResourceClassify extends PureComponent {
         formValues: values,
       });
 
-      dispatch({
-        type: 'rule/fetch',
-        payload: values,
-      });
+      // dispatch({
+      //   type: 'rule/fetch',
+      //   payload: values,
+      // });
     });
   };
 
@@ -365,6 +364,13 @@ export default class ResourceClassify extends PureComponent {
     const { expandForm } = this.state;
     return expandForm ? this.renderAdvancedForm() : this.renderSimpleForm();
   }
+  handleTree = data => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'rule/fetch',
+      payload: data,
+    });
+  }
 
   render() {
     const {
@@ -434,13 +440,8 @@ export default class ResourceClassify extends PureComponent {
         {/*<Col xl={6} lg={6} md={6} sm={6} xs={6} style={{ marginBottom: 24 }}>*/}
         <div className={styles.flexMain}>
           <SimpleTree
-            selectedRows={selectedRows}
-            loading={loading}
-            data={data}
+            handleTree={this.handleTree}
             title={'资源分类'}
-            columns={columns}
-            onSelectRow={this.handleSelectRows}
-            onChange={this.handleStandardTableChange}
           />
           <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
@@ -456,18 +457,18 @@ export default class ResourceClassify extends PureComponent {
                 <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
                   添加下级
                 </Button>
-                <Button icon="remove" onClick={() => this.handleModalVisible(true)}>
+                <Button icon="delete" onClick={() => this.handleModalVisible(true)}>
                   批量删除
                 </Button>
               </div>
-              <StandardTable
-                selectedRows={selectedRows}
-                loading={loading}
-                data={data}
-                columns={columns}
-                onSelectRow={this.handleSelectRows}
-                onChange={this.handleStandardTableChange}
-              />
+              {/*<StandardTable*/}
+                {/*selectedRows={selectedRows}*/}
+                {/*loading={loading}*/}
+                {/*data={data}*/}
+                {/*columns={columns}*/}
+                {/*onSelectRow={this.handleSelectRows}*/}
+                {/*onChange={this.handleStandardTableChange}*/}
+              {/*/>*/}
             </div>
           </Card>
         </div>

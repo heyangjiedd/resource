@@ -73,7 +73,7 @@ const proxy = {
   'GET /api/profile/advanced': getProfileAdvancedData,
   'POST /api/login/account': (req, res) => {
     const { password, userName, type } = req.body;
-    if (password === '888888' && userName === 'admin') {
+    if (password === 'admin' && userName === 'admin') {
       res.send({
         status: 'ok',
         type,
@@ -137,4 +137,7 @@ const proxy = {
   },
 };
 
-export default (noProxy ? {} : delay(proxy, 1000));
+const apiurl = 'http://120.77.155.17:8011/';
+
+export default (noProxy ?{'GET /(.*)': apiurl,
+  'POST /(.*)': apiurl} : delay(proxy, 1000));
