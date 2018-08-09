@@ -75,16 +75,16 @@ export const getRouterData = app => {
       component: dynamicWrapper(app, [], () => import('../layouts/BasicLayout')),
     },
     '/main': {
-      component: dynamicWrapper(app,[], () => import('../routes/Base/resourceClassify')),
+      component: dynamicWrapper(app,[], () => import('../routes/List/TableList')),
     },
     '/base/resourceClassify': {
-      component: dynamicWrapper(app,[], () => import('../routes/Base/resourceClassify')),
+      component: dynamicWrapper(app,['classify'], () => import('../routes/Base/resourceClassify')),
     },
     '/base/centralDataSource': {
-      component: dynamicWrapper(app, [], () => import('../routes/Base/centralDataSource')),
+      component: dynamicWrapper(app, ['centersource'], () => import('../routes/Base/centralDataSource')),
     },
     '/content': {
-      component: dynamicWrapper(app, [], () => import('../routes/List/TableList')),
+      component: dynamicWrapper(app, ['catalog'], () => import('../routes/List/TableList')),
     },
     '/resource/projects': {
       component: dynamicWrapper(app, [], () => import('../routes/List/TableList')),

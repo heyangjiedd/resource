@@ -87,8 +87,7 @@ class SimpleTree extends PureComponent {
   }
   render() {
     const { searchValue, expandedKeys, autoExpandParent,ss,title } = this.state;
-    const {handleTree} = this.props;
-    window.console.log(this.props);
+    const {handleTree,data} = this.props;
     const loop = data => data.map((item) => {
       const index = item.title.indexOf(searchValue);
       const beforeStr = item.title.substr(0, index);

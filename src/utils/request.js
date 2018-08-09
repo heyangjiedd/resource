@@ -69,7 +69,6 @@ export default function request(url, options) {
       };
     }
   }
-  debugger
   return fetch(url, newOptions)
     .then(response => {
       if (newOptions.method === 'DELETE' || response.status === 204) {
