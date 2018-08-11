@@ -1,5 +1,5 @@
 import React, { PureComponent, Fragment } from 'react';
-import { Tree ,Input ,Icon } from 'antd';
+import { Tree, Input, Icon } from 'antd';
 import styles from './index.less';
 
 
@@ -61,6 +61,7 @@ const getParentKey = (key, tree) => {
   }
   return parentKey;
 };
+
 class SimpleTree extends PureComponent {
   constructor(props) {
     super(props);
@@ -70,7 +71,7 @@ class SimpleTree extends PureComponent {
       expandedKeys: [],
       searchValue: '',
       autoExpandParent: true,
-      ss:{width:'220px'},
+      ss: { width: '220px' },
     };
   }
 
@@ -79,44 +80,65 @@ class SimpleTree extends PureComponent {
       expandedKeys,
       autoExpandParent: false,
     });
-  }
-  toggle = ()=>{
+  };
+  toggle = () => {
     this.setState({
-      ss:{transform: 'translate(50px)'},
+      ss: { transform: 'translate(50px)' },
     });
-  }
+  };
+  groupTree = (tree) => {
+    let result = [];
+    tree.forEach(item => {
+      if (item.parentId) {
+        tree.forEach(r => {
+          if (r.id == item.parentId) {
+            item.children || (item.children = []);
+            item.children.push(r)
+          }
+        });
+      }else{
+        result.push(item)
+      }
+    });
+    // for (let i = 0; i < tree.length; i++) {
+    //   if (tree[i].parentId) {
+    //     for (let j = 0; j < tree.length; j++) {
+    //       if (tree[j].id === tree[i].parentId) {
+    //         tree[j].children || (tree[j].children = []);
+    //         tree[j].children.push(tree[i]);
+    //       }
+    //     }
+    //   } else {
+    //     result.push(tree[i]);
+    //   }
+    // }
+    // ;
+    return result;
+  };
+
   render() {
-    const { searchValue, expandedKeys, autoExpandParent,ss,title } = this.state;
-    const {handleTree,data} = this.props;
-    let treeData =
+    const { searchValue, expandedKeys, autoExpandParent, ss, title } = this.state;
+    const { handleTree, data } = this.props;
+    let treeData = this.groupTree(data);
     const loop = data => data.map((item) => {
-      const index = item.title.indexOf(searchValue);
-      const beforeStr = item.title.substr(0, index);
-      const afterStr = item.title.substr(index + searchValue.length);
-      const title = index > -1 ? (
-        <span>
-          {beforeStr}
-          <span style={{ color: '#f50' }}>{searchValue}</span>
-          {afterStr}
-        </span>
-      ) : <span>{item.title}</span>;
+      const title = <span>{item.name}</span>;
       if (item.children) {
         return (
-          <TreeNode key={item.key} title={title}>
+          <TreeNode key={item.id} title={title}>
             {loop(item.children)}
           </TreeNode>
         );
       }
-      return <TreeNode key={item.key} title={title} />;
+      return <TreeNode key={item.id} title={title}/>;
     });
     return (
       <div className={styles.tree_back_ground} style={ss}>
         <div className={styles.tree_title}>{title}
-        <Icon
-          className={styles.trigger}
-          type={'menu-fold'}
-          onClick={this.toggle}
-        /></div>
+          <Icon
+            className={styles.trigger}
+            type={'menu-fold'}
+            onClick={this.toggle}
+          /></div>
         {/*<Search style={{ marginBottom: 8 }} placeholder="Search" onChange={this.onChange} />*/}
         <Tree
           onSelect={handleTree}
@@ -124,10 +146,11 @@ class SimpleTree extends PureComponent {
           expandedKeys={expandedKeys}
           autoExpandParent={autoExpandParent}
         >
-          {loop(data)}
+          {loop(treeData)}
         </Tree>
       </div>
     );
   }
 }
+
 export default SimpleTree;

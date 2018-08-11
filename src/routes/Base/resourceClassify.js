@@ -34,6 +34,7 @@ const getValue = obj =>
     .join(',');
 let itemDataStatus = 0;
 let listItemData = {};
+let treeSelect = {};
 
 const CreateForm = Form.create()(props => {
   const { modalVisible, form, handleAdd, handleModalVisible } = props;
@@ -55,9 +56,10 @@ const CreateForm = Form.create()(props => {
       md: { span: 17 },
     },
   };
+  let title = itemDataStatus===1?"编辑分类":itemDataStatus===2?"查看分类":"新增分类";
   return (
     <Modal
-      title="编辑分类"
+      title={title}
       visible={modalVisible}
       onOk={okHandle}
       destroyOnClose={true}
@@ -68,7 +70,7 @@ const CreateForm = Form.create()(props => {
         {form.getFieldDecorator('parentName', {
           rules: [{  message: 'Please input some description...' }],
           initialValue: listItemData.parentName,
-        })(<Input disabled={itemDataStatus === 2||itemDataStatus === 1} placeholder="请输入"/>)}
+        })(<Input disabled placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="分类名称">
         {form.getFieldDecorator('name', {
@@ -181,7 +183,7 @@ export default class ResourceClassify extends PureComponent {
     } else {
       dispatch({
         type: 'classify/add',
-        payload: fields,
+        payload: {...fields,...treeSelect},
         callback: () => {
           dispatch({
             type: 'classify/fetch',
@@ -196,7 +198,7 @@ export default class ResourceClassify extends PureComponent {
   };
   handleDelete = () => {
     const { dispatch } = this.props;
-    if (this.state.selectedRows.length > 1) {
+    if (this.state.selectedRows.length > 0) {
       this.state.selectedRows.forEach((item, index) => {
         if (index === this.state.selectedRows.length - 1) {
           dispatch({
@@ -210,6 +212,9 @@ export default class ResourceClassify extends PureComponent {
             },
           });
           message.success('删除成功');
+          this.setState({
+            selectedRows: [],
+          });
         } else {
           dispatch({
             type: 'classify/remove',
@@ -221,12 +226,8 @@ export default class ResourceClassify extends PureComponent {
       });
     }
   };
-  handleTree = data => {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'classify/fetch',
-      payload: data,
-    });
+  handleTree = (data,e) => {
+    treeSelect = data
   };
 
   render() {

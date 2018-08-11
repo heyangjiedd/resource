@@ -32,10 +32,9 @@ const getValue = obj =>
   Object.keys(obj)
     .map(key => obj[key])
     .join(',');
-const statusMap = ['default', 'processing', 'success', 'error'];
-const status = ['关闭', '运行中', '已上线', '异常'];
 let itemDataStatus = 0;
 let listItemData = {};
+let treeSelect = {}
 
 const CreateForm = Form.create()(props => {
   const { modalVisible, form, handleAdd, handleModalVisible } = props;
@@ -66,31 +65,34 @@ const CreateForm = Form.create()(props => {
     }
     return value;
   };
+  let title = itemDataStatus===1?"编辑分类":itemDataStatus===2?"查看分类":"新增分类";
   return (
     <Modal
-      title="编辑分类"
+      title={title}
       visible={modalVisible}
       onOk={okHandle}
+      destroyOnClose={true}
       onCancel={() => handleModalVisible()}
     >
+
       <FormItem {...formItemLayout} label="父级分类名称">
-        {form.getFieldDecorator('fjflmc', {
-          rules: [{ required: true, message: 'Please input some description...' }],
+        {form.getFieldDecorator('parentName', {
+          rules: [{  message: 'Please input some description...' }],
           initialValue: listItemData.parentName,
-        })(<Input placeholder="请输入"/>)}
+        })(<Input disabled placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="分类名称">
-        {form.getFieldDecorator('flmc', {
+        {form.getFieldDecorator('name', {
           rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.name,
-        })(<Input placeholder="请输入"/>)}
+        })(<Input disabled={itemDataStatus === 2} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="排序号">
-        {form.getFieldDecorator('pxh', {
+        {form.getFieldDecorator('sort', {
           rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.sort,
-        })(<Input placeholder="请输入"/>)}
+        })(<Input disabled={itemDataStatus === 2} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="分类描述">
-        {form.getFieldDecorator('flms', {
+        {form.getFieldDecorator('description', {
           rules: [
             {
               required: true,
@@ -100,6 +102,7 @@ const CreateForm = Form.create()(props => {
         })(
           <TextArea
             style={{ minHeight: 32 }}
+            disabled={itemDataStatus === 2}
             placeholder="请输入你的分类描述"
             rows={4}
           />,
@@ -126,6 +129,9 @@ export default class ResourceClassify extends PureComponent {
     const { dispatch } = this.props;
     dispatch({
       type: 'dervieClassify/fetch',
+    });
+    dispatch({
+      type: 'dervieClassify/tree',
     });
   }
 
@@ -241,142 +247,68 @@ export default class ResourceClassify extends PureComponent {
   };
   handleAdd = fields => {
     const { dispatch } = this.props;
-    dispatch({
-      type: 'dervieClassify/add',
-      payload: {
-        description: fields.desc,
-      },
-    });
-
-    message.success('添加成功');
+    if (itemDataStatus === 1) {
+      dispatch({
+        type: 'dervieClassify/update',
+        payload: { ...listItemData, ...fields },
+        callback: () => {
+          dispatch({
+            type: 'dervieClassify/fetch',
+          });
+        },
+      });
+      message.success('修改成功');
+    } else {
+      dispatch({
+        type: 'dervieClassify/add',
+        payload: {...fields,...treeSelect},
+        callback: () => {
+          dispatch({
+            type: 'dervieClassify/fetch',
+          });
+        },
+      });
+      message.success('添加成功');
+    }
     this.setState({
       modalVisible: false,
     });
   };
 
-  renderSimpleForm() {
-    const { form } = this.props;
-    const { getFieldDecorator } = form;
-    return (
-      <Form onSubmit={this.handleSearch} layout="inline">
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <Col md={8} sm={24}>
-            <FormItem label="规则编号">
-              {getFieldDecorator('no')(<Input placeholder="请输入"/>)}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status')(
-                <Select placeholder="请选择" style={{ width: '100%' }}>
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <span className={styles.submitButtons}>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-              <Button style={{ marginLeft: 8 }} onClick={this.handleFormReset}>
-                重置
-              </Button>
-              <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
-                展开 <Icon type="down"/>
-              </a>
-            </span>
-          </Col>
-        </Row>
-      </Form>
-    );
-  }
-
-  renderAdvancedForm() {
-    const { form } = this.props;
-    const { getFieldDecorator } = form;
-    return (
-      <Form onSubmit={this.handleSearch} layout="inline">
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <Col md={8} sm={24}>
-            <FormItem label="规则编号">
-              {getFieldDecorator('no')(<Input placeholder="请输入"/>)}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status')(
-                <Select placeholder="请选择" style={{ width: '100%' }}>
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="调用次数">
-              {getFieldDecorator('number')(<InputNumber style={{ width: '100%' }}/>)}
-            </FormItem>
-          </Col>
-        </Row>
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <Col md={8} sm={24}>
-            <FormItem label="更新日期">
-              {getFieldDecorator('date')(
-                <DatePicker style={{ width: '100%' }} placeholder="请输入更新日期"/>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status3')(
-                <Select placeholder="请选择" style={{ width: '100%' }}>
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status4')(
-                <Select placeholder="请选择" style={{ width: '100%' }}>
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-        </Row>
-        <div style={{ overflow: 'hidden' }}>
-          <span style={{ float: 'right', marginBottom: 24 }}>
-            <Button type="primary" htmlType="submit">
-              查询
-            </Button>
-            <Button style={{ marginLeft: 8 }} onClick={this.handleFormReset}>
-              重置
-            </Button>
-            <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
-              收起 <Icon type="up"/>
-            </a>
-          </span>
-        </div>
-      </Form>
-    );
-  }
-
   renderForm() {
     const { expandForm } = this.state;
     return expandForm ? this.renderAdvancedForm() : this.renderSimpleForm();
   }
-
-  handleTree = data => {
+  handleDelete = () => {
     const { dispatch } = this.props;
-    dispatch({
-      type: 'dervieClassify/fetch',
-      payload: data,
-    });
+    if (this.state.selectedRows.length > 0) {
+      this.state.selectedRows.forEach((item, index) => {
+        if (index === this.state.selectedRows.length - 1) {
+          dispatch({
+            type: 'dervieClassify/remove',
+            payload: {
+              id: item.id,
+            }, callback: () => {
+              dispatch({
+                type: 'dervieClassify/fetch',
+              });
+            },
+          });
+          message.success('删除成功');
+
+        } else {
+          dispatch({
+            type: 'dervieClassify/remove',
+            payload: {
+              id: item.id,
+            },
+          });
+        }
+      });
+    }
+  };
+  handleTree = data => {
+    treeSelect = data
   };
 
   render() {
@@ -435,19 +367,12 @@ export default class ResourceClassify extends PureComponent {
         },
       },
     ];
-
-    const menu = (
-      <Menu onClick={this.handleMenuClick} selectedKeys={[]}>
-        <Menu.Item key="remove">删除</Menu.Item>
-        <Menu.Item key="approval">批量审批</Menu.Item>
-      </Menu>
-    );
     return (
       <PageHeaderLayout>
         {/*<Col xl={6} lg={6} md={6} sm={6} xs={6} style={{ marginBottom: 24 }}>*/}
         <div className={styles.flexMain}>
           <SimpleTree
-            data={data}
+            data={treeData}
             handleTree={this.handleTree}
             title={'资源分类'}
           />
@@ -461,7 +386,7 @@ export default class ResourceClassify extends PureComponent {
                 <Button icon="plus" type="primary" onClick={() => {this.handleModal({},0);}}>
                   添加下级
                 </Button>
-                <Button icon="delete" onClick={() => this.handleModalVisible(true)}>
+                <Button icon="delete" onClick={() => this.handleDelete()}>
                   批量删除
                 </Button>
               </div>

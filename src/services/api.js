@@ -200,6 +200,10 @@ export async function deriverclassifyList(params) {
   return request(`/deriveresourceclassify/list`+url);
   // return request(`/deriveresourceclassify/list?${stringify(params)}`);
 }
+// 生成衍生库树状图
+export async function getAllderiverlassify(params) {
+  return request(`/deriveresourceclassify/all`);
+}
 // 根据id查询衍生资源分类
 export async function getderiverlassify(params) {
   return request(`/deriveresourceclassify/${params.id}`);
@@ -224,41 +228,67 @@ export async function updatederiverclassify(params) {
 }
 // 删除衍生资源分类
 export async function removederiverclassify(params) {
-  return request(`/deriveresourceclassify/${stringify(params.id)}`, {
+  return request('/deriveresourceclassify/'+params.id,{
     method: 'DELETE',
   });
 }
 
 //衍生库
 
-// 添加衍生库
-export async function addderive(params) {
-  return request(`/derive`, {
+// 根据id查询衍生库详情
+export async function getderivecatalog(params) {
+  return request(`/derivecatalog/list`+params.id);
+}
+// 删除衍生库
+export async function removederivecatalog(params) {
+  return request(`/derivecatalog/`+params.id, {
+    method: 'DELETE',
+  });
+}
+
+// 添加目录库和API的关联关系
+export async function deriveField(params) {
+  return request(`/derivecatalog/deriveApi`, {
     method: 'POST',
     body: {
       ...params,
-      method: 'post',
     },
   });
 }
-// 删除衍生库
-export async function removederive(params) {
-  return request(`/derive/${stringify(params.id)}`, {
-    method: 'DELETE',
+// 添加目录库和非关系型数据库的关联关系
+export async function deriveField(params) {
+  return request(`/derivecatalog/deriveCollection`, {
+    method: 'POST',
     body: {
-      method: 'delete',
+      ...params,
     },
   });
 }
-// 获取衍生数据库列表
-export async function deriveList(params) {
-  return request(`/derive/list?${stringify(params)}`);
-}
-// 获取衍生数据库所有的库
-export async function tableAndTableField(params) {
-  return request(`/derive/tableAndTableField?${stringify(params)}`);
+// 添加目录库和文件的关联关系
+export async function deriveField(params) {
+  return request(`/derivecatalog/deriveFile`, {
+    method: 'POST',
+    body: {
+      ...params,
+    },
+  });
 }
 
+// 添加衍生库信息资源
+export async function deriveField(params) {
+  return request(`/derivecatalog/deriveField`, {
+    method: 'POST',
+    body: {
+      ...params,
+    },
+  });
+}
+
+
+// 获取衍生数据库列表
+export async function deriveList(params) {
+  return request(`/derivecatalog/list?${stringify(params)}`);
+}
 
 export async function queryProjectNotice() {
   return request('/api/project/notice');

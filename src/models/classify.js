@@ -64,7 +64,7 @@ export default {
     get(state, action){
       return {
         ...state,
-        data: action.payload,
+        detail: action.payload,
       };
     }
   },
