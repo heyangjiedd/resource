@@ -20,10 +20,10 @@ import {
   Divider,
 } from 'antd';
 import StandardTable from 'components/StandardTable';
-import StandardTableNoselection from 'components/StandardTableNothing';
+import SimpleTree from 'components/SimpleTree';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
-import styles from './TableList.less';
+import styles from './index.less';
 
 const FormItem = Form.Item;
 const { Option } = Select;
@@ -32,8 +32,8 @@ const getValue = obj =>
   Object.keys(obj)
     .map(key => obj[key])
     .join(',');
-const statusMap = ['default', 'processing', 'success', 'error'];
-const status = ['关闭', '运行中', '已上线', '异常'];
+let itemDataStatus = 0;
+let listItemData = {};
 
 const CreateForm = Form.create()(props => {
   const { modalVisible, form, handleAdd, handleModalVisible } = props;
@@ -44,17 +44,64 @@ const CreateForm = Form.create()(props => {
       handleAdd(fieldsValue);
     });
   };
+  const formItemLayout = {
+    labelCol: {
+      xs: { span: 24 },
+      sm: { span: 7 },
+    },
+    wrapperCol: {
+      xs: { span: 24 },
+      sm: { span: 17 },
+      md: { span: 17 },
+    },
+  };
+  const normalizeAll = (value, prevValue = []) => {
+    if (value.indexOf('All') >= 0 && prevValue.indexOf('All') < 0) {
+      return ['All', 'Apple', 'Pear', 'Orange'];
+    }
+    if (value.indexOf('All') < 0 && prevValue.indexOf('All') >= 0) {
+      return [];
+    }
+    return value;
+  };
   return (
     <Modal
-      title="新建规则"
+      title="编辑分类"
       visible={modalVisible}
       onOk={okHandle}
       onCancel={() => handleModalVisible()}
     >
-      <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="描述">
-        {form.getFieldDecorator('desc', {
+      <FormItem {...formItemLayout} label="父级分类名称">
+        {form.getFieldDecorator('fjflmc', {
           rules: [{ required: true, message: 'Please input some description...' }],
+          initialValue: listItemData.parentName,
         })(<Input placeholder="请输入"/>)}
+      </FormItem>
+      <FormItem {...formItemLayout} label="分类名称">
+        {form.getFieldDecorator('flmc', {
+          rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.name,
+        })(<Input placeholder="请输入"/>)}
+      </FormItem>
+      <FormItem {...formItemLayout} label="排序号">
+        {form.getFieldDecorator('pxh', {
+          rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.sort,
+        })(<Input placeholder="请输入"/>)}
+      </FormItem>
+      <FormItem {...formItemLayout} label="分类描述">
+        {form.getFieldDecorator('flms', {
+          rules: [
+            {
+              required: true,
+              message: '请输入分类描述',
+            },
+          ], initialValue: listItemData.description,
+        })(
+          <TextArea
+            style={{ minHeight: 32 }}
+            placeholder="请输入你的分类描述"
+            rows={4}
+          />,
+        )}
       </FormItem>
     </Modal>
   );
@@ -131,13 +178,13 @@ const CatlogDetail = Form.create()(props => {
         </Col>
       </Row>
       <Row gutter={24}>
-      <Col span={24}>
-        <FormItem labelCol={{ span: 4 }} wrapperCol={{ span: 20 }} label="关联资源分类">
-          {form.getFieldDecorator('glzyfl', {
-            rules: [{ required: true, message: 'Please input some description...' }],
-          })(<Input disabled={true} placeholder="请输入"/>)}
-        </FormItem>
-      </Col>
+        <Col span={24}>
+          <FormItem labelCol={{ span: 4 }} wrapperCol={{ span: 20 }} label="关联资源分类">
+            {form.getFieldDecorator('glzyfl', {
+              rules: [{ required: true, message: 'Please input some description...' }],
+            })(<Input disabled={true} placeholder="请输入"/>)}
+          </FormItem>
+        </Col>
       </Row>
       <Row gutter={24}>
         <Col span={12}>
@@ -267,12 +314,12 @@ const CatlogDetail = Form.create()(props => {
     </Modal>
   );
 });
-@connect(({ rule, loading }) => ({
-  rule,
-  loading: loading.models.rule,
+@connect(({ classify, loading }) => ({
+  classify,
+  loading: loading.models.classify,
 }))
 @Form.create()
-export default class TableList extends PureComponent {
+export default class ResourceClassify extends PureComponent {
   state = {
     modalVisible: false,
     expandForm: false,
@@ -283,7 +330,7 @@ export default class TableList extends PureComponent {
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
-      type: 'rule/fetch',
+      type: 'catalog/fetch',
     });
   }
 
@@ -308,7 +355,7 @@ export default class TableList extends PureComponent {
     }
 
     dispatch({
-      type: 'rule/fetch',
+      type: 'catalog/fetch',
       payload: params,
     });
   };
@@ -320,7 +367,7 @@ export default class TableList extends PureComponent {
       formValues: {},
     });
     dispatch({
-      type: 'rule/fetch',
+      type: 'datasource/fetch',
       payload: {},
     });
   };
@@ -341,7 +388,7 @@ export default class TableList extends PureComponent {
     switch (e.key) {
       case 'remove':
         dispatch({
-          type: 'rule/remove',
+          type: 'catalog/remove',
           payload: {
             no: selectedRows.map(row => row.no).join(','),
           },
@@ -380,10 +427,10 @@ export default class TableList extends PureComponent {
         formValues: values,
       });
 
-      dispatch({
-        type: 'rule/fetch',
-        payload: values,
-      });
+      // dispatch({
+      //   type: 'catalog/fetch',
+      //   payload: values,
+      // });
     });
   };
 
@@ -392,11 +439,15 @@ export default class TableList extends PureComponent {
       modalVisible: !!flag,
     });
   };
-
+  handleModal = (item,status) => {
+    listItemData = item;
+    itemDataStatus = status;
+    this.handleModalVisible(true);
+  };
   handleAdd = fields => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'rule/add',
+      type: 'catalog/add',
       payload: {
         description: fields.desc,
       },
@@ -525,72 +576,63 @@ export default class TableList extends PureComponent {
     return expandForm ? this.renderAdvancedForm() : this.renderSimpleForm();
   }
 
+  handleTree = data => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'catalog/fetch',
+      payload: data,
+    });
+  };
+
   render() {
     const {
-      rule: { data },
+      catalog: { data, treeData },
       loading,
     } = this.props;
     const { selectedRows, modalVisible } = this.state;
-
+    const parentMethods = {
+      handleAdd: this.handleAdd,
+      handleModalVisible: this.handleModalVisible,
+    };
     const columns = [
       {
-        title: '规则编号',
-        dataIndex: 'no',
+        title: '序号',
+        dataIndex: 'sort',
       },
       {
-        title: '描述',
+        title: '信息资源名称',
+        dataIndex: 'name',
+      },
+      {
+        title: '目录分类',
+        dataIndex: 'childNum',
+      },
+      {
+        title: '信息资源管理资源类型',
         dataIndex: 'description',
       },
       {
-        title: '服务调用次数',
-        dataIndex: 'callNo',
-        sorter: true,
-        align: 'right',
-        render: val => `${val} 万`,
-        // mark to display a total number
-        needTotal: true,
-      },
-      {
-        title: '状态',
-        dataIndex: 'status',
-        filters: [
-          {
-            text: status[0],
-            value: 0,
-          },
-          {
-            text: status[1],
-            value: 1,
-          },
-          {
-            text: status[2],
-            value: 2,
-          },
-          {
-            text: status[3],
-            value: 3,
-          },
-        ],
-        onFilter: (value, record) => record.status.toString() === value,
-        render(val) {
-          return <Badge status={statusMap[val]} text={status[val]}/>;
-        },
-      },
-      {
-        title: '更新时间',
-        dataIndex: 'updatedAt',
-        sorter: true,
-        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
-      },
-      {
         title: '操作',
-        render: () => (
-          <Fragment>
-            <a href="">配置</a>
-            <Divider type="vertical"/>
-            <a href="">订阅警报</a>
-          </Fragment>
-        ),
+        render: (text, record, index) => {
+          return (
+            <Fragment>
+              <a onClick={() => {
+                this.handleModal(text,2);
+                listItemData = text;
+              }}>目录详情</a>
+              <Divider type="vertical"/>
+              <a onClick={() => {
+                this.handleModal(text,1);
+                listItemData = text;
+              }}>配置详情</a>
+              <Divider type="vertical"/>
+              <a onClick={() => {
+                this.handleModal(text,1);
+                listItemData = text;
+              }}>目数关联</a>
+            </Fragment>
+          );
+        },
       },
     ];
 
@@ -600,44 +642,45 @@ export default class TableList extends PureComponent {
         <Menu.Item key="approval">批量审批</Menu.Item>
       </Menu>
     );
-
-    const parentMethods = {
-      handleAdd: this.handleAdd,
-      handleModalVisible: this.handleModalVisible,
-    };
-
     return (
-      <PageHeaderLayout title="查询表格">
-        <Card bordered={false}>
-          <div className={styles.tableList}>
-            <div className={styles.tableListForm}>{this.renderForm()}</div>
-            <div className={styles.tableListOperator}>
-              <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
-                新建
-              </Button>
-              {selectedRows.length > 0 && (
-                <span>
-                  <Button>批量操作</Button>
-                  <Dropdown overlay={menu}>
-                    <Button>
-                      更多操作 <Icon type="down"/>
-                    </Button>
-                  </Dropdown>
-                </span>
-              )}
+      <PageHeaderLayout>
+        {/*<Col xl={6} lg={6} md={6} sm={6} xs={6} style={{ marginBottom: 24 }}>*/}
+        <div className={styles.flexMain}>
+          <SimpleTree
+            data={data}
+            handleTree={this.handleTree}
+            title={'资源分类'}
+          />
+          <Card bordered={false} className={styles.flexTable}>
+            <div className={styles.tableList}>
+              {/*<div className={styles.tableListForm}>{this.renderForm()}</div>*/}
+              <div className={styles.tableListOperator}>
+                <Button icon="plus" type="primary" onClick={() => {this.handleModal({},0);}}>
+                  添加同级
+                </Button>
+                <Button icon="plus" type="primary" onClick={() => {this.handleModal({},0);}}>
+                  添加下级
+                </Button>
+                <Button icon="delete" onClick={() => this.handleModalVisible(true)}>
+                  批量删除
+                </Button>
+              </div>
+              <StandardTable
+                selectedRows={selectedRows}
+                loading={loading}
+                data={data}
+                columns={columns}
+                onSelectRow={this.handleSelectRows}
+                onChange={this.handleStandardTableChange}
+              />
             </div>
-            <StandardTable
-              selectedRows={selectedRows}
-              loading={loading}
-              data={data}
-              columns={columns}
-              onSelectRow={this.handleSelectRows}
-              onChange={this.handleStandardTableChange}
-            />
-          </div>
-        </Card>
-        <CatlogDetail {...parentMethods} loading={loading} data={data} columns={columns} modalVisible={modalVisible}/>
-        <CreateForm {...parentMethods}  />
+          </Card>
+        </div>
+        {/*</Col>*/}
+        {/*<Col xl={18} lg={16} md={16} sm={16} xs={16} style={{ marginBottom: 24 }}>*/}
+
+        {/*</Col>*/}
+        <CreateForm {...parentMethods} modalVisible={modalVisible} />
       </PageHeaderLayout>
     );
   }

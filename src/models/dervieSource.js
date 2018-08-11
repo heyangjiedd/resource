@@ -1,7 +1,7 @@
-import { resourceclassifyList,getresourceclassify,addresourceclassify,updateresourceclassify,removeresourceclassify} from '../services/api';
+import { deriveList} from '../services/api';
 
 export default {
-  namespace: 'classify',
+  namespace: 'dervieSource',
 
   state: {
     data: {
@@ -13,7 +13,7 @@ export default {
   effects: {
     //取数据源列表
     *fetch({ payload }, { call, put }) {
-      const response = yield call(resourceclassifyList, payload);
+      const response = yield call(deriveList, payload);
       yield put({
         type: 'save',
         payload: response,

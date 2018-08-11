@@ -5,7 +5,13 @@ import requestToken from '../utils/requestToken';
 // 资源分类
 // 获取资源分类列表
 export async function resourceclassifyList(params) {
-  return request(`/resourceclassify/list${stringify(params)}`);
+  let url = params?`?${stringify(params)}`:'';
+  return request(`/resourceclassify/list`+url);
+  // return request(`/resourceclassify/list${stringify(params)}`);
+}
+//生成树状图接口
+export async function getAllresourceclassify() {
+  return request(`/resourceclassify/all`);
 }
 // 根据id查询资源分类
 export async function getresourceclassify(params) {
@@ -16,28 +22,23 @@ export async function addresourceclassify(params) {
   return request(`/resourceclassify`, {
     method: 'POST',
     body: {
-      ...params,
-      method: 'post',
+      ...params
     },
   });
 }
 // 修改资源分类
 export async function updateresourceclassify(params) {
-  return request(`/resourceclassify/list`, {
+  return request(`/resourceclassify`, {
     method: 'PUT',
     body: {
       ...params,
-      method: 'PUT',
     },
   });
 }
 // 删除资源分类
 export async function removeresourceclassify(params) {
-  return request(`/resourceclassify/${stringify(params.id)}`, {
+  return request('/resourceclassify/'+params.id, {
     method: 'DELETE',
-    body: {
-      method: 'delete',
-    },
   });
 }
 
@@ -77,7 +78,7 @@ export async function catalogTableField(params) {
   return request(`/itemField/catalogTableField?${stringify(params)}`);
 }
 // 查询目录项
-export async function querycatalog(params) {
+export async function querycatalogItem(params) {
   return request(`/itemField/item?${stringify(params)}`);
 }
 //添加信息项与表字段对应关系
@@ -124,7 +125,6 @@ export async function addresource(params) {
     method: 'POST',
     body: {
       ...params,
-      method: 'post',
     },
   });
 }
@@ -134,7 +134,6 @@ export async function updateresource(params) {
     method: 'PUT',
     body: {
       ...params,
-      method: 'PUT',
     },
   });
 }
@@ -146,9 +145,6 @@ export async function getresource(params) {
 export async function removeresource(params) {
   return request(`/datasource/${stringify(params.id)}`, {
     method: 'DELETE',
-    body: {
-      method: 'delete',
-    },
   });
 }
 //api查询
@@ -169,7 +165,8 @@ export async function resourcelink(params) {
 }
 // 获取数据源列表
 export async function resourcelist(params) {
-  return request(`/datasource/list?${stringify(params)}`);
+  let url = params?`?${stringify(params)}`:'';
+  return request(`/datasource/list`+url);
 }
 // 查询视图数据
 export async function mongoDataList(params) {
@@ -177,7 +174,6 @@ export async function mongoDataList(params) {
     method: 'POST',
     body: {
       ...params,
-      method: 'post',
     },
   });
 }
@@ -200,7 +196,9 @@ export async function wsdlData(params) {
 
 // 获取衍生资源分类列表
 export async function deriverclassifyList(params) {
-  return request(`/deriveresourceclassify/list?${stringify(params)}`);
+  let url = params?`?${stringify(params)}`:'';
+  return request(`/deriveresourceclassify/list`+url);
+  // return request(`/deriveresourceclassify/list?${stringify(params)}`);
 }
 // 根据id查询衍生资源分类
 export async function getderiverlassify(params) {
@@ -212,7 +210,6 @@ export async function addderiverclassify(params) {
     method: 'POST',
     body: {
       ...params,
-      method: 'post',
     },
   });
 }
@@ -222,7 +219,6 @@ export async function updatederiverclassify(params) {
     method: 'PUT',
     body: {
       ...params,
-      method: 'PUT',
     },
   });
 }
@@ -230,9 +226,6 @@ export async function updatederiverclassify(params) {
 export async function removederiverclassify(params) {
   return request(`/deriveresourceclassify/${stringify(params.id)}`, {
     method: 'DELETE',
-    body: {
-      method: 'delete',
-    },
   });
 }
 

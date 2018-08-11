@@ -1,7 +1,7 @@
-import { resourceclassifyList,getresourceclassify,addresourceclassify,updateresourceclassify,removeresourceclassify} from '../services/api';
+import { resourcefileLista} from '../services/api';
 
 export default {
-  namespace: 'classify',
+  namespace: 'resource_file',
 
   state: {
     data: {
@@ -13,7 +13,7 @@ export default {
   effects: {
     //取数据源列表
     *fetch({ payload }, { call, put }) {
-      const response = yield call(resourceclassifyList, payload);
+      const response = yield call(resourcefileLista, payload);
       yield put({
         type: 'save',
         payload: response,

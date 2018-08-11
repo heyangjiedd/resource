@@ -32,8 +32,6 @@ const getValue = obj =>
   Object.keys(obj)
     .map(key => obj[key])
     .join(',');
-const statusMap = ['default', 'processing', 'success', 'error'];
-const status = ['关闭', '运行中', '已上线', '异常'];
 let itemDataStatus = 0;
 let listItemData = {};
 
@@ -57,40 +55,33 @@ const CreateForm = Form.create()(props => {
       md: { span: 17 },
     },
   };
-  const normalizeAll = (value, prevValue = []) => {
-    if (value.indexOf('All') >= 0 && prevValue.indexOf('All') < 0) {
-      return ['All', 'Apple', 'Pear', 'Orange'];
-    }
-    if (value.indexOf('All') < 0 && prevValue.indexOf('All') >= 0) {
-      return [];
-    }
-    return value;
-  };
   return (
     <Modal
       title="编辑分类"
       visible={modalVisible}
       onOk={okHandle}
+      destroyOnClose={true}
       onCancel={() => handleModalVisible()}
     >
+
       <FormItem {...formItemLayout} label="父级分类名称">
-        {form.getFieldDecorator('fjflmc', {
-          rules: [{ required: true, message: 'Please input some description...' }],
+        {form.getFieldDecorator('parentName', {
+          rules: [{  message: 'Please input some description...' }],
           initialValue: listItemData.parentName,
-        })(<Input placeholder="请输入"/>)}
+        })(<Input disabled={itemDataStatus === 2||itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="分类名称">
-        {form.getFieldDecorator('flmc', {
+        {form.getFieldDecorator('name', {
           rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.name,
-        })(<Input placeholder="请输入"/>)}
+        })(<Input disabled={itemDataStatus === 2} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="排序号">
-        {form.getFieldDecorator('pxh', {
+        {form.getFieldDecorator('sort', {
           rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.sort,
-        })(<Input placeholder="请输入"/>)}
+        })(<Input disabled={itemDataStatus === 2} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="分类描述">
-        {form.getFieldDecorator('flms', {
+        {form.getFieldDecorator('description', {
           rules: [
             {
               required: true,
@@ -100,6 +91,7 @@ const CreateForm = Form.create()(props => {
         })(
           <TextArea
             style={{ minHeight: 32 }}
+            disabled={itemDataStatus === 2}
             placeholder="请输入你的分类描述"
             rows={4}
           />,
@@ -124,6 +116,9 @@ export default class ResourceClassify extends PureComponent {
 
   componentDidMount() {
     const { dispatch } = this.props;
+    dispatch({
+      type: 'classify/tree',
+    });
     dispatch({
       type: 'classify/fetch',
     });
@@ -155,222 +150,77 @@ export default class ResourceClassify extends PureComponent {
     });
   };
 
-  handleFormReset = () => {
-    const { form, dispatch } = this.props;
-    form.resetFields();
-    this.setState({
-      formValues: {},
-    });
-    dispatch({
-      type: 'datasource/fetch',
-      payload: {},
-    });
-  };
-
-  toggleForm = () => {
-    const { expandForm } = this.state;
-    this.setState({
-      expandForm: !expandForm,
-    });
-  };
-
-  handleMenuClick = e => {
-    const { dispatch } = this.props;
-    const { selectedRows } = this.state;
-
-    if (!selectedRows) return;
-
-    switch (e.key) {
-      case 'remove':
-        dispatch({
-          type: 'classify/remove',
-          payload: {
-            no: selectedRows.map(row => row.no).join(','),
-          },
-          callback: () => {
-            this.setState({
-              selectedRows: [],
-            });
-          },
-        });
-        break;
-      default:
-        break;
-    }
-  };
-
   handleSelectRows = rows => {
     this.setState({
       selectedRows: rows,
     });
   };
-
-  handleSearch = e => {
-    e.preventDefault();
-
-    const { dispatch, form } = this.props;
-
-    form.validateFields((err, fieldsValue) => {
-      if (err) return;
-
-      const values = {
-        ...fieldsValue,
-        updatedAt: fieldsValue.updatedAt && fieldsValue.updatedAt.valueOf(),
-      };
-
-      this.setState({
-        formValues: values,
-      });
-
-      // dispatch({
-      //   type: 'classify/fetch',
-      //   payload: values,
-      // });
-    });
-  };
-
   handleModalVisible = flag => {
     this.setState({
       modalVisible: !!flag,
     });
   };
-  handleModal = (item,status) => {
+  handleModal = (item, status) => {
     listItemData = item;
     itemDataStatus = status;
     this.handleModalVisible(true);
   };
   handleAdd = fields => {
     const { dispatch } = this.props;
-    dispatch({
-      type: 'classify/add',
-      payload: {
-        description: fields.desc,
-      },
-    });
-
-    message.success('添加成功');
+    if (itemDataStatus === 1) {
+      dispatch({
+        type: 'classify/update',
+        payload: { ...listItemData, ...fields },
+        callback: () => {
+          dispatch({
+            type: 'classify/fetch',
+          });
+        },
+      });
+      message.success('修改成功');
+    } else {
+      dispatch({
+        type: 'classify/add',
+        payload: fields,
+        callback: () => {
+          dispatch({
+            type: 'classify/fetch',
+          });
+        },
+      });
+      message.success('添加成功');
+    }
     this.setState({
       modalVisible: false,
     });
   };
-
-  renderSimpleForm() {
-    const { form } = this.props;
-    const { getFieldDecorator } = form;
-    return (
-      <Form onSubmit={this.handleSearch} layout="inline">
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <Col md={8} sm={24}>
-            <FormItem label="规则编号">
-              {getFieldDecorator('no')(<Input placeholder="请输入"/>)}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status')(
-                <Select placeholder="请选择" style={{ width: '100%' }}>
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <span className={styles.submitButtons}>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-              <Button style={{ marginLeft: 8 }} onClick={this.handleFormReset}>
-                重置
-              </Button>
-              <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
-                展开 <Icon type="down"/>
-              </a>
-            </span>
-          </Col>
-        </Row>
-      </Form>
-    );
-  }
-
-  renderAdvancedForm() {
-    const { form } = this.props;
-    const { getFieldDecorator } = form;
-    return (
-      <Form onSubmit={this.handleSearch} layout="inline">
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <Col md={8} sm={24}>
-            <FormItem label="规则编号">
-              {getFieldDecorator('no')(<Input placeholder="请输入"/>)}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status')(
-                <Select placeholder="请选择" style={{ width: '100%' }}>
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="调用次数">
-              {getFieldDecorator('number')(<InputNumber style={{ width: '100%' }}/>)}
-            </FormItem>
-          </Col>
-        </Row>
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <Col md={8} sm={24}>
-            <FormItem label="更新日期">
-              {getFieldDecorator('date')(
-                <DatePicker style={{ width: '100%' }} placeholder="请输入更新日期"/>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status3')(
-                <Select placeholder="请选择" style={{ width: '100%' }}>
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status4')(
-                <Select placeholder="请选择" style={{ width: '100%' }}>
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-        </Row>
-        <div style={{ overflow: 'hidden' }}>
-          <span style={{ float: 'right', marginBottom: 24 }}>
-            <Button type="primary" htmlType="submit">
-              查询
-            </Button>
-            <Button style={{ marginLeft: 8 }} onClick={this.handleFormReset}>
-              重置
-            </Button>
-            <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
-              收起 <Icon type="up"/>
-            </a>
-          </span>
-        </div>
-      </Form>
-    );
-  }
-
-  renderForm() {
-    const { expandForm } = this.state;
-    return expandForm ? this.renderAdvancedForm() : this.renderSimpleForm();
-  }
-
+  handleDelete = () => {
+    const { dispatch } = this.props;
+    if (this.state.selectedRows.length > 1) {
+      this.state.selectedRows.forEach((item, index) => {
+        if (index === this.state.selectedRows.length - 1) {
+          dispatch({
+            type: 'classify/remove',
+            payload: {
+              id: item.id,
+            }, callback: () => {
+              dispatch({
+                type: 'classify/fetch',
+              });
+            },
+          });
+          message.success('删除成功');
+        } else {
+          dispatch({
+            type: 'classify/remove',
+            payload: {
+              id: item.id,
+            },
+          });
+        }
+      });
+    }
+  };
   handleTree = data => {
     const { dispatch } = this.props;
     dispatch({
@@ -381,7 +231,7 @@ export default class ResourceClassify extends PureComponent {
 
   render() {
     const {
-      classify: { data, treeData },
+      classify: { data ,treeData},
       loading,
     } = this.props;
     const { selectedRows, modalVisible } = this.state;
@@ -420,13 +270,13 @@ export default class ResourceClassify extends PureComponent {
           return (
             <Fragment>
               <a onClick={() => {
-                this.handleModal(text,2);
+                this.handleModal(text, 2);
 
                 listItemData = text;
               }}>查看</a>
               <Divider type="vertical"/>
               <a onClick={() => {
-                this.handleModal(text,1);
+                this.handleModal(text, 1);
 
                 listItemData = text;
               }}>编辑</a>
@@ -436,18 +286,12 @@ export default class ResourceClassify extends PureComponent {
       },
     ];
 
-    const menu = (
-      <Menu onClick={this.handleMenuClick} selectedKeys={[]}>
-        <Menu.Item key="remove">删除</Menu.Item>
-        <Menu.Item key="approval">批量审批</Menu.Item>
-      </Menu>
-    );
     return (
       <PageHeaderLayout>
         {/*<Col xl={6} lg={6} md={6} sm={6} xs={6} style={{ marginBottom: 24 }}>*/}
         <div className={styles.flexMain}>
           <SimpleTree
-            data={data}
+            data={treeData}
             handleTree={this.handleTree}
             title={'资源分类'}
           />
@@ -455,13 +299,17 @@ export default class ResourceClassify extends PureComponent {
             <div className={styles.tableList}>
               {/*<div className={styles.tableListForm}>{this.renderForm()}</div>*/}
               <div className={styles.tableListOperator}>
-                <Button icon="plus" type="primary" onClick={() => {this.handleModal({},0);}}>
+                <Button icon="plus" type="primary" onClick={() => {
+                  this.handleModal({}, 0);
+                }}>
                   添加同级
                 </Button>
-                <Button icon="plus" type="primary" onClick={() => {this.handleModal({},0);}}>
+                <Button icon="plus" type="primary" onClick={() => {
+                  this.handleModal({}, 0);
+                }}>
                   添加下级
                 </Button>
-                <Button icon="delete" onClick={() => this.handleModalVisible(true)}>
+                <Button icon="delete" onClick={() => this.handleDelete()}>
                   批量删除
                 </Button>
               </div>
@@ -480,7 +328,7 @@ export default class ResourceClassify extends PureComponent {
         {/*<Col xl={18} lg={16} md={16} sm={16} xs={16} style={{ marginBottom: 24 }}>*/}
 
         {/*</Col>*/}
-        <CreateForm {...parentMethods} modalVisible={modalVisible} />
+        <CreateForm {...parentMethods} modalVisible={modalVisible}/>
       </PageHeaderLayout>
     );
   }

@@ -24,7 +24,7 @@ const menuData = [
   {
     name: '目录库',
     icon: 'database',
-    path: 'content',
+    path: 'catalog',
   },
   {
     name: '资源库',
@@ -33,16 +33,16 @@ const menuData = [
     children: [
       {
         name: '数据库资源',
-        path: 'projects',
+        path: 'resource_db',
       },
       {
         name: '文件资源',
-        path: 'projects1',
+        path: 'resource_file',
       },
       {
         name: '服务资源',
         authority: 'admin',
-        path: 'projects2',
+        path: 'resource_servers',
       },
     ],
   },
@@ -53,11 +53,11 @@ const menuData = [
     children: [
       {
         name: '衍生资源分类管理',
-        path: 'projects',
+        path: 'dervieClassify',
       },
       {
         name: '衍生资源库管理',
-        path: 'projects1',
+        path: 'dervieSource',
       }
     ],
   },

@@ -1,7 +1,7 @@
-import { resourceclassifyList,getresourceclassify,addresourceclassify,updateresourceclassify,removeresourceclassify} from '../services/api';
+import { deriverclassifyList,getderiverlassify,addderiverclassify,updatederiverclassify,removederiverclassify} from '../services/api';
 
 export default {
-  namespace: 'classify',
+  namespace: 'dervieClassify',
 
   state: {
     data: {
@@ -13,41 +13,29 @@ export default {
   effects: {
     //取数据源列表
     *fetch({ payload }, { call, put }) {
-      const response = yield call(resourceclassifyList, payload);
+      const response = yield call(deriverclassifyList, payload);
       yield put({
         type: 'save',
         payload: response,
       });
     },
     *get({ payload }, { call, put }) {
-      const response = yield call(getresourceclassify, payload);
+      const response = yield call(getderiverlassify, payload);
       yield put({
         type: 'get',
         payload: response,
       });
     },
     *add({ payload, callback }, { call, put }) {
-      const response = yield call(addresourceclassify, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
+      const response = yield call(addderiverclassify, payload);
       if (callback) callback();
     },
     *remove({ payload, callback }, { call, put }) {
-      const response = yield call(removeresourceclassify, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
+      const response = yield call(removederiverclassify, payload);
       if (callback) callback();
     },
     *update({ payload, callback }, { call, put }) {
-      const response = yield call(updateresourceclassify, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
+      const response = yield call(updatederiverclassify, payload);
       if (callback) callback();
     },
   },

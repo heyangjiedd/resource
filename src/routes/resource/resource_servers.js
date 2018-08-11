@@ -25,7 +25,7 @@ import TagSelect from 'components/TagSelect';
 import StandardFormRow from 'components/StandardFormRow';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
-import styles from './resourceClassify.less';
+import styles from './resource_servers.less';
 
 const FormItem = Form.Item;
 const confirm = Modal.confirm;
@@ -37,7 +37,6 @@ const getValue = obj =>
     .join(',');
 const statusMap = ['default', 'processing', 'success', 'error'];
 const status = ['关闭', '运行中', '已上线', '异常'];
-let listItemData = {};
 
 const CreateForm = Form.create()(props => {
   const { modalVisible, form, handleAdd, handleModalVisible } = props;
@@ -61,10 +60,9 @@ const CreateForm = Form.create()(props => {
   };
   return (
     <Modal
-      title="创建数据源"
+      title="修改配置"
       visible={modalVisible}
       onOk={okHandle}
-      destroyOnClose={true}
       onCancel={() => handleModalVisible()}
     >
       <FormItem {...formItemLayout} label="数据源类型">
@@ -140,218 +138,15 @@ const CreateForm = Form.create()(props => {
     </Modal>
   );
 });
-const UpdateForm = Form.create()(props => {
-  const { modalVisible, form, handleAdd, handleModalVisible } = props;
-  const okHandle = () => {
-    form.validateFields((err, fieldsValue) => {
-      if (err) return;
-      form.resetFields();
-      handleAdd(fieldsValue);
-    });
-  };
-  const formItemLayout = {
-    labelCol: {
-      xs: { span: 24 },
-      sm: { span: 8 },
-    },
-    wrapperCol: {
-      xs: { span: 24 },
-      sm: { span: 16 },
-      md: { span: 16 },
-    },
-  };
-  return (
-    <Modal
-      title="修改配置"
-      visible={modalVisible}
-      onOk={okHandle}
-      destroyOnClose={true}
-      onCancel={() => handleModalVisible()}
-    >
-      <FormItem {...formItemLayout} label="数据源类型">
-        {form.getFieldDecorator('desc', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据库类型">
-        {form.getFieldDecorator('desc1', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据源名称">
-        {form.getFieldDecorator('desc2', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="所属组织机构">
-        {form.getFieldDecorator('desc3', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="资源分类">
-        {form.getFieldDecorator('desc4', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(
-          <Select placeholder="请选择" style={{ width: '100%' }}>
-            <Option value="0">关闭</Option>
-            <Option value="1">运行中</Option>
-          </Select>,)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="IP地址">
-        {form.getFieldDecorator('desc5', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="端口">
-        {form.getFieldDecorator('desc6', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据库名称/SID">
-        {form.getFieldDecorator('desc7', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="用户名">
-        {form.getFieldDecorator('desc8', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="密码">
-        {form.getFieldDecorator('desc9', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据源描述">
-        {form.getFieldDecorator('flms', {
-          rules: [
-            {
-              required: true,
-              message: '请输入数据源描述',
-            },
-          ],initialValue:listItemData.owner
-        })(
-          <TextArea
-            style={{ minHeight: 32 }}
-            placeholder="请输入你的数据源描述"
-            rows={4}
-          />
-        )}
-      </FormItem>
-    </Modal>
-  );
-});
-const TestForm = Form.create()(props => {
-  const { modalVisible, form, handleAdd, handleModalVisible } = props;
-  const okHandle = () => {
-    form.validateFields((err, fieldsValue) => {
-      if (err) return;
-      form.resetFields();
-      handleAdd(fieldsValue);
-    });
-  };
-  const formItemLayout = {
-    labelCol: {
-      xs: { span: 24 },
-      sm: { span: 8 },
-    },
-    wrapperCol: {
-      xs: { span: 24 },
-      sm: { span: 16 },
-      md: { span: 16 },
-    },
-  };
-  return (
-    <Modal
-      title="测试连通性"
-      visible={modalVisible}
-      onOk={okHandle}
-      destroyOnClose={true}
-      onCancel={() => handleModalVisible()}
-    >
-      <FormItem {...formItemLayout} label="数据源类型">
-        {form.getFieldDecorator('desc', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据库类型">
-        {form.getFieldDecorator('desc1', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据源名称">
-        {form.getFieldDecorator('desc2', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="所属组织机构">
-        {form.getFieldDecorator('desc3', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="资源分类">
-        {form.getFieldDecorator('desc4', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(
-          <Select placeholder="请选择" style={{ width: '100%' }}>
-            <Option value="0">关闭</Option>
-            <Option value="1">运行中</Option>
-          </Select>,)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="IP地址">
-        {form.getFieldDecorator('desc5', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="端口">
-        {form.getFieldDecorator('desc6', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据库名称/SID">
-        {form.getFieldDecorator('desc7', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="用户名">
-        {form.getFieldDecorator('desc8', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="密码">
-        {form.getFieldDecorator('desc9', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据源描述">
-        {form.getFieldDecorator('flms', {
-          rules: [
-            {
-              required: true,
-              message: '请输入数据源描述',
-            },
-          ],initialValue:listItemData.owner
-        })(
-          <TextArea
-            style={{ minHeight: 32 }}
-            placeholder="请输入你的数据源描述"
-            rows={4}
-          />
-        )}
-      </FormItem>
-    </Modal>
-  );
-});
-@connect(({ centersource, loading }) => ({
-  centersource,
-  loading: loading.models.centersource,
+
+@connect(({ rule, loading }) => ({
+  rule,
+  loading: loading.models.rule,
 }))
 @Form.create()
 export default class ResourceClassify extends PureComponent {
   state = {
     modalVisible: false,
-    testModalVisible:false,
-    updateModalVisible:false,
     expandForm: false,
     selectedRows: [],
     formValues: {},
@@ -360,9 +155,9 @@ export default class ResourceClassify extends PureComponent {
 
   componentDidMount() {
     const { dispatch } = this.props;
-    // dispatch({
-    //   type: 'centersource/fetch',
-    // });
+    dispatch({
+      type: 'rule/fetch',
+    });
   }
 
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
@@ -386,7 +181,7 @@ export default class ResourceClassify extends PureComponent {
     }
 
     dispatch({
-      type: 'centersource/fetch',
+      type: 'rule/fetch',
       payload: params,
     });
   };
@@ -398,7 +193,7 @@ export default class ResourceClassify extends PureComponent {
       formValues: {},
     });
     dispatch({
-      type: 'centersource/fetch',
+      type: 'rule/fetch',
       payload: {},
     });
   };
@@ -419,7 +214,7 @@ export default class ResourceClassify extends PureComponent {
     switch (e.key) {
       case 'remove':
         dispatch({
-          type: 'centersource/remove',
+          type: 'rule/remove',
           payload: {
             no: selectedRows.map(row => row.no).join(','),
           },
@@ -459,24 +254,15 @@ export default class ResourceClassify extends PureComponent {
       });
 
       dispatch({
-        type: 'centersource/fetch',
+        type: 'rule/fetch',
         payload: values,
       });
     });
   };
+
   handleModalVisible = flag => {
     this.setState({
       modalVisible: !!flag,
-    });
-  };
-  testHandleModalVisible = flag => {
-    this.setState({
-      testModalVisible: !!flag,
-    });
-  };
-  updateHandleModalVisible = flag => {
-    this.setState({
-      updateModalVisible: !!flag,
     });
   };
   handleDelete = () => {
@@ -494,40 +280,15 @@ export default class ResourceClassify extends PureComponent {
   handleAdd = fields => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'centersource/add',
+      type: 'rule/add',
       payload: {
         description: fields.desc,
       },
     });
+
     message.success('添加成功');
     this.setState({
       modalVisible: false,
-    });
-  };
-  testHandleAdd = fields => {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'centersource/add',
-      payload: {
-        description: fields.desc,
-      },
-    });
-    message.success('添加成功');
-    this.setState({
-      testModalVisible: false,
-    });
-  };
-  updateHandleAdd = fields => {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'centersource/add',
-      payload: {
-        description: fields.desc,
-      },
-    });
-    message.success('添加成功');
-    this.setState({
-      updateModalVisible: false,
     });
   };
 
@@ -707,29 +468,34 @@ export default class ResourceClassify extends PureComponent {
   handleTree = data => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'centersource/fetch',
+      type: 'rule/fetch',
       payload: data,
     });
   }
   render() {
     const {
-      centersource: { data },
+      rule: { data },
       loading,
     } = this.props;
-    const { selectedRows, modalVisible,testModalVisible,updateModalVisible,listItemData } = this.state;
+    const { selectedRows, modalVisible,listItemData } = this.state;
 
     const columns = [
       {
         title: '数据源名称',
-        dataIndex: 'sourceName',
+        dataIndex: 'no',
       },
       {
         title: '数据源类型',
-        dataIndex: 'sourceType',
+        dataIndex: 'description',
       },
       {
         title: '所属组织机构',
-        dataIndex: 'orgId',
+        dataIndex: 'callNo',
+        sorter: true,
+        align: 'right',
+        render: val => `${val} 万`,
+        // mark to display a total number
+        needTotal: true,
       },
       {
         title: '所属资源分类',
@@ -739,17 +505,20 @@ export default class ResourceClassify extends PureComponent {
         },
       },
       {
+        title: '数据源描述',
+        dataIndex: 'updatedAt1',
+        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
+      },
+      {
         title: '最近连接时间',
-        dataIndex: 'createTime',
+        dataIndex: 'updatedAt2',
         sorter: true,
         render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
       },
       {
         title: '连通状态',
-        dataIndex: 'linkStatus',
-        render(val) {
-          return <Badge status={val?'success': 'error'}/>;
-        },
+        dataIndex: 'updatedAt3',
+        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
       },
       {
         title: '操作',
@@ -757,14 +526,14 @@ export default class ResourceClassify extends PureComponent {
           return (
             <Fragment>
               <a onClick={() => {
-                this.updateHandleModalVisible(true);
+                this.handleModalVisible(true);
                 this.setState({
                   listItemData: text
                 });
               }}>配置详情</a>
               <Divider type="vertical"/>
               <a onClick={() => {
-                this.updateHandleModalVisible(true);
+                this.handleModalVisible(true);
                 this.setState({
                   listItemData: text
                 });
@@ -779,14 +548,7 @@ export default class ResourceClassify extends PureComponent {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
     };
-    const testParentMethods = {
-      handleAdd: this.testHandleAdd,
-      handleModalVisible: this.testHandleModalVisible,
-    };
-    const updateParentMethods = {
-      handleAdd: this.updateHandleAdd,
-      handleModalVisible: this.updateHandleModalVisible,
-    };
+
     return (
       <PageHeaderLayout>
         <div className={styles.flexMain}>
@@ -800,7 +562,7 @@ export default class ResourceClassify extends PureComponent {
               <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
                 新建数据源
               </Button>
-              <Button icon="desktop" type="primary" onClick={() => this.testHandleModalVisible(true)}>
+              <Button icon="desktop" type="primary" onClick={() => this.handleModalVisible(true)}>
                 测试连通性
               </Button>
               <Button icon="delete" onClick={() => this.handleDelete(true)}>
@@ -808,19 +570,17 @@ export default class ResourceClassify extends PureComponent {
               </Button>
             </div>
             <div className={styles.tableListForm}>{this.renderForm()}</div>
-            {/*<StandardTable*/}
-              {/*selectedRows={selectedRows}*/}
-              {/*loading={loading}*/}
-              {/*data={data}*/}
-              {/*columns={columns}*/}
-              {/*onSelectRow={this.handleSelectRows}*/}
-              {/*onChange={this.handleStandardTableChange}*/}
-            {/*/>*/}
+            <StandardTable
+              selectedRows={selectedRows}
+              loading={loading}
+              data={data}
+              columns={columns}
+              onSelectRow={this.handleSelectRows}
+              onChange={this.handleStandardTableChange}
+            />
           </div>
         </Card>
         </div>
-        <TestForm {...testParentMethods} modalVisible={testModalVisible}/>
-        <UpdateForm {...updateParentMethods} modalVisible={updateModalVisible}/>
         <CreateForm {...parentMethods} modalVisible={modalVisible} />
       </PageHeaderLayout>
     );

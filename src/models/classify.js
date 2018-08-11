@@ -1,4 +1,4 @@
-import { resourceclassifyList,getresourceclassify,addresourceclassify,updateresourceclassify,removeresourceclassify} from '../services/api';
+import { resourceclassifyList,getresourceclassify,addresourceclassify,updateresourceclassify,removeresourceclassify,getAllresourceclassify} from '../services/api';
 
 export default {
   namespace: 'classify',
@@ -8,6 +8,7 @@ export default {
       list: [],
       pagination: {},
     },
+    treeData:[]
   },
 
   effects: {
@@ -16,6 +17,13 @@ export default {
       const response = yield call(resourceclassifyList, payload);
       yield put({
         type: 'save',
+        payload: response,
+      });
+    },
+    *tree({ payload }, { call, put }) {
+      const response = yield call(getAllresourceclassify, payload);
+      yield put({
+        type: 'treeDate',
         payload: response,
       });
     },
@@ -28,26 +36,14 @@ export default {
     },
     *add({ payload, callback }, { call, put }) {
       const response = yield call(addresourceclassify, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
       if (callback) callback();
     },
     *remove({ payload, callback }, { call, put }) {
       const response = yield call(removeresourceclassify, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
       if (callback) callback();
     },
     *update({ payload, callback }, { call, put }) {
       const response = yield call(updateresourceclassify, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
       if (callback) callback();
     },
   },
@@ -59,10 +55,16 @@ export default {
         data: action.payload,
       };
     },
-    get(state, action){
+    treeDate(state, action) {
       return {
         ...state,
         treeData: action.payload,
+      };
+    },
+    get(state, action){
+      return {
+        ...state,
+        data: action.payload,
       };
     }
   },

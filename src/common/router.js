@@ -83,23 +83,23 @@ export const getRouterData = app => {
     '/base/centralDataSource': {
       component: dynamicWrapper(app, ['centersource'], () => import('../routes/Base/centralDataSource')),
     },
-    '/content': {
-      component: dynamicWrapper(app, ['catalog'], () => import('../routes/List/TableList')),
+    '/catalog': {
+      component: dynamicWrapper(app, ['catalog'], () => import('../routes/catalog/index')),
     },
-    '/resource/projects': {
-      component: dynamicWrapper(app, [], () => import('../routes/List/TableList')),
+    '/resource/resource_db': {
+      component: dynamicWrapper(app, ['resource_db'], () => import('../routes/resource/resource_db')),
     },
-    '/resource/projects1': {
-      component: dynamicWrapper(app, [], () => import('../routes/List/TableList')),
+    '/resource/resource_file': {
+      component: dynamicWrapper(app, ['resource_file'], () => import('../routes/resource/resource_file')),
     },
-    '/resource/projects2': {
-      component: dynamicWrapper(app, [], () => import('../routes/List/TableList')),
+    '/resource/resource_servers': {
+      component: dynamicWrapper(app, ['resource_servers'], () => import('../routes/resource/resource_servers')),
     },
-    '/derivation/projects': {
-      component: dynamicWrapper(app, [], () => import('../routes/List/TableList')),
+    '/derivation/dervieClassify': {
+      component: dynamicWrapper(app, ['dervieClassify'], () => import('../routes/derivation/dervieClassify')),
     },
-    '/derivation/projects1': {
-      component: dynamicWrapper(app, [], () => import('../routes/List/TableList')),
+    '/derivation/dervieSource': {
+      component: dynamicWrapper(app, ['dervieSource'], () => import('../routes/derivation/dervieSource')),
     },
 
     '/dashboard/analysis': {
