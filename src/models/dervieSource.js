@@ -1,4 +1,4 @@
-import { deriveList} from '../services/api';
+import { deriveList,getderivecatalog,removederivecatalog,deriveApi,deriveCollection,deriveFile,deriveFilederiveField} from '../services/api';
 
 export default {
   namespace: 'dervieSource',
@@ -20,30 +20,42 @@ export default {
       });
     },
     *get({ payload }, { call, put }) {
-      const response = yield call(getresourceclassify, payload);
+      const response = yield call(getderivecatalog, payload);
       yield put({
         type: 'get',
         payload: response,
       });
     },
-    *add({ payload, callback }, { call, put }) {
-      const response = yield call(addresourceclassify, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
-      if (callback) callback();
-    },
     *remove({ payload, callback }, { call, put }) {
-      const response = yield call(removeresourceclassify, payload);
+      const response = yield call(removederivecatalog, payload);
+      if (callback) callback();
+    },
+    *api({ payload, callback }, { call, put }) {
+      const response = yield call(deriveApi, payload);
       yield put({
         type: 'save',
         payload: response,
       });
       if (callback) callback();
     },
-    *update({ payload, callback }, { call, put }) {
-      const response = yield call(updateresourceclassify, payload);
+    *collection({ payload, callback }, { call, put }) {
+      const response = yield call(deriveCollection, payload);
+      yield put({
+        type: 'save',
+        payload: response,
+      });
+      if (callback) callback();
+    },
+    *file({ payload, callback }, { call, put }) {
+      const response = yield call(deriveFile, payload);
+      yield put({
+        type: 'save',
+        payload: response,
+      });
+      if (callback) callback();
+    },
+    *field({ payload, callback }, { call, put }) {
+      const response = yield call(deriveFilederiveField, payload);
       yield put({
         type: 'save',
         payload: response,
@@ -62,7 +74,7 @@ export default {
     get(state, action){
       return {
         ...state,
-        treeData: action.payload,
+        detail: action.payload,
       };
     }
   },

@@ -20,6 +20,8 @@ import {
   Divider,
 } from 'antd';
 import StandardTable from 'components/StandardTable';
+import StandardTableNoCheck from 'components/StandardTableNoCheck';
+import StandardTableNothing from 'components/StandardTableNothing';
 import SimpleTree from 'components/SimpleTree';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
@@ -107,7 +109,7 @@ const CreateForm = Form.create()(props => {
   );
 });
 const CatlogDetail = Form.create()(props => {
-  const { modalVisible, form, handleModalVisible,loading,data,columns} = props;
+  const { modalVisible, form, handleModalVisible, loading, data, columns } = props;
   const okHandle = () => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
@@ -202,7 +204,7 @@ const CatlogDetail = Form.create()(props => {
           </FormItem>
         </Col>
         <Col span={6}>
-          <FormItem labelCol={{ span: 8 }} wrapperCol={{ span: 16}} label="周期">
+          <FormItem labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} label="周期">
             {form.getFieldDecorator('zq', {
               rules: [{ required: true, message: 'Please input some description...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
@@ -236,15 +238,15 @@ const CatlogDetail = Form.create()(props => {
         <Col span={12}>
           <FormItem {...formItemLayout} label="共享条件">
             {form.getFieldDecorator('gxtj', {
-              rules: [{ required: true, message: 'Please input some description...', },],
-            })(<TextArea disabled={true} placeholder="请输入" rows={4}/>,)}
+              rules: [{ required: true, message: 'Please input some description...' }],
+            })(<TextArea disabled={true} placeholder="请输入" rows={4}/>)}
           </FormItem>
         </Col>
         <Col span={12}>
           <FormItem {...formItemLayout} label="开放条件">
             {form.getFieldDecorator('kftj', {
-              rules: [{ required: true, message: 'Please input some description...', },],
-            })(<TextArea disabled={true} placeholder="请输入" rows={4}/>,)}
+              rules: [{ required: true, message: 'Please input some description...' }],
+            })(<TextArea disabled={true} placeholder="请输入" rows={4}/>)}
           </FormItem>
         </Col>
       </Row>
@@ -306,7 +308,7 @@ const CatlogDetail = Form.create()(props => {
           信息项列表：
         </Col>
       </Row>
-      <StandardTableNoselection
+      <StandardTableNothing
         loading={loading}
         data={data}
         columns={columns}
@@ -314,9 +316,9 @@ const CatlogDetail = Form.create()(props => {
     </Modal>
   );
 });
-@connect(({ classify, loading }) => ({
-  classify,
-  loading: loading.models.classify,
+@connect(({ catalog, loading }) => ({
+  catalog,
+  loading: loading.models.catalog,
 }))
 @Form.create()
 export default class ResourceClassify extends PureComponent {
@@ -367,7 +369,7 @@ export default class ResourceClassify extends PureComponent {
       formValues: {},
     });
     dispatch({
-      type: 'datasource/fetch',
+      type: 'catalog/fetch',
       payload: {},
     });
   };
@@ -439,7 +441,7 @@ export default class ResourceClassify extends PureComponent {
       modalVisible: !!flag,
     });
   };
-  handleModal = (item,status) => {
+  handleModal = (item, status) => {
     listItemData = item;
     itemDataStatus = status;
     this.handleModalVisible(true);
@@ -588,6 +590,7 @@ export default class ResourceClassify extends PureComponent {
     const {
       catalog: { data, treeData },
       loading,
+      form
     } = this.props;
     const { selectedRows, modalVisible } = this.state;
     const parentMethods = {
@@ -617,17 +620,17 @@ export default class ResourceClassify extends PureComponent {
           return (
             <Fragment>
               <a onClick={() => {
-                this.handleModal(text,2);
+                this.handleModal(text, 2);
                 listItemData = text;
               }}>目录详情</a>
               <Divider type="vertical"/>
               <a onClick={() => {
-                this.handleModal(text,1);
+                this.handleModal(text, 1);
                 listItemData = text;
               }}>配置详情</a>
               <Divider type="vertical"/>
               <a onClick={() => {
-                this.handleModal(text,1);
+                this.handleModal(text, 1);
                 listItemData = text;
               }}>目数关联</a>
             </Fragment>
@@ -642,30 +645,34 @@ export default class ResourceClassify extends PureComponent {
         <Menu.Item key="approval">批量审批</Menu.Item>
       </Menu>
     );
+    const { getFieldDecorator } = form;
     return (
       <PageHeaderLayout>
         {/*<Col xl={6} lg={6} md={6} sm={6} xs={6} style={{ marginBottom: 24 }}>*/}
         <div className={styles.flexMain}>
-          <SimpleTree
-            data={data}
-            handleTree={this.handleTree}
-            title={'资源分类'}
-          />
+          {/*<SimpleTree*/}
+          {/*data={data}*/}
+          {/*handleTree={this.handleTree}*/}
+          {/*title={'资源分类'}*/}
+          {/*/>*/}
           <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
               {/*<div className={styles.tableListForm}>{this.renderForm()}</div>*/}
-              <div className={styles.tableListOperator}>
-                <Button icon="plus" type="primary" onClick={() => {this.handleModal({},0);}}>
-                  添加同级
-                </Button>
-                <Button icon="plus" type="primary" onClick={() => {this.handleModal({},0);}}>
-                  添加下级
-                </Button>
-                <Button icon="delete" onClick={() => this.handleModalVisible(true)}>
-                  批量删除
-                </Button>
-              </div>
-              <StandardTable
+                <Row>
+                <Col md={8} sm={24}>
+                  <FormItem>
+                    {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
+                  </FormItem>
+                </Col>
+                <Col md={6} sm={24}>
+                  <FormItem>
+                  <Button type="primary" htmlType="submit">
+                    查询
+                  </Button>
+                  </FormItem>
+                </Col>
+                </Row>
+              <StandardTableNoCheck
                 selectedRows={selectedRows}
                 loading={loading}
                 data={data}
@@ -680,7 +687,7 @@ export default class ResourceClassify extends PureComponent {
         {/*<Col xl={18} lg={16} md={16} sm={16} xs={16} style={{ marginBottom: 24 }}>*/}
 
         {/*</Col>*/}
-        <CreateForm {...parentMethods} modalVisible={modalVisible} />
+        <CreateForm {...parentMethods} modalVisible={modalVisible}/>
       </PageHeaderLayout>
     );
   }

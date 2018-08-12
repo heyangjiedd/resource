@@ -20,7 +20,7 @@ import {
   Divider,
 } from 'antd';
 import StandardTable from 'components/StandardTable';
-import StandardTableNoselection from 'components/StandardTableNothing';
+import StandardTableNothing from 'components/StandardTableNothing';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
 import styles from './TableList.less';

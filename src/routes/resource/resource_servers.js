@@ -37,6 +37,9 @@ const getValue = obj =>
     .join(',');
 const statusMap = ['default', 'processing', 'success', 'error'];
 const status = ['关闭', '运行中', '已上线', '异常'];
+let itemDataStatus = 0;
+let listItemData = {};
+let treeSelect = {};
 
 const CreateForm = Form.create()(props => {
   const { modalVisible, form, handleAdd, handleModalVisible } = props;
@@ -476,6 +479,7 @@ export default class ResourceClassify extends PureComponent {
     const {
       rule: { data },
       loading,
+      form
     } = this.props;
     const { selectedRows, modalVisible,listItemData } = this.state;
 
@@ -548,28 +552,30 @@ export default class ResourceClassify extends PureComponent {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
     };
-
+    const { getFieldDecorator } = form;
     return (
       <PageHeaderLayout>
         <div className={styles.flexMain}>
-        <SimpleTree
-          handleTree={this.handleTree}
-          title={'中心数据源'}
-        />
-        <Card bordered={false}>
+        {/*<SimpleTree*/}
+          {/*handleTree={this.handleTree}*/}
+          {/*title={'中心数据源'}*/}
+        {/*/>*/}
+        <Card bordered={false}  className={styles.flexTable}>
           <div className={styles.tableList}>
-            <div className={styles.tableListOperator}>
-              <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
-                新建数据源
-              </Button>
-              <Button icon="desktop" type="primary" onClick={() => this.handleModalVisible(true)}>
-                测试连通性
-              </Button>
-              <Button icon="delete" onClick={() => this.handleDelete(true)}>
-                批量删除
-              </Button>
-            </div>
-            <div className={styles.tableListForm}>{this.renderForm()}</div>
+            <Row gutter={{ md: 2, lg:6, xl: 12 }}>
+              <Col md={8} sm={24}>
+                <FormItem>
+                  {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
+                </FormItem>
+              </Col>
+              <Col md={2} sm={24}>
+                <FormItem>
+                  <Button type="primary" htmlType="submit">
+                    查询
+                  </Button>
+                </FormItem>
+              </Col>
+            </Row>
             <StandardTable
               selectedRows={selectedRows}
               loading={loading}

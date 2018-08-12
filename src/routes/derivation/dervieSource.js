@@ -18,12 +18,17 @@ import {
   message,
   Badge,
   Divider,
+  Cascader,
+  Radio
 } from 'antd';
 import StandardTable from 'components/StandardTable';
+import StandardTableNoPage from 'components/StandardTableNoPage';
 import SimpleTree from 'components/SimpleTree';
 import TagSelect from 'components/TagSelect';
 import StandardFormRow from 'components/StandardFormRow';
+import StandardTableRadio from 'components/StandardTableRadio';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
+
 
 import styles from './dervieSource.less';
 
@@ -31,15 +36,20 @@ const FormItem = Form.Item;
 const confirm = Modal.confirm;
 const { TextArea } = Input;
 const { Option } = Select;
+const RadioGroup = Radio.Group;
 const getValue = obj =>
   Object.keys(obj)
     .map(key => obj[key])
     .join(',');
 const statusMap = ['default', 'processing', 'success', 'error'];
 const status = ['关闭', '运行中', '已上线', '异常'];
+let itemDataStatus = 0;
+let listItemData = {};
+let treeSelect = {};
+let selectValue = [];
 
 const CreateForm = Form.create()(props => {
-  const { modalVisible, form, handleAdd, handleModalVisible } = props;
+  const { modalVisible, form, handleAdd, handleModalVisible,data,handleItem,item} = props;
   const okHandle = () => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
@@ -47,101 +57,222 @@ const CreateForm = Form.create()(props => {
       handleAdd(fieldsValue);
     });
   };
+  const { getFieldDecorator } = form;
+  const options = [{
+    value: '关系型数据库',
+    label: '关系型数据库',
+    children: [{
+      value: 'MySQL', label: 'MySQL',
+    }, {
+      value: 'Oracle', label: 'Oracle',
+    }, {
+      value: 'SQLServer', label: 'SQLServer',
+    }, {
+      value: 'DB2', label: 'DB2',
+    }],
+  }, {
+    value: '非关系型数据库',
+    label: '非关系型数据库',
+    children: [{
+      value: 'MongoDB', label: 'MongoDB',
+    }, {
+      value: 'Hbase', label: 'Hbase',
+    }],
+  }, {
+    value: 'API',
+    label: 'API',
+    children: [{
+      value: 'HTTP', label: 'HTTP',
+    }, {
+      value: 'HTTPS', label: 'HTTPS',
+    }, {
+      value: 'WSDL', label: 'WSDL',
+    }, {
+      value: 'REST', label: 'REST',
+    }],
+  }, {
+    value: '普通文件',
+    label: '普通文件',
+    children: [{
+      value: 'FTP', label: 'FTP',
+    }, {
+      value: 'SFTP', label: 'SFTP',
+    }, {
+      value: '本地磁盘', label: '本地磁盘',
+    }, {
+      value: '共享文件夹', label: '共享文件夹',
+    }],
+  }];
+  const columns = [
+    {
+      title: '数据源名称',
+      dataIndex: 'no',
+    },
+    {
+      title: '数据源类型',
+      dataIndex: 'status',
+      render(val) {
+        return <Badge status={statusMap[val]} text={status[val]}/>;
+      },
+    },
+    {
+      title: '数据源描述',
+      dataIndex: 'no',
+    },
+    {
+      title: '最近连接时间',
+      dataIndex: 'updatedAt1',
+      render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
+    },
+    {
+      title: '连接状态',
+      dataIndex: 'updatedAt2',
+      render(val) {
+        return <Badge status={val?'success': 'error'} text={val}/>;
+      },
+    }
+  ];
+  const columnsNoPage = [
+    {
+      title: '序号',
+      dataIndex: 'no',
+    },
+    {
+      title: '表名',
+      dataIndex: 'no1',
+    },
+    {
+      title: '表描述',
+      dataIndex: 'updatedAt1',
+    },
+  ];
+  const firstFooter = (<Row>
+    <Col md={24} sm={24}>
+      <Button type="primary" onClick={()=>{handleItem(2)}}>
+        下一步
+      </Button>
+      <Button onClick={()=>{handleModalVisible(false)}}>
+        取消
+      </Button>
+    </Col>
+  </Row>);
+  const secondFooter = (<Row>
+    <Col md={24} sm={24}>
+      <Button onClick={()=>{handleItem(1)}}>
+        上一步
+      </Button>
+      <Button type="primary" onClick={handleAdd}>
+        提交
+      </Button>
+      <Button onClick={()=>{handleModalVisible(false)}}>
+        取消
+      </Button>
+    </Col>
+  </Row>);
+  let selectedRows = []
+  function onChange(value) {
+    selectValue = value;
+  }
+  function handleSelectRows() {
+
+  }
+  function handleStandardTableChange() {
+
+  }
   const formItemLayout = {
     labelCol: {
       xs: { span: 24 },
-      sm: { span: 8 },
+      sm: { span: 6 },
     },
     wrapperCol: {
       xs: { span: 24 },
-      sm: { span: 16 },
-      md: { span: 16 },
+      sm: { span: 18 },
+      md: { span: 18 },
     },
   };
-  return (
-    <Modal
-      title="修改配置"
+  return (<Modal
+      title="新增"
       visible={modalVisible}
-      onOk={okHandle}
-      onCancel={() => handleModalVisible()}
+      width={900}
+      footer={item===1?firstFooter:secondFooter}
+      onOk={handleItem}
+      onCancel={() => handleModalVisible(false)}
     >
-      <FormItem {...formItemLayout} label="数据源类型">
-        {form.getFieldDecorator('desc', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据库类型">
-        {form.getFieldDecorator('desc1', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据源名称">
-        {form.getFieldDecorator('desc2', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="所属组织机构">
-        {form.getFieldDecorator('desc3', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="资源分类">
-        {form.getFieldDecorator('desc4', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(
-          <Select placeholder="请选择" style={{ width: '100%' }}>
-          <Option value="0">关闭</Option>
-          <Option value="1">运行中</Option>
-        </Select>,)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="IP地址">
-        {form.getFieldDecorator('desc5', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="端口">
-        {form.getFieldDecorator('desc6', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据库名称/SID">
-        {form.getFieldDecorator('desc7', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="用户名">
-        {form.getFieldDecorator('desc8', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="密码">
-        {form.getFieldDecorator('desc9', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据源描述">
-        {form.getFieldDecorator('flms', {
-          rules: [
-            {
-              required: true,
-              message: '请输入数据源描述',
-            },
-          ],initialValue:listItemData.owner
-        })(
-          <TextArea
-            style={{ minHeight: 32 }}
-            placeholder="请输入你的数据源描述"
-            rows={4}
-          />
-        )}
-      </FormItem>
+      {item===1?<div>
+        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
+          <Col md={12} sm={24}>
+              <FormItem {...formItemLayout} label="资源分类">
+                {getFieldDecorator('status')(
+                  <Select placeholder="选择资源分类" style={{ width: '100%' }}>
+                    <Option value="0">关系型数据库</Option>
+                    <Option value="1">非关系型数据库</Option>
+                  </Select>
+                )}
+              </FormItem>
+          </Col>
+        </Row>
+        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
+        <Col md={12} sm={24}>
+          <FormItem {...formItemLayout} label="数据源类型"><Cascader style={{ width: 100 + '%' }} options={options} onChange={onChange}
+                              placeholder="请选择数据源/数据库"/>
+          </FormItem>
+        </Col>
+        <Col md={8} sm={24}>
+          <FormItem>
+            {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
+          </FormItem>
+        </Col>
+        <Col md={4} sm={24}>
+            <span className={styles.submitButtons}>
+              <Button type="primary" htmlType="submit">
+                查询
+              </Button>
+            </span>
+        </Col>
+      </Row><Row gutter={{ md: 8, lg: 24, xl: 48 }}>
+        <StandardTableRadio
+        selectedRows={selectedRows}
+        data={data}
+        columns={columns}
+        onSelectRow={handleSelectRows}
+        onChange={handleStandardTableChange}
+        />
+        </Row></div>:<div><Row gutter={{ md: 8, lg: 24, xl: 48 }}>
+        <Col md={12} sm={24}>
+          <FormItem {...formItemLayout} label="新增类型">
+            {getFieldDecorator('status')(
+              <Select placeholder="选择新增类型" style={{ width: '100%' }}>
+                <Option value="0">关系型数据库</Option>
+                <Option value="1">非关系型数据库</Option>
+              </Select>
+            )}
+          </FormItem>
+        </Col>
+        <Col md={12} sm={24}>
+          <FormItem {...formItemLayout} label="请选择表/视图">
+            <RadioGroup onChange={this.onChange} >
+              <Radio value={1}>表</Radio>
+              <Radio value={2}>视图</Radio>
+            </RadioGroup>
+          </FormItem>
+        </Col>
+      </Row>
+      <Row>
+        <StandardTableNoPage
+          selectedRows={selectedRows}
+          data={data}
+          columns={columnsNoPage}
+          onSelectRow={handleSelectRows}
+          onChange={handleStandardTableChange}
+        />
+      </Row></div>}
     </Modal>
   );
 });
 
-@connect(({ rule, loading }) => ({
-  rule,
-  loading: loading.models.rule,
+@connect(({ dervieSource, loading }) => ({
+  dervieSource,
+  loading: loading.models.dervieSource,
 }))
 @Form.create()
 export default class ResourceClassify extends PureComponent {
@@ -151,12 +282,13 @@ export default class ResourceClassify extends PureComponent {
     selectedRows: [],
     formValues: {},
     listItemData: {},
+    item:1
   };
 
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
-      type: 'rule/fetch',
+      type: 'dervieSource/fetch',
     });
   }
 
@@ -181,7 +313,7 @@ export default class ResourceClassify extends PureComponent {
     }
 
     dispatch({
-      type: 'rule/fetch',
+      type: 'dervieSource/fetch',
       payload: params,
     });
   };
@@ -193,8 +325,7 @@ export default class ResourceClassify extends PureComponent {
       formValues: {},
     });
     dispatch({
-      type: 'rule/fetch',
-      payload: {},
+      type: 'dervieSource/fetch',
     });
   };
 
@@ -214,7 +345,7 @@ export default class ResourceClassify extends PureComponent {
     switch (e.key) {
       case 'remove':
         dispatch({
-          type: 'rule/remove',
+          type: 'dervieSource/remove',
           payload: {
             no: selectedRows.map(row => row.no).join(','),
           },
@@ -235,7 +366,6 @@ export default class ResourceClassify extends PureComponent {
       selectedRows: rows,
     });
   };
-
   handleSearch = e => {
     e.preventDefault();
 
@@ -254,12 +384,16 @@ export default class ResourceClassify extends PureComponent {
       });
 
       dispatch({
-        type: 'rule/fetch',
+        type: 'dervieSource/fetch',
         payload: values,
       });
     });
   };
-
+  handleItem = (index)=>{
+    this.setState({
+      item: index,
+    });
+  }
   handleModalVisible = flag => {
     this.setState({
       modalVisible: !!flag,
@@ -274,13 +408,14 @@ export default class ResourceClassify extends PureComponent {
           setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
         }).catch(() => console.log('Oops errors!'));
       },
-      onCancel() {},
+      onCancel() {
+      },
     });
-  }
+  };
   handleAdd = fields => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'rule/add',
+      type: 'dervieSource/add',
       payload: {
         description: fields.desc,
       },
@@ -292,231 +427,51 @@ export default class ResourceClassify extends PureComponent {
     });
   };
 
-  renderSimpleForm() {
-    const { form } = this.props;
-    const { getFieldDecorator } = form;
-    return (
-      <Form onSubmit={this.handleSearch} layout="inline">
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <Col md={6} sm={24}>
-            <FormItem >
-              {getFieldDecorator('status')(
-                <Select placeholder="数据库类型" style={{ width: '100%' }}>
-                  <Option value="0">关系型数据库</Option>
-                  <Option value="1">非关系型数据库</Option>
-                </Select>
-              )}
-            </FormItem>
-          </Col>
-          <Col md={3} sm={24}>
-            <FormItem >
-              {getFieldDecorator('status')(
-                <Select placeholder="连通状态" style={{ width: '100%' }}>
-                  <Option value="0">已连通</Option>
-                  <Option value="1">未连通</Option>
-                </Select>
-              )}
-            </FormItem>
-          </Col>
-          <Col md={3} sm={24}>
-            <FormItem >
-              {getFieldDecorator('status')(
-                <Select placeholder="同步状态" style={{ width: '100%' }}>
-                  <Option value="0">已同步</Option>
-                  <Option value="1">未同步</Option>
-                </Select>
-              )}
-            </FormItem>
-          </Col>
-          <Col md={6} sm={24}>
-            <FormItem>
-              {getFieldDecorator('no')(<Input placeholder="请输入数据源名称" />)}
-            </FormItem>
-          </Col>
-          <Col md={6} sm={24}>
-            <span className={styles.submitButtons}>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-              <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
-                展开 <Icon type="down" />
-              </a>
-            </span>
-          </Col>
-        </Row>
-      </Form>
-    );
-  }
-
-  renderAdvancedForm() {
-    const { form } = this.props;
-    const { getFieldDecorator } = form;
-    return (
-      <Form onSubmit={this.handleSearch} layout="inline">
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <Col md={6} sm={24}>
-            <FormItem >
-              {getFieldDecorator('status')(
-                <Select placeholder="数据库类型" style={{ width: '100%' }}>
-                  <Option value="0">关系型数据库</Option>
-                  <Option value="1">非关系型数据库</Option>
-                </Select>
-              )}
-            </FormItem>
-          </Col>
-          <Col md={3} sm={24}>
-            <FormItem >
-              {getFieldDecorator('status')(
-                <Select placeholder="连通状态" style={{ width: '100%' }}>
-                  <Option value="0">已连通</Option>
-                  <Option value="1">未连通</Option>
-                </Select>
-              )}
-            </FormItem>
-          </Col>
-          <Col md={3} sm={24}>
-            <FormItem >
-              {getFieldDecorator('status')(
-                <Select placeholder="同步状态" style={{ width: '100%' }}>
-                  <Option value="0">已同步</Option>
-                  <Option value="1">未同步</Option>
-                </Select>
-              )}
-            </FormItem>
-          </Col>
-          <Col md={6} sm={24}>
-            <FormItem>
-              {getFieldDecorator('no')(<Input placeholder="请输入数据源名称" />)}
-            </FormItem>
-          </Col>
-          <Col md={6} sm={24}>
-            <span className={styles.submitButtons}>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-               <Button style={{ marginLeft: 8 }} onClick={this.handleFormReset}>
-              重置
-              </Button>
-              <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
-              收起 <Icon type="up" />
-            </a>
-            </span>
-          </Col>
-        </Row>
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <StandardFormRow title="关系型数据库" block style={{ paddingBottom: 5 }}>
-            <FormItem style={{ marginBottom: 0 }}>
-              {getFieldDecorator('category')(
-                <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="cat1">MySQL</TagSelect.Option>
-                  <TagSelect.Option value="cat2">Oracle</TagSelect.Option>
-                  <TagSelect.Option value="cat3">SQLServer</TagSelect.Option>
-                  <TagSelect.Option value="cat4">DB2</TagSelect.Option>
-                </TagSelect>
-              )}
-            </FormItem>
-          </StandardFormRow>
-        </Row>
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <StandardFormRow title="非关系型数据库" block style={{ paddingBottom: 5 }}>
-            <FormItem style={{ marginBottom: 0 }}>
-              {getFieldDecorator('category')(
-                <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="cat1">MongoDB</TagSelect.Option>
-                  <TagSelect.Option value="cat2">Hbase</TagSelect.Option>
-                </TagSelect>
-              )}
-            </FormItem>
-          </StandardFormRow>
-        </Row>
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <StandardFormRow title="API" block style={{ paddingBottom: 5 }}>
-            <FormItem style={{ marginBottom: 0 }}>
-              {getFieldDecorator('category')(
-                <TagSelect onChange={this.handleFormSubmit} >
-                  <TagSelect.Option value="cat1">HTTP</TagSelect.Option>
-                  <TagSelect.Option value="cat2">HTTPS</TagSelect.Option>
-                  <TagSelect.Option value="cat3">WSDL</TagSelect.Option>
-                  <TagSelect.Option value="cat4">REST</TagSelect.Option>
-                </TagSelect>
-              )}
-            </FormItem>
-          </StandardFormRow>
-        </Row>
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <StandardFormRow title="普通文件系统" block style={{ paddingBottom: 5 }}>
-            <FormItem style={{ marginBottom: 0 }}>
-              {getFieldDecorator('category')(
-                <TagSelect onChange={this.handleFormSubmit} >
-                  <TagSelect.Option value="cat1">FTP</TagSelect.Option>
-                  <TagSelect.Option value="cat2">SFTP</TagSelect.Option>
-                  <TagSelect.Option value="cat3">本地磁盘</TagSelect.Option>
-                  <TagSelect.Option value="cat4">共享文件件</TagSelect.Option>
-                </TagSelect>
-              )}
-            </FormItem>
-          </StandardFormRow>
-        </Row>
-      </Form>
-    );
-  }
-
   renderForm() {
     const { expandForm } = this.state;
     return expandForm ? this.renderAdvancedForm() : this.renderSimpleForm();
   }
+
   handleTree = data => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'rule/fetch',
+      type: 'dervieSource/fetch',
       payload: data,
     });
-  }
+  };
+
   render() {
     const {
-      rule: { data },
+      dervieSource: { data },
       loading,
     } = this.props;
-    const { selectedRows, modalVisible,listItemData } = this.state;
+    const { selectedRows, modalVisible, listItemData ,item} = this.state;
 
     const columns = [
       {
-        title: '数据源名称',
+        title: '序号',
         dataIndex: 'no',
       },
       {
-        title: '数据源类型',
-        dataIndex: 'description',
-      },
-      {
-        title: '所属组织机构',
-        dataIndex: 'callNo',
-        sorter: true,
-        align: 'right',
-        render: val => `${val} 万`,
-        // mark to display a total number
-        needTotal: true,
-      },
-      {
-        title: '所属资源分类',
+        title: '数据名称',
         dataIndex: 'status',
         render(val) {
-          return <Badge status={statusMap[val]} text={status[val]} />;
+          return <Badge status={statusMap[val]} text={status[val]}/>;
         },
       },
       {
-        title: '数据源描述',
+        title: '所属数据源',
         dataIndex: 'updatedAt1',
         render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
       },
       {
-        title: '最近连接时间',
+        title: '数据源类型',
         dataIndex: 'updatedAt2',
         sorter: true,
         render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
       },
       {
-        title: '连通状态',
+        title: '数据来源',
         dataIndex: 'updatedAt3',
         render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
       },
@@ -528,19 +483,12 @@ export default class ResourceClassify extends PureComponent {
               <a onClick={() => {
                 this.handleModalVisible(true);
                 this.setState({
-                  listItemData: text
+                  listItemData: text,
                 });
-              }}>配置详情</a>
-              <Divider type="vertical"/>
-              <a onClick={() => {
-                this.handleModalVisible(true);
-                this.setState({
-                  listItemData: text
-                });
-              }}>修改配置</a>
+              }}>查看</a>
             </Fragment>
-          )
-        }
+          );
+        },
       },
     ];
 
@@ -552,36 +500,34 @@ export default class ResourceClassify extends PureComponent {
     return (
       <PageHeaderLayout>
         <div className={styles.flexMain}>
-        <SimpleTree
-          handleTree={this.handleTree}
-          title={'中心数据源'}
-        />
-        <Card bordered={false}>
-          <div className={styles.tableList}>
-            <div className={styles.tableListOperator}>
-              <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
-                新建数据源
-              </Button>
-              <Button icon="desktop" type="primary" onClick={() => this.handleModalVisible(true)}>
-                测试连通性
-              </Button>
-              <Button icon="delete" onClick={() => this.handleDelete(true)}>
-                批量删除
-              </Button>
+          {/*<SimpleTree*/}
+          {/*data={data}*/}
+          {/*handleTree={this.handleTree}*/}
+          {/*title={'中心数据源'}*/}
+          {/*/>*/}
+          <Card bordered={false}  className={styles.flexTable}>
+            <div className={styles.tableList}>
+              <div className={styles.tableListOperator}>
+                <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
+                  新增
+                </Button>
+                <Button icon="delete" onClick={() => this.handleDelete(true)}>
+                  批量删除
+                </Button>
+              </div>
+              <StandardTable
+                selectedRows={selectedRows}
+                loading={loading}
+                data={data}
+                columns={columns}
+                onSelectRow={this.handleSelectRows}
+                onChange={this.handleStandardTableChange}
+              />
             </div>
-            <div className={styles.tableListForm}>{this.renderForm()}</div>
-            <StandardTable
-              selectedRows={selectedRows}
-              loading={loading}
-              data={data}
-              columns={columns}
-              onSelectRow={this.handleSelectRows}
-              onChange={this.handleStandardTableChange}
-            />
-          </div>
-        </Card>
+          </Card>
         </div>
-        <CreateForm {...parentMethods} modalVisible={modalVisible} />
+        <CreateForm {...parentMethods} data={data} handleItem={this.handleItem} item={item} modalVisible={modalVisible}/>
+        {/*<StepNoTitle {...parentMethods} data={data} modalVisible={modalVisible}/>*/}
       </PageHeaderLayout>
     );
   }

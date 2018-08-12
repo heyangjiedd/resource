@@ -24,6 +24,9 @@ import SimpleTree from 'components/SimpleTree';
 import TagSelect from 'components/TagSelect';
 import StandardFormRow from 'components/StandardFormRow';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
+let itemDataStatus = 0;
+let listItemData = {};
+let treeSelect = {};
 
 import styles from './resource_file.less';
 
@@ -476,6 +479,7 @@ export default class ResourceClassify extends PureComponent {
     const {
       rule: { data },
       loading,
+      form
     } = this.props;
     const { selectedRows, modalVisible,listItemData } = this.state;
 
@@ -543,33 +547,62 @@ export default class ResourceClassify extends PureComponent {
         }
       },
     ];
-
+    const formItemLayout = {
+      labelCol: {
+        xs: { span: 24 },
+        sm: { span: 6 },
+      },
+      wrapperCol: {
+        xs: { span: 24 },
+        sm: { span: 18 },
+        md: { span: 18 },
+      },
+    };
     const parentMethods = {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
     };
-
+    const { getFieldDecorator } = form;
     return (
       <PageHeaderLayout>
         <div className={styles.flexMain}>
-        <SimpleTree
-          handleTree={this.handleTree}
-          title={'中心数据源'}
-        />
-        <Card bordered={false}>
+        {/*<SimpleTree*/}
+          {/*handleTree={this.handleTree}*/}
+          {/*title={'中心数据源'}*/}
+        {/*/>*/}
+        <Card bordered={false}  className={styles.flexTable}>
           <div className={styles.tableList}>
-            <div className={styles.tableListOperator}>
-              <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
-                新建数据源
-              </Button>
-              <Button icon="desktop" type="primary" onClick={() => this.handleModalVisible(true)}>
-                测试连通性
-              </Button>
-              <Button icon="delete" onClick={() => this.handleDelete(true)}>
-                批量删除
-              </Button>
-            </div>
-            <div className={styles.tableListForm}>{this.renderForm()}</div>
+            <Row gutter={{ md: 2, lg:6, xl: 12 }}>
+              <Col md={6} sm={24}>
+                <FormItem>
+                  <Button icon="desktop" type="primary" onClick={() => this.handleModalVisible(true)}>
+                    测试连通性
+                  </Button>
+                </FormItem>
+              </Col>
+              <Col md={8} sm={24}>
+                  <FormItem {...formItemLayout}  label="数据源类型" style={{ marginBottom: 0 }}>
+                    {getFieldDecorator('status')(
+                      <Select placeholder="数据库类型" style={{ width: '100%' }}>
+                        <Option value="0">关系型数据库</Option>
+                        <Option value="1">非关系型数据库</Option>
+                      </Select>
+                    )}
+                  </FormItem>
+              </Col>
+              <Col md={8} sm={24}>
+                <FormItem>
+                  {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
+                </FormItem>
+              </Col>
+              <Col md={2} sm={24}>
+                <FormItem>
+                  <Button type="primary" htmlType="submit">
+                    查询
+                  </Button>
+                </FormItem>
+              </Col>
+            </Row>
             <StandardTable
               selectedRows={selectedRows}
               loading={loading}

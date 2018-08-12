@@ -536,7 +536,7 @@ export default class ResourceClassify extends PureComponent {
     const { getFieldDecorator } = form;
     return (
       <Form onSubmit={this.handleSearch} layout="inline">
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
+        <Row gutter={{ md: 2, lg:6, xl: 12 }}>
           <Col md={6} sm={24}>
             <FormItem >
               {getFieldDecorator('status')(
@@ -713,7 +713,7 @@ export default class ResourceClassify extends PureComponent {
   }
   render() {
     const {
-      centersource: { data },
+      centersource: { data,treeData },
       loading,
     } = this.props;
     const { selectedRows, modalVisible,testModalVisible,updateModalVisible,listItemData } = this.state;
@@ -791,10 +791,11 @@ export default class ResourceClassify extends PureComponent {
       <PageHeaderLayout>
         <div className={styles.flexMain}>
         <SimpleTree
+          data={treeData}
           handleTree={this.handleTree}
           title={'中心数据源'}
         />
-        <Card bordered={false}>
+        <Card bordered={false}  className={styles.flexTable}>
           <div className={styles.tableList}>
             <div className={styles.tableListOperator}>
               <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
@@ -808,14 +809,14 @@ export default class ResourceClassify extends PureComponent {
               </Button>
             </div>
             <div className={styles.tableListForm}>{this.renderForm()}</div>
-            {/*<StandardTable*/}
-              {/*selectedRows={selectedRows}*/}
-              {/*loading={loading}*/}
-              {/*data={data}*/}
-              {/*columns={columns}*/}
-              {/*onSelectRow={this.handleSelectRows}*/}
-              {/*onChange={this.handleStandardTableChange}*/}
-            {/*/>*/}
+            <StandardTable
+              selectedRows={selectedRows}
+              loading={loading}
+              data={data}
+              columns={columns}
+              onSelectRow={this.handleSelectRows}
+              onChange={this.handleStandardTableChange}
+            />
           </div>
         </Card>
         </div>

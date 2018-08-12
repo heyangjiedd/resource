@@ -88,8 +88,8 @@ class Step1 extends React.PureComponent {
             label=""
           >
             <Button type="primary" onClick={onValidateForm}>
-              下一步
-            </Button>
+            下一步
+          </Button>
           </Form.Item>
         </Form>
         <Divider style={{ margin: '40px 0 24px' }} />

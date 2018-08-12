@@ -8,6 +8,7 @@ export default {
       list: [],
       pagination: {},
     },
+    treeData:[]
   },
 
   effects: {

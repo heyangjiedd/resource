@@ -18,6 +18,7 @@ import {
   message,
   Badge,
   Divider,
+  Cascader
 } from 'antd';
 import StandardTable from 'components/StandardTable';
 import SimpleTree from 'components/SimpleTree';
@@ -37,6 +38,9 @@ const getValue = obj =>
     .join(',');
 const statusMap = ['default', 'processing', 'success', 'error'];
 const status = ['关闭', '运行中', '已上线', '异常'];
+let itemDataStatus = 0;
+let listItemData = {};
+let treeSelect = {};
 
 const CreateForm = Form.create()(props => {
   const { modalVisible, form, handleAdd, handleModalVisible } = props;
@@ -476,6 +480,7 @@ export default class ResourceClassify extends PureComponent {
     const {
       rule: { data },
       loading,
+      form
     } = this.props;
     const { selectedRows, modalVisible,listItemData } = this.state;
 
@@ -548,28 +553,101 @@ export default class ResourceClassify extends PureComponent {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
     };
-
+    const options = [{
+      value: '关系型数据库',
+      label: '关系型数据库',
+      children: [{
+        value: 'MySQL', label: 'MySQL',
+      }, {
+        value: 'Oracle', label: 'Oracle',
+      }, {
+        value: 'SQLServer', label: 'SQLServer',
+      }, {
+        value: 'DB2', label: 'DB2',
+      }],
+    }, {
+      value: '非关系型数据库',
+      label: '非关系型数据库',
+      children: [{
+        value: 'MongoDB', label: 'MongoDB',
+      }, {
+        value: 'Hbase', label: 'Hbase',
+      }],
+    }, {
+      value: 'API',
+      label: 'API',
+      children: [{
+        value: 'HTTP', label: 'HTTP',
+      }, {
+        value: 'HTTPS', label: 'HTTPS',
+      }, {
+        value: 'WSDL', label: 'WSDL',
+      }, {
+        value: 'REST', label: 'REST',
+      }],
+    }, {
+      value: '普通文件',
+      label: '普通文件',
+      children: [{
+        value: 'FTP', label: 'FTP',
+      }, {
+        value: 'SFTP', label: 'SFTP',
+      }, {
+        value: '本地磁盘', label: '本地磁盘',
+      }, {
+        value: '共享文件夹', label: '共享文件夹',
+      }],
+    }];
+    const formItemLayout = {
+      labelCol: {
+        xs: { span: 24 },
+        sm: { span: 6 },
+      },
+      wrapperCol: {
+        xs: { span: 24 },
+        sm: { span: 18 },
+        md: { span: 18 },
+      },
+    };
+    const onChange = (value)=> {
+    }
+    const { getFieldDecorator } = form;
     return (
       <PageHeaderLayout>
         <div className={styles.flexMain}>
-        <SimpleTree
-          handleTree={this.handleTree}
-          title={'中心数据源'}
-        />
-        <Card bordered={false}>
+        {/*<SimpleTree*/}
+          {/*handleTree={this.handleTree}*/}
+          {/*title={'中心数据源'}*/}
+        {/*/>*/}
+        <Card bordered={false}  className={styles.flexTable}>
           <div className={styles.tableList}>
-            <div className={styles.tableListOperator}>
-              <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
-                新建数据源
-              </Button>
-              <Button icon="desktop" type="primary" onClick={() => this.handleModalVisible(true)}>
-                测试连通性
-              </Button>
-              <Button icon="delete" onClick={() => this.handleDelete(true)}>
-                批量删除
-              </Button>
-            </div>
-            <div className={styles.tableListForm}>{this.renderForm()}</div>
+            <Row gutter={{ md: 2, lg:6, xl: 12 }}>
+              <Col md={6} sm={24}>
+                <FormItem>
+                  <Button icon="desktop" type="primary" onClick={() => this.handleModalVisible(true)}>
+                    测试连通性
+                  </Button>
+                </FormItem>
+              </Col>
+              <Col md={8} sm={24}>
+                <FormItem {...formItemLayout}  label="数据源类型">
+                  <Cascader style={{ width: 100 + '%' }} options={options} onChange={onChange}
+                            placeholder="请选择数据源/数据库"/>
+                </FormItem>
+              </Col>
+              <Col md={8} sm={24}>
+                <FormItem>
+                  {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
+                </FormItem>
+              </Col>
+              <Col md={2} sm={24}>
+                <FormItem>
+                  <Button type="primary" htmlType="submit">
+                    查询
+                  </Button>
+                </FormItem>
+              </Col>
+            </Row>
             <StandardTable
               selectedRows={selectedRows}
               loading={loading}
