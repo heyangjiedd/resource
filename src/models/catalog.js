@@ -1,4 +1,4 @@
-import { catalogList } from '../services/api';
+import { catalogList,catalogListTree } from '../services/api';
 
 export default {
   namespace: 'catalog',
@@ -8,6 +8,7 @@ export default {
       list: [],
       pagination: {},
     },
+    treeData:[]
   },
 
   effects: {
@@ -15,6 +16,13 @@ export default {
       const response = yield call(catalogList, payload);
       yield put({
         type: 'save',
+        payload: response,
+      });
+    },
+    *tree({ payload }, { call, put }) {
+      const response = yield call(catalogListTree, payload);
+      yield put({
+        type: 'treeData',
         payload: response,
       });
     },
@@ -56,6 +64,12 @@ export default {
       return {
         ...state,
         data: action.payload,
+      };
+    },
+    treeData(state, action){
+      return {
+        ...state,
+        treeData: action.payload,
       };
     },
     get(state, action){

@@ -259,7 +259,7 @@ const CatlogDetail = Form.create()(props => {
           信息项列表：
         </Col>
       </Row>
-      <StandardTableNoselection
+      <StandardTableNothing
         loading={loading}
         data={data}
         columns={columns}

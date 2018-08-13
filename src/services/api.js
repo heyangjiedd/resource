@@ -43,6 +43,11 @@ export async function removeresourceclassify(params) {
 }
 
 //目录库
+
+// 动态获取目录库分类树形图
+export async function catalogListTree(params) {
+  return request(`/dirclassify/list?${stringify(params)}`);
+}
 //获取目录库列表
 export async function catalogList(params) {
   let url = params?`?${stringify(params)}`:'';
@@ -140,11 +145,11 @@ export async function updateresource(params) {
 }
 //根据id查询数据源
 export async function getresource(params) {
-  return request(`/datasource/${params.id}`);
+  return request(`/datasource/`+params.id);
 }
 //删除数据源
 export async function removeresource(params) {
-  return request(`/datasource/${stringify(params.id)}`, {
+  return request(`/datasource/`+params.id, {
     method: 'DELETE',
   });
 }
@@ -162,7 +167,7 @@ export async function resourcefileLista(params) {
 }
 // 测试连通性
 export async function resourcelink(params) {
-  return request(`//datasource/link/${params.id}`);
+  return request(`/datasource/link/${params.id}`);
 }
 // 获取数据源列表
 export async function resourcelist(params) {
@@ -313,6 +318,7 @@ export async function removeRule(params) {
     },
   });
 }
+
 
 export async function addRule(params) {
   return request('/api/rule', {

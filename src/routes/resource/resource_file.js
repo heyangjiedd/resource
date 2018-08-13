@@ -142,9 +142,10 @@ const CreateForm = Form.create()(props => {
   );
 });
 
-@connect(({ rule, loading }) => ({
-  rule,
-  loading: loading.models.rule,
+@connect(({ resource_file,classify, loading }) => ({
+  resource_file,
+  classify,
+  loading: loading.models.resource_file,
 }))
 @Form.create()
 export default class ResourceClassify extends PureComponent {
@@ -159,7 +160,10 @@ export default class ResourceClassify extends PureComponent {
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
-      type: 'rule/fetch',
+      type: 'resource_file/fetch',
+    });
+    dispatch({
+      type: 'classify/tree',
     });
   }
 
@@ -184,7 +188,7 @@ export default class ResourceClassify extends PureComponent {
     }
 
     dispatch({
-      type: 'rule/fetch',
+      type: 'resource_file/fetch',
       payload: params,
     });
   };
@@ -196,7 +200,7 @@ export default class ResourceClassify extends PureComponent {
       formValues: {},
     });
     dispatch({
-      type: 'rule/fetch',
+      type: 'resource_file/fetch',
       payload: {},
     });
   };
@@ -217,7 +221,7 @@ export default class ResourceClassify extends PureComponent {
     switch (e.key) {
       case 'remove':
         dispatch({
-          type: 'rule/remove',
+          type: 'resource_file/remove',
           payload: {
             no: selectedRows.map(row => row.no).join(','),
           },
@@ -257,7 +261,7 @@ export default class ResourceClassify extends PureComponent {
       });
 
       dispatch({
-        type: 'rule/fetch',
+        type: 'resource_file/fetch',
         payload: values,
       });
     });
@@ -283,7 +287,7 @@ export default class ResourceClassify extends PureComponent {
   handleAdd = fields => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'rule/add',
+      type: 'resource_file/add',
       payload: {
         description: fields.desc,
       },
@@ -471,14 +475,15 @@ export default class ResourceClassify extends PureComponent {
   handleTree = data => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'rule/fetch',
+      type: 'resource_file/fetch',
       payload: data,
     });
   }
   render() {
     const {
-      rule: { data },
+      resource_file: { data },
       loading,
+      classify: { treeData },
       form
     } = this.props;
     const { selectedRows, modalVisible,listItemData } = this.state;
@@ -566,10 +571,11 @@ export default class ResourceClassify extends PureComponent {
     return (
       <PageHeaderLayout>
         <div className={styles.flexMain}>
-        {/*<SimpleTree*/}
-          {/*handleTree={this.handleTree}*/}
-          {/*title={'中心数据源'}*/}
-        {/*/>*/}
+        <SimpleTree
+          data={treeData}
+          handleTree={this.handleTree}
+          title={'资源库'}
+        />
         <Card bordered={false}  className={styles.flexTable}>
           <div className={styles.tableList}>
             <Row gutter={{ md: 2, lg:6, xl: 12 }}>

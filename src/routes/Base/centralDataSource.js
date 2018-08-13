@@ -18,6 +18,7 @@ import {
   message,
   Badge,
   Divider,
+  Progress,
 } from 'antd';
 import StandardTable from 'components/StandardTable';
 import SimpleTree from 'components/SimpleTree';
@@ -250,17 +251,7 @@ const TestForm = Form.create()(props => {
       handleAdd(fieldsValue);
     });
   };
-  const formItemLayout = {
-    labelCol: {
-      xs: { span: 24 },
-      sm: { span: 8 },
-    },
-    wrapperCol: {
-      xs: { span: 24 },
-      sm: { span: 16 },
-      md: { span: 16 },
-    },
-  };
+  let percent = 50
   return (
     <Modal
       title="测试连通性"
@@ -269,81 +260,20 @@ const TestForm = Form.create()(props => {
       destroyOnClose={true}
       onCancel={() => handleModalVisible()}
     >
-      <FormItem {...formItemLayout} label="数据源类型">
+      <Row>
+        <Progress percent={percent} />
+      </Row>
+      <FormItem label="数据源类型">
         {form.getFieldDecorator('desc', {
           rules: [{ required: true, message: 'Please input some description...' }],
         })(<Input placeholder="请输入" />)}
       </FormItem>
-      <FormItem {...formItemLayout} label="数据库类型">
-        {form.getFieldDecorator('desc1', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据源名称">
-        {form.getFieldDecorator('desc2', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="所属组织机构">
-        {form.getFieldDecorator('desc3', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="资源分类">
-        {form.getFieldDecorator('desc4', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(
-          <Select placeholder="请选择" style={{ width: '100%' }}>
-            <Option value="0">关闭</Option>
-            <Option value="1">运行中</Option>
-          </Select>,)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="IP地址">
-        {form.getFieldDecorator('desc5', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="端口">
-        {form.getFieldDecorator('desc6', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据库名称/SID">
-        {form.getFieldDecorator('desc7', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="用户名">
-        {form.getFieldDecorator('desc8', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="密码">
-        {form.getFieldDecorator('desc9', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据源描述">
-        {form.getFieldDecorator('flms', {
-          rules: [
-            {
-              required: true,
-              message: '请输入数据源描述',
-            },
-          ],initialValue:listItemData.owner
-        })(
-          <TextArea
-            style={{ minHeight: 32 }}
-            placeholder="请输入你的数据源描述"
-            rows={4}
-          />
-        )}
-      </FormItem>
     </Modal>
   );
 });
-@connect(({ centersource, loading }) => ({
+@connect(({ centersource,classify, loading }) => ({
   centersource,
+  classify,
   loading: loading.models.centersource,
 }))
 @Form.create()
@@ -363,6 +293,9 @@ export default class ResourceClassify extends PureComponent {
     // dispatch({
     //   type: 'centersource/fetch',
     // });
+    dispatch({
+      type: 'classify/tree',
+    });
   }
 
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
@@ -592,7 +525,7 @@ export default class ResourceClassify extends PureComponent {
     const { getFieldDecorator } = form;
     return (
       <Form onSubmit={this.handleSearch} layout="inline">
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
+        <Row gutter={{ md: 2, lg:6, xl: 12 }}>
           <Col md={6} sm={24}>
             <FormItem >
               {getFieldDecorator('status')(
@@ -605,7 +538,7 @@ export default class ResourceClassify extends PureComponent {
           </Col>
           <Col md={3} sm={24}>
             <FormItem >
-              {getFieldDecorator('status')(
+              {getFieldDecorator('status1')(
                 <Select placeholder="连通状态" style={{ width: '100%' }}>
                   <Option value="0">已连通</Option>
                   <Option value="1">未连通</Option>
@@ -615,7 +548,7 @@ export default class ResourceClassify extends PureComponent {
           </Col>
           <Col md={3} sm={24}>
             <FormItem >
-              {getFieldDecorator('status')(
+              {getFieldDecorator('status2')(
                 <Select placeholder="同步状态" style={{ width: '100%' }}>
                   <Option value="0">已同步</Option>
                   <Option value="1">未同步</Option>
@@ -642,7 +575,7 @@ export default class ResourceClassify extends PureComponent {
             </span>
           </Col>
         </Row>
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
+        <Row gutter={{ md: 2, lg:6, xl: 12 }}>
           <StandardFormRow title="关系型数据库" block style={{ paddingBottom: 5 }}>
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
@@ -656,7 +589,7 @@ export default class ResourceClassify extends PureComponent {
             </FormItem>
           </StandardFormRow>
         </Row>
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
+        <Row gutter={{ md: 2, lg:6, xl: 12 }}>
           <StandardFormRow title="非关系型数据库" block style={{ paddingBottom: 5 }}>
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
@@ -668,7 +601,7 @@ export default class ResourceClassify extends PureComponent {
             </FormItem>
           </StandardFormRow>
         </Row>
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
+        <Row gutter={{ md: 2, lg:6, xl: 12 }}>
           <StandardFormRow title="API" block style={{ paddingBottom: 5 }}>
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
@@ -682,7 +615,7 @@ export default class ResourceClassify extends PureComponent {
             </FormItem>
           </StandardFormRow>
         </Row>
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
+        <Row gutter={{ md: 2, lg:6, xl: 12 }}>
           <StandardFormRow title="普通文件系统" block style={{ paddingBottom: 5 }}>
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
@@ -713,7 +646,8 @@ export default class ResourceClassify extends PureComponent {
   }
   render() {
     const {
-      centersource: { data,treeData },
+      centersource: { data },
+      classify: { treeData },
       loading,
     } = this.props;
     const { selectedRows, modalVisible,testModalVisible,updateModalVisible,listItemData } = this.state;

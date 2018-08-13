@@ -22,7 +22,7 @@ import {
 import StandardTable from 'components/StandardTable';
 import StandardTableNoCheck from 'components/StandardTableNoCheck';
 import StandardTableNothing from 'components/StandardTableNothing';
-import SimpleTree from 'components/SimpleTree';
+import AnycSimpleTree from 'components/AnycSimpleTree';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
 import styles from './index.less';
@@ -333,6 +333,10 @@ export default class ResourceClassify extends PureComponent {
     const { dispatch } = this.props;
     dispatch({
       type: 'catalog/fetch',
+    });
+    dispatch({
+      type: 'catalog/tree',
+      payload: {region:'000000',type:'7'},
     });
   }
 
@@ -650,11 +654,11 @@ export default class ResourceClassify extends PureComponent {
       <PageHeaderLayout>
         {/*<Col xl={6} lg={6} md={6} sm={6} xs={6} style={{ marginBottom: 24 }}>*/}
         <div className={styles.flexMain}>
-          {/*<SimpleTree*/}
-          {/*data={data}*/}
-          {/*handleTree={this.handleTree}*/}
-          {/*title={'资源分类'}*/}
-          {/*/>*/}
+          <AnycSimpleTree
+          data={treeData}
+          handleTree={this.handleTree}
+          title={'目录分类'}
+          />
           <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
               {/*<div className={styles.tableListForm}>{this.renderForm()}</div>*/}

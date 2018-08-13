@@ -19,7 +19,7 @@ import {
   Badge,
   Divider,
   Cascader,
-  Radio
+  Radio,
 } from 'antd';
 import StandardTable from 'components/StandardTable';
 import StandardTableNoPage from 'components/StandardTableNoPage';
@@ -49,7 +49,7 @@ let treeSelect = {};
 let selectValue = [];
 
 const CreateForm = Form.create()(props => {
-  const { modalVisible, form, handleAdd, handleModalVisible,data,handleItem,item} = props;
+  const { modalVisible, form, handleAdd, handleModalVisible, data, handleItem, item } = props;
   const okHandle = () => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
@@ -128,9 +128,9 @@ const CreateForm = Form.create()(props => {
       title: '连接状态',
       dataIndex: 'updatedAt2',
       render(val) {
-        return <Badge status={val?'success': 'error'} text={val}/>;
+        return <Badge status={val ? 'success' : 'error'} text={val}/>;
       },
-    }
+    },
   ];
   const columnsNoPage = [
     {
@@ -148,37 +148,49 @@ const CreateForm = Form.create()(props => {
   ];
   const firstFooter = (<Row>
     <Col md={24} sm={24}>
-      <Button type="primary" onClick={()=>{handleItem(2)}}>
+      <Button type="primary" onClick={() => {
+        handleItem(2);
+      }}>
         下一步
       </Button>
-      <Button onClick={()=>{handleModalVisible(false)}}>
+      <Button onClick={() => {
+        handleModalVisible(false);
+      }}>
         取消
       </Button>
     </Col>
   </Row>);
   const secondFooter = (<Row>
     <Col md={24} sm={24}>
-      <Button onClick={()=>{handleItem(1)}}>
+      <Button onClick={() => {
+        handleItem(1);
+      }}>
         上一步
       </Button>
       <Button type="primary" onClick={handleAdd}>
         提交
       </Button>
-      <Button onClick={()=>{handleModalVisible(false)}}>
+      <Button onClick={() => {
+        handleModalVisible(false);
+      }}>
         取消
       </Button>
     </Col>
   </Row>);
-  let selectedRows = []
+  let selectedRows = [];
+
   function onChange(value) {
     selectValue = value;
   }
+
   function handleSelectRows() {
 
   }
+
   function handleStandardTableChange() {
 
   }
+
   const formItemLayout = {
     labelCol: {
       xs: { span: 24 },
@@ -194,84 +206,86 @@ const CreateForm = Form.create()(props => {
       title="新增"
       visible={modalVisible}
       width={900}
-      footer={item===1?firstFooter:secondFooter}
+      footer={item === 1 ? firstFooter : secondFooter}
       onOk={handleItem}
       onCancel={() => handleModalVisible(false)}
     >
-      {item===1?<div>
+      {item === 1 ? <div>
         <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
           <Col md={12} sm={24}>
-              <FormItem {...formItemLayout} label="资源分类">
-                {getFieldDecorator('status')(
-                  <Select placeholder="选择资源分类" style={{ width: '100%' }}>
-                    <Option value="0">关系型数据库</Option>
-                    <Option value="1">非关系型数据库</Option>
-                  </Select>
-                )}
-              </FormItem>
+            <FormItem {...formItemLayout} label="资源分类">
+              {getFieldDecorator('status')(
+                <Select placeholder="选择资源分类" style={{ width: '100%' }}>
+                  <Option value="0">关系型数据库</Option>
+                  <Option value="1">非关系型数据库</Option>
+                </Select>,
+              )}
+            </FormItem>
           </Col>
         </Row>
         <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-        <Col md={12} sm={24}>
-          <FormItem {...formItemLayout} label="数据源类型"><Cascader style={{ width: 100 + '%' }} options={options} onChange={onChange}
-                              placeholder="请选择数据源/数据库"/>
-          </FormItem>
-        </Col>
-        <Col md={8} sm={24}>
-          <FormItem>
-            {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
-          </FormItem>
-        </Col>
-        <Col md={4} sm={24}>
+          <Col md={12} sm={24}>
+            <FormItem {...formItemLayout} label="数据源类型"><Cascader style={{ width: 100 + '%' }} options={options}
+                                                                  onChange={onChange}
+                                                                  placeholder="请选择数据源/数据库"/>
+            </FormItem>
+          </Col>
+          <Col md={8} sm={24}>
+            <FormItem>
+              {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
+            </FormItem>
+          </Col>
+          <Col md={4} sm={24}>
             <span className={styles.submitButtons}>
               <Button type="primary" htmlType="submit">
                 查询
               </Button>
             </span>
-        </Col>
-      </Row><Row gutter={{ md: 8, lg: 24, xl: 48 }}>
+          </Col>
+        </Row><Row gutter={{ md: 8, lg: 24, xl: 48 }}>
         <StandardTableRadio
-        selectedRows={selectedRows}
-        data={data}
-        columns={columns}
-        onSelectRow={handleSelectRows}
-        onChange={handleStandardTableChange}
+          selectedRows={selectedRows}
+          data={data}
+          columns={columns}
+          onSelectRow={handleSelectRows}
+          onChange={handleStandardTableChange}
         />
-        </Row></div>:<div><Row gutter={{ md: 8, lg: 24, xl: 48 }}>
+      </Row></div> : <div><Row gutter={{ md: 8, lg: 24, xl: 48 }}>
         <Col md={12} sm={24}>
           <FormItem {...formItemLayout} label="新增类型">
             {getFieldDecorator('status')(
               <Select placeholder="选择新增类型" style={{ width: '100%' }}>
                 <Option value="0">关系型数据库</Option>
                 <Option value="1">非关系型数据库</Option>
-              </Select>
+              </Select>,
             )}
           </FormItem>
         </Col>
         <Col md={12} sm={24}>
           <FormItem {...formItemLayout} label="请选择表/视图">
-            <RadioGroup onChange={this.onChange} >
+            <RadioGroup onChange={this.onChange}>
               <Radio value={1}>表</Radio>
               <Radio value={2}>视图</Radio>
             </RadioGroup>
           </FormItem>
         </Col>
       </Row>
-      <Row>
-        <StandardTableNoPage
-          selectedRows={selectedRows}
-          data={data}
-          columns={columnsNoPage}
-          onSelectRow={handleSelectRows}
-          onChange={handleStandardTableChange}
-        />
-      </Row></div>}
+        <Row>
+          <StandardTableNoPage
+            selectedRows={selectedRows}
+            data={data}
+            columns={columnsNoPage}
+            onSelectRow={handleSelectRows}
+            onChange={handleStandardTableChange}
+          />
+        </Row></div>}
     </Modal>
   );
 });
 
-@connect(({ dervieSource, loading }) => ({
+@connect(({ dervieSource, dervieClassify, loading }) => ({
   dervieSource,
+  dervieClassify,
   loading: loading.models.dervieSource,
 }))
 @Form.create()
@@ -282,13 +296,16 @@ export default class ResourceClassify extends PureComponent {
     selectedRows: [],
     formValues: {},
     listItemData: {},
-    item:1
+    item: 1,
   };
 
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
       type: 'dervieSource/fetch',
+    });
+    dispatch({
+      type: 'dervieClassify/tree',
     });
   }
 
@@ -389,11 +406,11 @@ export default class ResourceClassify extends PureComponent {
       });
     });
   };
-  handleItem = (index)=>{
+  handleItem = (index) => {
     this.setState({
       item: index,
     });
-  }
+  };
   handleModalVisible = flag => {
     this.setState({
       modalVisible: !!flag,
@@ -443,9 +460,10 @@ export default class ResourceClassify extends PureComponent {
   render() {
     const {
       dervieSource: { data },
+      dervieClassify: { treeData },
       loading,
     } = this.props;
-    const { selectedRows, modalVisible, listItemData ,item} = this.state;
+    const { selectedRows, modalVisible, listItemData, item } = this.state;
 
     const columns = [
       {
@@ -500,12 +518,12 @@ export default class ResourceClassify extends PureComponent {
     return (
       <PageHeaderLayout>
         <div className={styles.flexMain}>
-          {/*<SimpleTree*/}
-          {/*data={data}*/}
-          {/*handleTree={this.handleTree}*/}
-          {/*title={'中心数据源'}*/}
-          {/*/>*/}
-          <Card bordered={false}  className={styles.flexTable}>
+          <SimpleTree
+            data={treeData}
+            handleTree={this.handleTree}
+            title={'衍生资源库'}
+          />
+          <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
               <div className={styles.tableListOperator}>
                 <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
@@ -526,7 +544,8 @@ export default class ResourceClassify extends PureComponent {
             </div>
           </Card>
         </div>
-        <CreateForm {...parentMethods} data={data} handleItem={this.handleItem} item={item} modalVisible={modalVisible}/>
+        <CreateForm {...parentMethods} data={data} handleItem={this.handleItem} item={item}
+                    modalVisible={modalVisible}/>
         {/*<StepNoTitle {...parentMethods} data={data} modalVisible={modalVisible}/>*/}
       </PageHeaderLayout>
     );
