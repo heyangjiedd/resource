@@ -1,6 +1,7 @@
 import React, { PureComponent, Fragment } from 'react';
 import { Tree, Input, Icon } from 'antd';
 import styles from './index.less';
+import { connect } from 'dva/index';
 
 
 const TreeNode = Tree.TreeNode;
@@ -61,7 +62,10 @@ const getParentKey = (key, tree) => {
   }
   return parentKey;
 };
-
+@connect(({ catalog, loading }) => ({
+  catalog,
+  loading: loading.models.catalog,
+}))
 class SimpleTree extends PureComponent {
   constructor(props) {
     super(props);
@@ -72,9 +76,21 @@ class SimpleTree extends PureComponent {
       searchValue: '',
       autoExpandParent: true,
       ss: { width: '220px' },
+      treeData:[]
     };
   }
-
+  componentDidMount() {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'catalog/tree',
+      payload: {region:'000000',type:'7'},
+      callback: (list) => {
+        this.setState({
+          treeData:list,
+        });
+      }
+    });
+  }
   onExpand = (expandedKeys) => {
     this.setState({
       expandedKeys,
@@ -86,40 +102,38 @@ class SimpleTree extends PureComponent {
       ss: { transform: 'translate(50px)' },
     });
   };
-  groupTree = (tree) => {
-    let result = [];
-    tree.forEach(item => {
-      if (item.parentId) {
-        tree.forEach(r => {
-          if (r.id == item.parentId) {
-            item.children || (item.children = []);
-            item.children.push(r)
-          }
-        });
-      }else{
-        result.push(item)
-      }
+  onLoadData = (treeNode) => {
+    const { dispatch } = this.props;
+    return new Promise((resolve) => {
+      dispatch({
+        type: 'catalog/tree',
+        payload: {
+          type :treeNode.props.dataRef.type,
+          region:treeNode.props.dataRef.region
+        },
+        callback: (list) => {
+          treeNode.props.dataRef.children = list;
+          resolve();
+        }
+      });
     });
-    // for (let i = 0; i < tree.length; i++) {
-    //   if (tree[i].parentId) {
-    //     for (let j = 0; j < tree.length; j++) {
-    //       if (tree[j].id === tree[i].parentId) {
-    //         tree[j].children || (tree[j].children = []);
-    //         tree[j].children.push(tree[i]);
-    //       }
-    //     }
-    //   } else {
-    //     result.push(tree[i]);
-    //   }
-    // }
-    // ;
-    return result;
-  };
-
+  }
+  renderTreeNodes = (data) => {
+    return data.map((item) => {
+      if (item.children) {
+        return (
+          <TreeNode title={item.name} key={item.id} dataRef={item}>
+            {this.renderTreeNodes(item.children)}
+          </TreeNode>
+        );
+      }
+      return <TreeNode title={item.name} key={item.id} dataRef={item} />;
+    });
+  }
   render() {
     const { searchValue, expandedKeys, autoExpandParent, ss, title } = this.state;
-    const { handleTree, data } = this.props;
-    let treeData = this.groupTree(data);
+    const { handleTree, data ,catalog: {treeData}, } = this.props;
+    // let treeData = this.groupTree(data);
     const loop = data => data.map((item) => {
       const title = <span>{item.name}</span>;
       if (item.children) {
@@ -139,14 +153,12 @@ class SimpleTree extends PureComponent {
             type={'menu-fold'}
             onClick={this.toggle}
           /></div>
-        {/*<Search style={{ marginBottom: 8 }} placeholder="Search" onChange={this.onChange} />*/}
         <Tree
           onSelect={handleTree}
-          onExpand={this.onExpand}
-          expandedKeys={expandedKeys}
-          autoExpandParent={autoExpandParent}
+          loadData={this.onLoadData}
         >
-          {loop(treeData)}
+          {this.renderTreeNodes(this.state.treeData)}
+          {/*{loop(treeData)}*/}
         </Tree>
       </div>
     );

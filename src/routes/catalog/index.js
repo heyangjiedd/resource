@@ -334,10 +334,10 @@ export default class ResourceClassify extends PureComponent {
     dispatch({
       type: 'catalog/fetch',
     });
-    dispatch({
-      type: 'catalog/tree',
-      payload: {region:'000000',type:'7'},
-    });
+    // dispatch({
+    //   type: 'catalog/tree',
+    //   payload: {region:'000000',type:'7'},
+    // });
   }
 
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
@@ -655,7 +655,6 @@ export default class ResourceClassify extends PureComponent {
         {/*<Col xl={6} lg={6} md={6} sm={6} xs={6} style={{ marginBottom: 24 }}>*/}
         <div className={styles.flexMain}>
           <AnycSimpleTree
-          data={treeData}
           handleTree={this.handleTree}
           title={'目录分类'}
           />

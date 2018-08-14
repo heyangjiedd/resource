@@ -1,4 +1,4 @@
-import { resourcelist} from '../services/api';
+import { resourcelist,resourcelink} from '../services/api';
 
 export default {
   namespace: 'centersource',
@@ -21,22 +21,26 @@ export default {
       });
     },
     *get({ payload }, { call, put }) {
-      const response = yield call(getresourceclassify, payload);
+      const response = yield call(resourcelist, payload);
       yield put({
         type: 'get',
         payload: response,
       });
     },
+    *test({ payload, callback }, { call, put }) {
+      const response = yield call(resourcelink, payload);
+      if (callback) callback(response);
+    },
     *add({ payload, callback }, { call, put }) {
-      const response = yield call(addresourceclassify, payload);
+      const response = yield call(resourcelist, payload);
       if (callback) callback();
     },
     *remove({ payload, callback }, { call, put }) {
-      const response = yield call(removeresourceclassify, payload);
+      const response = yield call(resourcelist, payload);
       if (callback) callback();
     },
     *update({ payload, callback }, { call, put }) {
-      const response = yield call(updateresourceclassify, payload);
+      const response = yield call(resourcelist, payload);
       if (callback) callback();
     },
   },

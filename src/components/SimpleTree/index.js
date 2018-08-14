@@ -88,31 +88,31 @@ class SimpleTree extends PureComponent {
   };
   groupTree = (tree) => {
     let result = [];
-    tree.forEach(item => {
-      if (item.parentId) {
-        tree.forEach(r => {
-          if (r.id == item.parentId) {
-            item.children || (item.children = []);
-            item.children.push(r)
-          }
-        });
-      }else{
-        result.push(item)
-      }
-    });
-    // for (let i = 0; i < tree.length; i++) {
-    //   if (tree[i].parentId) {
-    //     for (let j = 0; j < tree.length; j++) {
-    //       if (tree[j].id === tree[i].parentId) {
-    //         tree[j].children || (tree[j].children = []);
-    //         tree[j].children.push(tree[i]);
+    // tree.forEach(item => {
+    //   if (item.parentId) {
+    //     tree.forEach(r => {
+    //       if (r.id == item.parentId) {
+    //         item.children || (item.children = []);
+    //         item.children.push(r)
     //       }
-    //     }
-    //   } else {
-    //     result.push(tree[i]);
+    //     });
+    //   }else{
+    //     result.push(item)
     //   }
-    // }
-    // ;
+    // });
+    for (let i = 0; i < tree.length; i++) {
+      if (tree[i].parentId) {
+        for (let j = 0; j < tree.length; j++) {
+          if (tree[j].id === tree[i].parentId) {
+            tree[j].children || (tree[j].children = []);
+            tree[j].children.push(tree[i]);
+          }
+        }
+      } else {
+        result.push(tree[i]);
+      }
+    }
+    ;
     return result;
   };
 

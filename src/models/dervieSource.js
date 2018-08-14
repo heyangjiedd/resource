@@ -1,4 +1,4 @@
-import { deriveList,getderivecatalog,removederivecatalog,deriveApi,deriveCollection,deriveFile,deriveFilederiveField} from '../services/api';
+import { deriveList,getderivecatalog,removederivecatalog,deriveApi,deriveCollection,deriveFile} from '../services/api';
 
 export default {
   namespace: 'dervieSource',

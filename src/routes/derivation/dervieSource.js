@@ -59,48 +59,48 @@ const CreateForm = Form.create()(props => {
   };
   const { getFieldDecorator } = form;
   const options = [{
-    value: '关系型数据库',
+    value: 'gxxsjk',
     label: '关系型数据库',
     children: [{
-      value: 'MySQL', label: 'MySQL',
+      value: 'gxxsjk_MySQL', label: 'MySQL',
     }, {
-      value: 'Oracle', label: 'Oracle',
+      value: 'gxxsjk_Oracle', label: 'Oracle',
     }, {
-      value: 'SQLServer', label: 'SQLServer',
+      value: 'gxxsjk_SQLServer', label: 'SQLServer',
     }, {
-      value: 'DB2', label: 'DB2',
+      value: 'gxxsjk_DB2', label: 'DB2',
     }],
   }, {
     value: '非关系型数据库',
-    label: '非关系型数据库',
+    label: 'fgxxsjk',
     children: [{
-      value: 'MongoDB', label: 'MongoDB',
+      value: 'fgxxsjk_MongoDB', label: 'MongoDB',
     }, {
-      value: 'Hbase', label: 'Hbase',
+      value: 'fgxxsjk_Hbase', label: 'Hbase',
     }],
   }, {
     value: 'API',
     label: 'API',
     children: [{
-      value: 'HTTP', label: 'HTTP',
+      value: 'API_HTTP', label: 'HTTP',
     }, {
-      value: 'HTTPS', label: 'HTTPS',
+      value: 'API_HTTPS', label: 'HTTPS',
     }, {
-      value: 'WSDL', label: 'WSDL',
+      value: 'API_WSDL', label: 'WSDL',
     }, {
-      value: 'REST', label: 'REST',
+      value: 'API_REST', label: 'REST',
     }],
   }, {
-    value: '普通文件',
+    value: 'ptwj',
     label: '普通文件',
     children: [{
-      value: 'FTP', label: 'FTP',
+      value: 'ptwj_FTP', label: 'FTP',
     }, {
-      value: 'SFTP', label: 'SFTP',
+      value: 'ptwj_SFTP', label: 'SFTP',
     }, {
-      value: '本地磁盘', label: '本地磁盘',
+      value: 'ptwj_bdcp', label: '本地磁盘',
     }, {
-      value: '共享文件夹', label: '共享文件夹',
+      value: 'ptwj_gxwjj', label: '共享文件夹',
     }],
   }];
   const columns = [
