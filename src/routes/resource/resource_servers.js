@@ -40,6 +40,7 @@ const status = ['关闭', '运行中', '已上线', '异常'];
 let itemDataStatus = 0;
 let listItemData = {};
 let treeSelect = {};
+let createItemData = {};
 
 const CreateForm = Form.create()(props => {
   const { modalVisible, form, handleAdd, handleModalVisible } = props;
@@ -142,9 +143,10 @@ const CreateForm = Form.create()(props => {
   );
 });
 
-@connect(({ resource_servers,classify, loading }) => ({
+@connect(({ resource_servers,classify, centersource,loading }) => ({
   resource_servers,
   classify,
+  centersource,
   loading: loading.models.resource_servers,
 }))
 @Form.create()
@@ -160,7 +162,7 @@ export default class ResourceClassify extends PureComponent {
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
-      type: 'resource_servers/fetch',
+      type: 'centersource/fetch',
     });
     dispatch({
       type: 'classify/tree',
@@ -188,7 +190,7 @@ export default class ResourceClassify extends PureComponent {
     }
 
     dispatch({
-      type: 'resource_servers/fetch',
+      type: 'centersource/fetch',
       payload: params,
     });
   };
@@ -200,7 +202,7 @@ export default class ResourceClassify extends PureComponent {
       formValues: {},
     });
     dispatch({
-      type: 'resource_servers/fetch',
+      type: 'centersource/fetch',
       payload: {},
     });
   };
@@ -221,7 +223,7 @@ export default class ResourceClassify extends PureComponent {
     switch (e.key) {
       case 'remove':
         dispatch({
-          type: 'resource_servers/remove',
+          type: 'centersource/remove',
           payload: {
             no: selectedRows.map(row => row.no).join(','),
           },
@@ -261,7 +263,7 @@ export default class ResourceClassify extends PureComponent {
       });
 
       dispatch({
-        type: 'resource_servers/fetch',
+        type: 'centersource/fetch',
         payload: values,
       });
     });
@@ -287,7 +289,7 @@ export default class ResourceClassify extends PureComponent {
   handleAdd = fields => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'resource_servers/add',
+      type: 'centersource/add',
       payload: {
         description: fields.desc,
       },
@@ -474,14 +476,15 @@ export default class ResourceClassify extends PureComponent {
   }
   handleTree = data => {
     const { dispatch } = this.props;
+    createItemData.resourceId = data[0];
     dispatch({
-      type: 'resource_servers/fetch',
-      payload: data,
+      type: 'centersource/fetch',
+      payload: {resourceId:createItemData.resourceId},
     });
   }
   render() {
     const {
-      resource_servers: { data },
+      centersource: { data },
       loading,
       classify: { treeData },
       form
@@ -490,44 +493,25 @@ export default class ResourceClassify extends PureComponent {
 
     const columns = [
       {
-        title: '数据源名称',
-        dataIndex: 'no',
+        title: '服务名称',
+        dataIndex: 'sourceName',
       },
       {
         title: '数据源类型',
-        dataIndex: 'description',
+        dataIndex: 'sourceType',
       },
       {
-        title: '所属组织机构',
-        dataIndex: 'callNo',
+        title: '服务类型',
+        dataIndex: 'createTime',
         sorter: true,
-        align: 'right',
-        render: val => `${val} 万`,
-        // mark to display a total number
-        needTotal: true,
+        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
       },
       {
-        title: '所属资源分类',
-        dataIndex: 'status',
+        title: '服务描述',
+        dataIndex: 'linkStatus',
         render(val) {
-          return <Badge status={statusMap[val]} text={status[val]} />;
+          return <Badge status={val ? 'success' : 'error'}/>;
         },
-      },
-      {
-        title: '数据源描述',
-        dataIndex: 'updatedAt1',
-        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
-      },
-      {
-        title: '最近连接时间',
-        dataIndex: 'updatedAt2',
-        sorter: true,
-        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
-      },
-      {
-        title: '连通状态',
-        dataIndex: 'updatedAt3',
-        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
       },
       {
         title: '操作',
@@ -535,21 +519,11 @@ export default class ResourceClassify extends PureComponent {
           return (
             <Fragment>
               <a onClick={() => {
-                this.handleModalVisible(true);
-                this.setState({
-                  listItemData: text
-                });
-              }}>配置详情</a>
-              <Divider type="vertical"/>
-              <a onClick={() => {
-                this.handleModalVisible(true);
-                this.setState({
-                  listItemData: text
-                });
-              }}>修改配置</a>
+                this.updateHandleModal(text,1);
+              }}>查看</a>
             </Fragment>
-          )
-        }
+          );
+        },
       },
     ];
 

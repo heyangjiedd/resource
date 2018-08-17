@@ -18,6 +18,7 @@ import {
   message,
   Badge,
   Divider,
+  Progress,
 } from 'antd';
 import StandardTable from 'components/StandardTable';
 import SimpleTree from 'components/SimpleTree';
@@ -27,6 +28,7 @@ import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 let itemDataStatus = 0;
 let listItemData = {};
 let treeSelect = {};
+let createItemData = {};
 
 import styles from './resource_file.less';
 
@@ -141,26 +143,66 @@ const CreateForm = Form.create()(props => {
     </Modal>
   );
 });
-
-@connect(({ resource_file,classify, loading }) => ({
+const TestForm = Form.create()(props => {
+  const { modalVisible, form, selectedRows, testList, handleModalVisible } = props;
+  let percent = 50;
+  return (
+    <Modal
+      title="测试连通性"
+      visible={modalVisible}
+      onOk={() => handleModalVisible()}
+      destroyOnClose={true}
+      onCancel={() => handleModalVisible()}
+    >
+      <Row>
+        <Progress percent={(testList.length / selectedRows.length)*100}/>
+      </Row>
+      <Row>
+        <Col xl={16} lg={12} md={12} sm={24} xs={24}>
+          <div>
+            测试连通：<span style={{ marginLeft: '10px' }}>{testList.filter(item => {
+            return item;
+          }).length}</span>条
+          </div>
+        </Col>
+        <Col xl={16} lg={12} md={12} sm={24} xs={24}>
+          <div>
+            测试未连通：<span style={{ color: 'red', marginLeft: '10px' }}>{testList.filter(item => {
+            return !item;
+          }).length}</span>条
+          </div>
+        </Col>
+      </Row>
+      <Row>
+        <Col xl={16} lg={12} md={12} sm={24} xs={24}>
+          <Button type="primary">重试</Button>
+        </Col>
+      </Row>
+    </Modal>
+  );
+});
+@connect(({ resource_file,classify, centersource,loading }) => ({
   resource_file,
   classify,
+  centersource,
   loading: loading.models.resource_file,
 }))
 @Form.create()
 export default class ResourceClassify extends PureComponent {
   state = {
     modalVisible: false,
+    testModalVisible: false,
     expandForm: false,
     selectedRows: [],
     formValues: {},
     listItemData: {},
+    testList: [],
   };
 
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
-      type: 'resource_file/fetch',
+      type: 'centersource/fetch',
     });
     dispatch({
       type: 'classify/tree',
@@ -188,7 +230,7 @@ export default class ResourceClassify extends PureComponent {
     }
 
     dispatch({
-      type: 'resource_file/fetch',
+      type: 'centersource/fetch',
       payload: params,
     });
   };
@@ -200,7 +242,7 @@ export default class ResourceClassify extends PureComponent {
       formValues: {},
     });
     dispatch({
-      type: 'resource_file/fetch',
+      type: 'centersource/fetch',
       payload: {},
     });
   };
@@ -221,7 +263,7 @@ export default class ResourceClassify extends PureComponent {
     switch (e.key) {
       case 'remove':
         dispatch({
-          type: 'resource_file/remove',
+          type: 'centersource/remove',
           payload: {
             no: selectedRows.map(row => row.no).join(','),
           },
@@ -261,7 +303,7 @@ export default class ResourceClassify extends PureComponent {
       });
 
       dispatch({
-        type: 'resource_file/fetch',
+        type: 'centersource/fetch',
         payload: values,
       });
     });
@@ -287,7 +329,7 @@ export default class ResourceClassify extends PureComponent {
   handleAdd = fields => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'resource_file/add',
+      type: 'centersource/add',
       payload: {
         description: fields.desc,
       },
@@ -474,60 +516,76 @@ export default class ResourceClassify extends PureComponent {
   }
   handleTree = data => {
     const { dispatch } = this.props;
+    createItemData.resourceId = data[0];
     dispatch({
-      type: 'resource_file/fetch',
-      payload: data,
+      type: 'centersource/fetch',
+      payload: {resourceId:createItemData.resourceId},
     });
   }
+  testHandleAdd = fields => {
+    const { dispatch } = this.props;
+    this.setState({
+      testModalVisible: true,
+    });
+    this.state.selectedRows.forEach((item, index) => {
+      dispatch({
+        type: 'centersource/test',
+        payload: {
+          id: item.id,
+        },
+        callback: (index) => {
+          this.state.testList.push(index);
+          this.setState({
+            testList: this.state.testList,
+          });
+          if (index === this.state.selectedRows.length - 1) {
+            message.success('测试完毕');
+          }
+        },
+      });
+    });
+  };
   render() {
     const {
-      resource_file: { data },
+      centersource: { data },
       loading,
       classify: { treeData },
       form
     } = this.props;
-    const { selectedRows, modalVisible,listItemData } = this.state;
+    const { selectedRows, modalVisible,listItemData,testModalVisible } = this.state;
 
     const columns = [
       {
         title: '数据源名称',
-        dataIndex: 'no',
+        dataIndex: 'sourceName',
       },
       {
         title: '数据源类型',
-        dataIndex: 'description',
+        dataIndex: 'sourceType',
       },
       {
         title: '所属组织机构',
-        dataIndex: 'callNo',
-        sorter: true,
-        align: 'right',
-        render: val => `${val} 万`,
-        // mark to display a total number
-        needTotal: true,
+        dataIndex: 'orgId',
       },
       {
         title: '所属资源分类',
         dataIndex: 'status',
         render(val) {
-          return <Badge status={statusMap[val]} text={status[val]} />;
+          return <Badge status={statusMap[val]} text={status[val]}/>;
         },
       },
       {
-        title: '数据源描述',
-        dataIndex: 'updatedAt1',
-        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
-      },
-      {
         title: '最近连接时间',
-        dataIndex: 'updatedAt2',
+        dataIndex: 'createTime',
         sorter: true,
         render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
       },
       {
         title: '连通状态',
-        dataIndex: 'updatedAt3',
-        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
+        dataIndex: 'linkStatus',
+        render(val) {
+          return <Badge status={val ? 'success' : 'error'}/>;
+        },
       },
       {
         title: '操作',
@@ -535,37 +593,32 @@ export default class ResourceClassify extends PureComponent {
           return (
             <Fragment>
               <a onClick={() => {
-                this.handleModalVisible(true);
-                this.setState({
-                  listItemData: text
-                });
-              }}>配置详情</a>
-              <Divider type="vertical"/>
-              <a onClick={() => {
-                this.handleModalVisible(true);
-                this.setState({
-                  listItemData: text
-                });
-              }}>修改配置</a>
+                this.updateHandleModal(text,1);
+              }}>文件详情</a>
             </Fragment>
-          )
-        }
+          );
+        },
       },
     ];
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },
-        sm: { span: 6 },
+        sm: { span: 8 },
       },
       wrapperCol: {
         xs: { span: 24 },
-        sm: { span: 18 },
-        md: { span: 18 },
+        sm: { span: 16 },
+        md: { span: 16 },
       },
     };
     const parentMethods = {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
+    };
+    const testParentMethods = {
+      handleModalVisible: this.testHandleModalVisible,
+      selectedRows: this.state.selectedRows,
+      testList: this.state.testList,
     };
     const { getFieldDecorator } = form;
     return (
@@ -581,7 +634,7 @@ export default class ResourceClassify extends PureComponent {
             <Row gutter={{ md: 2, lg:6, xl: 12 }}>
               <Col md={6} sm={24}>
                 <FormItem>
-                  <Button icon="desktop" type="primary" onClick={() => this.handleModalVisible(true)}>
+                  <Button icon="desktop" type="primary" onClick={() => this.testHandleAdd(true)}>
                     测试连通性
                   </Button>
                 </FormItem>
@@ -620,6 +673,7 @@ export default class ResourceClassify extends PureComponent {
           </div>
         </Card>
         </div>
+        <TestForm {...testParentMethods} modalVisible={testModalVisible}/>
         <CreateForm {...parentMethods} modalVisible={modalVisible} />
       </PageHeaderLayout>
     );

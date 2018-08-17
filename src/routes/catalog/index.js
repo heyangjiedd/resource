@@ -18,6 +18,8 @@ import {
   message,
   Badge,
   Divider,
+  Tabs,
+  Radio
 } from 'antd';
 import StandardTable from 'components/StandardTable';
 import StandardTableNoCheck from 'components/StandardTableNoCheck';
@@ -26,10 +28,13 @@ import AnycSimpleTree from 'components/AnycSimpleTree';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
 import styles from './index.less';
+import { Radio } from 'antd/lib/index';
 
 const FormItem = Form.Item;
 const { Option } = Select;
 const { TextArea } = Input;
+const TabPane = Tabs.TabPane;
+const RadioGroup = Radio.Group;
 const getValue = obj =>
   Object.keys(obj)
     .map(key => obj[key])
@@ -68,7 +73,7 @@ const CreateForm = Form.create()(props => {
   };
   return (
     <Modal
-      title="编辑分类"
+      title="目数关联"
       visible={modalVisible}
       onOk={okHandle}
       onCancel={() => handleModalVisible()}
@@ -76,17 +81,16 @@ const CreateForm = Form.create()(props => {
       <FormItem {...formItemLayout} label="父级分类名称">
         {form.getFieldDecorator('fjflmc', {
           rules: [{ required: true, message: 'Please input some description...' }],
-          initialValue: listItemData.parentName,
         })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="分类名称">
         {form.getFieldDecorator('flmc', {
-          rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.name,
+          rules: [{ required: true, message: 'Please input some description...' }],
         })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="排序号">
         {form.getFieldDecorator('pxh', {
-          rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.sort,
+          rules: [{ required: true, message: 'Please input some description...' }],
         })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="分类描述">
@@ -96,7 +100,7 @@ const CreateForm = Form.create()(props => {
               required: true,
               message: '请输入分类描述',
             },
-          ], initialValue: listItemData.description,
+          ],
         })(
           <TextArea
             style={{ minHeight: 32 }}
@@ -308,11 +312,140 @@ const CatlogDetail = Form.create()(props => {
           信息项列表：
         </Col>
       </Row>
-      <StandardTableNothing
-        loading={loading}
-        data={data}
-        columns={columns}
-      />
+      {/*<StandardTableNothing*/}
+      {/*loading={loading}*/}
+      {/*data={data}*/}
+      {/*columns={columns}*/}
+      {/*/>*/}
+    </Modal>
+  );
+});
+const ResourceDetail = Form.create()(props => {
+  const { modalVisible, form, handleModalVisible, loading, data, columns } = props;
+  const okHandle = () => {
+    form.validateFields((err, fieldsValue) => {
+      if (err) return;
+      form.resetFields();
+      handleAdd(fieldsValue);
+    });
+  };
+  const formItemLayout = {
+    labelCol: {
+      xs: { span: 24 },
+      sm: { span: 8 },
+    },
+    wrapperCol: {
+      xs: { span: 24 },
+      sm: { span: 16 },
+      md: { span: 16 },
+    },
+  };
+  const onChange = ()=>{
+
+  };
+  return (
+    <Modal
+      title="资源详情"
+      visible={modalVisible}
+      footer={null}
+      onOk={okHandle}
+      destroyOnClose={true}
+      width={900}
+      onCancel={() => handleModalVisible()}
+    >
+      {/*<Tabs defaultActiveKey="1" onChange={callback}>*/}
+      <Tabs defaultActiveKey="1">
+        <TabPane tab="数据详情" key="1"> <Row gutter={24}>
+          <Col span={24}>
+            <FormItem labelCol={{ span: 4 }} wrapperCol={{ span: 20 }} label="目录分类">
+              {form.getFieldDecorator('mlfl', {
+                rules: [{ required: true, message: 'Please input some description...' }],
+              })(<Input disabled={true} placeholder="请输入"/>)}
+            </FormItem>
+          </Col>
+        </Row>
+          <Row>
+            <Col md={12} sm={24}>
+              <div>过滤条件</div>
+            </Col>
+          </Row>
+          <Row>
+          <Col md={12} sm={24}>
+            <FormItem {...formItemLayout} defaultValue='view'  label="请选择表/视图">
+              <RadioGroup onChange={onChange}>
+                <Radio value='view'>视图操作</Radio>
+                <Radio value='sql'>SQL操作</Radio>
+              </RadioGroup>
+            </FormItem>
+          </Col>
+        </Row>
+        </TabPane>
+        <TabPane tab="表结构" key="2">
+          <Row gutter={24}>
+          <Col span={12}>
+            <FormItem {...formItemLayout} label="所属资源格式">
+              {form.getFieldDecorator('sszygs', {
+                rules: [{ required: true, message: 'Please input some description...' }],
+              })(<Input disabled={true} placeholder="请输入"/>)}
+            </FormItem>
+          </Col>
+          <Col span={6}>
+            <FormItem labelCol={{ span: 16 }} wrapperCol={{ span: 8 }} label="涉密标识">
+              {form.getFieldDecorator('smbs', {
+                rules: [{ required: true, message: 'Please input some description...' }],
+              })(<Input disabled={true} placeholder="请输入"/>)}
+            </FormItem>
+          </Col>
+          <Col span={6}>
+            <FormItem labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} label="周期">
+              {form.getFieldDecorator('zq', {
+                rules: [{ required: true, message: 'Please input some description...' }],
+              })(<Input disabled={true} placeholder="请输入"/>)}
+            </FormItem>
+          </Col>
+        </Row>
+          <Row gutter={24}>
+            <Col span={6}>
+              <FormItem labelCol={{ span: 16 }} wrapperCol={{ span: 8 }} label="共享类型">
+                {form.getFieldDecorator('gxlx', {
+                  rules: [{ required: true, message: 'Please input some description...' }],
+                })(<Input disabled={true} placeholder="请输入"/>)}
+              </FormItem>
+            </Col>
+            <Col span={6}>
+              <FormItem labelCol={{ span: 12 }} wrapperCol={{ span: 12 }} label="共享方式">
+                {form.getFieldDecorator('gxff', {
+                  rules: [{ required: true, message: 'Please input some description...' }],
+                })(<Input disabled={true} placeholder="请输入"/>)}
+              </FormItem>
+            </Col>
+            <Col span={12}>
+              <FormItem {...formItemLayout} label="是否开放">
+                {form.getFieldDecorator('sfkf', {
+                  rules: [{ required: true, message: 'Please input some description...' }],
+                })(<Input disabled={true} placeholder="请输入"/>)}
+              </FormItem>
+            </Col>
+          </Row>
+          <Row gutter={24}>
+            <Col span={12}>
+              <FormItem {...formItemLayout} label="共享条件">
+                {form.getFieldDecorator('gxtj', {
+                  rules: [{ required: true, message: 'Please input some description...' }],
+                })(<TextArea disabled={true} placeholder="请输入" rows={4}/>)}
+              </FormItem>
+            </Col>
+            <Col span={12}>
+              <FormItem {...formItemLayout} label="开放条件">
+                {form.getFieldDecorator('kftj', {
+                  rules: [{ required: true, message: 'Please input some description...' }],
+                })(<TextArea disabled={true} placeholder="请输入" rows={4}/>)}
+              </FormItem>
+            </Col>
+          </Row>
+        </TabPane>
+      </Tabs>
+
     </Modal>
   );
 });
@@ -330,10 +463,10 @@ export default class ResourceClassify extends PureComponent {
   };
 
   componentDidMount() {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'catalog/fetch',
-    });
+    // const { dispatch } = this.props;
+    // dispatch({
+    //   type: 'catalog/fetch',
+    // });
     // dispatch({
     //   type: 'catalog/tree',
     //   payload: {region:'000000',type:'7'},
@@ -440,10 +573,30 @@ export default class ResourceClassify extends PureComponent {
     });
   };
 
+  handleModalVisibleCatlog = flag => {
+    this.setState({
+      modalVisibleCatlog: !!flag,
+    });
+  };
+  handleModalVisibleResource = flag => {
+    this.setState({
+      modalVisibleResource: !!flag,
+    });
+  };
   handleModalVisible = flag => {
     this.setState({
       modalVisible: !!flag,
     });
+  };
+  handleModalCatlog = (item, status) => {
+    listItemData = item;
+    itemDataStatus = status;
+    this.handleModalVisibleCatlog(true);
+  };
+  handleModalResource = (item, status) => {
+    listItemData = item;
+    itemDataStatus = status;
+    this.handleModalVisibleResource(true);
   };
   handleModal = (item, status) => {
     listItemData = item;
@@ -586,20 +739,28 @@ export default class ResourceClassify extends PureComponent {
     const { dispatch } = this.props;
     dispatch({
       type: 'catalog/fetch',
-      payload: data,
+      payload: { classifyId: data[0] },
     });
   };
 
   render() {
     const {
-      catalog: { data, treeData },
+      catalog: { data },
       loading,
-      form
+      form,
     } = this.props;
-    const { selectedRows, modalVisible } = this.state;
+    const { selectedRows, modalVisible, modalVisibleCatlog, modalVisibleResource } = this.state;
     const parentMethods = {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
+    };
+    const parentMethodsCatlog = {
+      handleAdd: this.handleAddCatlog,
+      handleModalVisible: this.handleModalVisibleCatlog,
+    };
+    const parentMethodsResource = {
+      handleAdd: this.handleAddResource,
+      handleModalVisible: this.handleModalVisibleResource,
     };
     const columns = [
       {
@@ -642,39 +803,53 @@ export default class ResourceClassify extends PureComponent {
         },
       },
     ];
-
-    const menu = (
-      <Menu onClick={this.handleMenuClick} selectedKeys={[]}>
-        <Menu.Item key="remove">删除</Menu.Item>
-        <Menu.Item key="approval">批量审批</Menu.Item>
-      </Menu>
-    );
     const { getFieldDecorator } = form;
     return (
       <PageHeaderLayout>
         {/*<Col xl={6} lg={6} md={6} sm={6} xs={6} style={{ marginBottom: 24 }}>*/}
         <div className={styles.flexMain}>
           <AnycSimpleTree
-          handleTree={this.handleTree}
-          title={'目录分类'}
+            handleTree={this.handleTree}
+            title={'目录分类'}
           />
           <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
               {/*<div className={styles.tableListForm}>{this.renderForm()}</div>*/}
-                <Row>
+              <Row>
                 <Col md={8} sm={24}>
                   <FormItem>
                     {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
                   </FormItem>
                 </Col>
+                <Col md={3} sm={24}>
+                  <Button type="primary" onClick={() => {
+                    this.handleModalCatlog();
+                  }}>
+                    目录详情
+                  </Button>
+                </Col>
+                <Col md={3} sm={24}>
+                  <Button type="primary" onClick={() => {
+                    this.handleModalResource();
+                  }}>
+                    配置详情
+                  </Button>
+                </Col>
+                <Col md={3} sm={24}>
+                  <Button type="primary" onClick={() => {
+                    this.handleModal();
+                  }}>
+                    目数关联
+                  </Button>
+                </Col>
                 <Col md={6} sm={24}>
                   <FormItem>
-                  <Button type="primary" htmlType="submit">
-                    查询
-                  </Button>
+                    <Button type="primary" htmlType="submit">
+                      查询
+                    </Button>
                   </FormItem>
                 </Col>
-                </Row>
+              </Row>
               <StandardTableNoCheck
                 selectedRows={selectedRows}
                 loading={loading}
@@ -690,6 +865,8 @@ export default class ResourceClassify extends PureComponent {
         {/*<Col xl={18} lg={16} md={16} sm={16} xs={16} style={{ marginBottom: 24 }}>*/}
 
         {/*</Col>*/}
+        <ResourceDetail {...parentMethodsResource} modalVisible={modalVisibleResource}/>
+        <CatlogDetail {...parentMethodsCatlog} modalVisible={modalVisibleCatlog}/>
         <CreateForm {...parentMethods} modalVisible={modalVisible}/>
       </PageHeaderLayout>
     );

@@ -29,6 +29,7 @@ import StandardFormRow from 'components/StandardFormRow';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
 import styles from './resourceClassify.less';
+import { updateresource } from '../../services/api';
 
 const FormItem = Form.Item;
 const confirm = Modal.confirm;
@@ -42,6 +43,8 @@ const getValue = obj =>
 const statusMap = ['default', 'processing', 'success', 'error'];
 const status = ['关闭', '运行中', '已上线', '异常'];
 let listItemData = {};
+let createItemData = {};
+let itemDataStatus = status;
 
 const CreateForm = Form.create()(props => {
   const { modalVisible, form, handleAdd, handleModalVisible, handleItem, item } = props;
@@ -52,6 +55,21 @@ const CreateForm = Form.create()(props => {
       handleAdd(fieldsValue);
     });
   };
+  const exHandle = (index) => {
+    form.validateFields((err, fieldsValue) => {
+      if (err) return;
+      if(index != 4){
+        createItemData = {...createItemData,...fieldsValue}
+        handleItem(index)
+      }else{
+        createItemData = {...createItemData,...fieldsValue}
+        handleAdd(createItemData)
+      }
+    });
+  };
+  const onChange = (index)=>{
+    createItemData.sourceType = index[0]+'/'+index[1];
+  }
   const options = [{
     value: 'gxxsjk',
     label: '关系型数据库',
@@ -65,8 +83,8 @@ const CreateForm = Form.create()(props => {
       value: 'gxxsjk_DB2', label: 'DB2',
     }],
   }, {
-    value: '非关系型数据库',
-    label: 'fgxxsjk',
+    value: 'fgxxsjk',
+    label: '非关系型数据库',
     children: [{
       value: 'fgxxsjk_MongoDB', label: 'MongoDB',
     }, {
@@ -111,7 +129,7 @@ const CreateForm = Form.create()(props => {
   const firstFooter = (<Row>
     <Col md={24} sm={24}>
       <Button type="primary" onClick={() => {
-        handleItem(2);
+        exHandle(2);
       }}>
         下一步
       </Button>
@@ -125,12 +143,12 @@ const CreateForm = Form.create()(props => {
   const secondFooter = (<Row>
     <Col md={24} sm={24}>
       <Button onClick={() => {
-        handleItem(1);
+        exHandle(1);
       }}>
         上一步
       </Button>
       <Button type="primary" onClick={() => {
-        handleItem(3);
+        exHandle(3);
       }}>
         下一步
       </Button>
@@ -144,11 +162,13 @@ const CreateForm = Form.create()(props => {
   const thirdFooter = (<Row>
     <Col md={24} sm={24}>
       <Button onClick={() => {
-        handleItem(2);
+        exHandle(2);
       }}>
         上一步
       </Button>
-      <Button type="primary" onClick={handleAdd}>
+      <Button type="primary" onClick={() => {
+        exHandle(4);
+      }}>
         提交
       </Button>
       <Button onClick={() => {
@@ -158,9 +178,6 @@ const CreateForm = Form.create()(props => {
       </Button>
     </Col>
   </Row>);
-  const onChange = ()=>{
-
-  }
   return (
     <Modal
       title="创建数据源"
@@ -185,12 +202,13 @@ const CreateForm = Form.create()(props => {
           </FormItem>
         </Col></Row></div> : item === 2 ? <div>
           <FormItem {...formItemLayout} label="数据源名称">
-            {form.getFieldDecorator('desc7', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+            {form.getFieldDecorator('sourceName', {
+              rules: [{ required: true, message: 'Please input some description...' }], initialValue:createItemData.sourceName
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="所属组织机构">
-            {form.getFieldDecorator('status')(
+            {form.getFieldDecorator('orgId', {initialValue:createItemData.sourceName
+            })(
               <Select placeholder="选择所属组织机构" style={{ width: '100%' }}>
                 <Option value="0">公安局</Option>
                 <Option value="1">刑侦科</Option>
@@ -200,18 +218,18 @@ const CreateForm = Form.create()(props => {
             )}
           </FormItem>
           <FormItem {...formItemLayout} label="资源分类">
-            {form.getFieldDecorator('desc9', {
-              rules: [{ required: true, message: 'Please input some description...' }],
-            })(<Input placeholder="请输入"/>)}
+            {form.getFieldDecorator('sourceType', {
+              rules: [{ required: true, message: 'Please input some description...' }], initialValue:createItemData.resourceId
+            })(<Input disable placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据源描述">
-            {form.getFieldDecorator('flms', {
+            {form.getFieldDecorator('content', {
               rules: [
                 {
                   required: true,
                   message: '请输入数据源描述',
                 },
-              ], initialValue: listItemData.owner,
+              ], initialValue: listItemData.content,
             })(
               <TextArea
                 style={{ minHeight: 32 }}
@@ -223,38 +241,43 @@ const CreateForm = Form.create()(props => {
         </div> :
         <div>
           <FormItem {...formItemLayout} label="IP地址">
-            {form.getFieldDecorator('desc5', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+            {form.getFieldDecorator('ip', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.ip
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="端口">
-            {form.getFieldDecorator('desc6', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+            {form.getFieldDecorator('port', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.port
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="SID">
-            {form.getFieldDecorator('desc7', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+            {form.getFieldDecorator('sid', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.sid
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据库名称/服务名称">
-            {form.getFieldDecorator('desc8', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+            {form.getFieldDecorator('dbName', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.dbName
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据库版本号">
-            {form.getFieldDecorator('desc8', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+            {form.getFieldDecorator('dbVersion', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.dbVersion
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="用户名">
-            {form.getFieldDecorator('desc8', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+            {form.getFieldDecorator('account', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.account
+            })(<Input placeholder="请输入"/>)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="密码">
+            {form.getFieldDecorator('password', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.password
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="备注">
-            {form.getFieldDecorator('desc9', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+            {form.getFieldDecorator('bz', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.bz
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <Row>
@@ -287,78 +310,76 @@ const UpdateForm = Form.create()(props => {
       md: { span: 16 },
     },
   };
+  let title = itemDataStatus===1?"配置详情":"修改配置";
   return (
     <Modal
-      title="修改配置"
+      title={title}
       visible={modalVisible}
       onOk={okHandle}
       destroyOnClose={true}
       onCancel={() => handleModalVisible()}
     >
       <FormItem {...formItemLayout} label="数据源类型">
-        {form.getFieldDecorator('desc', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
+        {form.getFieldDecorator('sourceType', {
+          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.sourceType,
+        })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据库类型">
-        {form.getFieldDecorator('desc1', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
+        {form.getFieldDecorator('dbName', {
+          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.dbName,
+        })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据源名称">
-        {form.getFieldDecorator('desc2', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
+        {form.getFieldDecorator('sourceName', {
+          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.sourceName,
+        })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="所属组织机构">
-        {form.getFieldDecorator('desc3', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
+        {form.getFieldDecorator('orgId', {
+          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.orgId,
+        })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="资源分类">
-        {form.getFieldDecorator('desc4', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(
-          <Select placeholder="请选择" style={{ width: '100%' }}>
-            <Option value="0">关闭</Option>
-            <Option value="1">运行中</Option>
-          </Select>)}
+        {form.getFieldDecorator('resourceId', {
+          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.resourceId,
+        })(<Input disabled placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="IP地址">
-        {form.getFieldDecorator('desc5', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
+        {form.getFieldDecorator('ip', {
+          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.ip,
+        })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="端口">
-        {form.getFieldDecorator('desc6', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
+        {form.getFieldDecorator('port', {
+          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.port,
+        })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据库名称/SID">
-        {form.getFieldDecorator('desc7', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
+        {form.getFieldDecorator('sid', {
+          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.sid,
+        })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="用户名">
-        {form.getFieldDecorator('desc8', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
+        {form.getFieldDecorator('account', {
+          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.account,
+        })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="密码">
-        {form.getFieldDecorator('desc9', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
+        {form.getFieldDecorator('password', {
+          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.password,
+        })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据源描述">
-        {form.getFieldDecorator('flms', {
+        {form.getFieldDecorator('content', {
           rules: [
             {
               required: true,
               message: '请输入数据源描述',
             },
-          ], initialValue: listItemData.owner,
+          ], initialValue: listItemData.content,
         })(
           <TextArea
+            disabled={itemDataStatus === 1}
             style={{ minHeight: 32 }}
             placeholder="请输入你的数据源描述"
             rows={4}
@@ -380,7 +401,7 @@ const TestForm = Form.create()(props => {
       onCancel={() => handleModalVisible()}
     >
       <Row>
-        <Progress percent={testList.length / selectedRows.length}/>
+        <Progress percent={(testList.length / selectedRows.length)*100}/>
       </Row>
       <Row>
         <Col xl={16} lg={12} md={12} sm={24} xs={24}>
@@ -522,7 +543,6 @@ export default class ResourceClassify extends PureComponent {
 
     form.validateFields((err, fieldsValue) => {
       if (err) return;
-
       const values = {
         ...fieldsValue,
         updatedAt: fieldsValue.updatedAt && fieldsValue.updatedAt.valueOf(),
@@ -531,7 +551,18 @@ export default class ResourceClassify extends PureComponent {
       this.setState({
         formValues: values,
       });
-
+      if(values.relationDb&&values.relationDb.length>0){
+        values.relationDb = values.relationDb.join(',')
+      }
+      if(values.unrelationDb&&values.unrelationDb.length>0){
+        values.unrelationDb = values.unrelationDb.join(',')
+      }
+      if(values.api&&values.api.length>0){
+        values.api = values.api.join(',')
+      }
+      if(values.file&&values.file.length>0){
+        values.file = values.file.join(',')
+      }
       dispatch({
         type: 'centersource/fetch',
         payload: values,
@@ -553,26 +584,53 @@ export default class ResourceClassify extends PureComponent {
       updateModalVisible: !!flag,
     });
   };
-  handleDelete = () => {
-    confirm({
-      title: '确定删除选中数据?',
-      content: '删除数据不可恢复，请悉知！！！',
-      onOk() {
-        return new Promise((resolve, reject) => {
-          setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
-        }).catch(() => console.log('Oops errors!'));
-      },
-      onCancel() {
-      },
+  updateHandleModal = (item,index) => {
+    listItemData = item;
+    itemDataStatus = index;
+    this.setState({
+      updateModalVisible: true,
     });
+  };
+  handleDelete = () => {
+    const { dispatch } = this.props;
+    if (this.state.selectedRows.length > 0) {
+      this.state.selectedRows.forEach((item, index) => {
+        if (index === this.state.selectedRows.length - 1) {
+          dispatch({
+            type: 'centersource/remove',
+            payload: {
+              id: item.id,
+            }, callback: () => {
+              dispatch({
+                type: 'centersource/fetch',
+              });
+            },
+          });
+          message.success('删除成功');
+          this.setState({
+            selectedRows: [],
+          });
+        } else {
+          dispatch({
+            type: 'centersource/remove',
+            payload: {
+              id: item.id,
+            },
+          });
+        }
+      });
+    }
   };
   handleAdd = fields => {
     const { dispatch } = this.props;
     dispatch({
       type: 'centersource/add',
-      payload: {
-        description: fields.desc,
-      },
+      payload: fields,
+      callback:()=>{
+        dispatch({
+          type: 'centersource/fetch',
+        });
+      }
     });
     message.success('添加成功');
     this.setState({
@@ -605,12 +663,15 @@ export default class ResourceClassify extends PureComponent {
   updateHandleAdd = fields => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'centersource/add',
-      payload: {
-        description: fields.desc,
-      },
+      type: 'centersource/update',
+      payload: {...listItemData,...fields},
+      callback:()=>{
+        dispatch({
+          type: 'centersource/fetch',
+        });
+      }
     });
-    message.success('添加成功');
+    message.success('修改成功');
     this.setState({
       updateModalVisible: false,
     });
@@ -622,42 +683,22 @@ export default class ResourceClassify extends PureComponent {
     return (
       <Form onSubmit={this.handleSearch} layout="inline">
         <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
-          <Col md={6} sm={24}>
+          <Col md={8} sm={24}>
             <FormItem>
-              {getFieldDecorator('status')(
-                <Select placeholder="数据库类型" style={{ width: '100%' }}>
-                  <Option value="0">关系型数据库</Option>
-                  <Option value="1">非关系型数据库</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={3} sm={24}>
-            <FormItem>
-              {getFieldDecorator('status')(
+              {getFieldDecorator('linkStatus')(
                 <Select placeholder="连通状态" style={{ width: '100%' }}>
-                  <Option value="0">已连通</Option>
-                  <Option value="1">未连通</Option>
+                  <Option value="1">已连通</Option>
+                  <Option value="0">未连通</Option>
                 </Select>,
               )}
             </FormItem>
           </Col>
-          <Col md={3} sm={24}>
+          <Col md={8} sm={24}>
             <FormItem>
-              {getFieldDecorator('status')(
-                <Select placeholder="同步状态" style={{ width: '100%' }}>
-                  <Option value="0">已同步</Option>
-                  <Option value="1">未同步</Option>
-                </Select>,
-              )}
+              {getFieldDecorator('sourceName')(<Input placeholder="请输入数据源名称"/>)}
             </FormItem>
           </Col>
-          <Col md={6} sm={24}>
-            <FormItem>
-              {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
-            </FormItem>
-          </Col>
-          <Col md={6} sm={24}>
+          <Col md={8} sm={24}>
             <span className={styles.submitButtons}>
               <Button type="primary" htmlType="submit">
                 查询
@@ -678,42 +719,22 @@ export default class ResourceClassify extends PureComponent {
     return (
       <Form onSubmit={this.handleSearch} layout="inline">
         <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
-          <Col md={6} sm={24}>
+          <Col md={8} sm={24}>
             <FormItem>
-              {getFieldDecorator('status')(
-                <Select placeholder="数据库类型" style={{ width: '100%' }}>
-                  <Option value="0">关系型数据库</Option>
-                  <Option value="1">非关系型数据库</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={3} sm={24}>
-            <FormItem>
-              {getFieldDecorator('status1')(
+              {getFieldDecorator('linkStatus')(
                 <Select placeholder="连通状态" style={{ width: '100%' }}>
-                  <Option value="0">已连通</Option>
-                  <Option value="1">未连通</Option>
+                  <Option value="1">已连通</Option>
+                  <Option value="0">未连通</Option>
                 </Select>,
               )}
             </FormItem>
           </Col>
-          <Col md={3} sm={24}>
+          <Col md={8} sm={24}>
             <FormItem>
-              {getFieldDecorator('status2')(
-                <Select placeholder="同步状态" style={{ width: '100%' }}>
-                  <Option value="0">已同步</Option>
-                  <Option value="1">未同步</Option>
-                </Select>,
-              )}
+              {getFieldDecorator('sourceName')(<Input placeholder="请输入数据源名称"/>)}
             </FormItem>
           </Col>
-          <Col md={6} sm={24}>
-            <FormItem>
-              {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
-            </FormItem>
-          </Col>
-          <Col md={6} sm={24}>
+          <Col md={8} sm={24}>
             <span className={styles.submitButtons}>
               <Button type="primary" htmlType="submit">
                 查询
@@ -730,12 +751,12 @@ export default class ResourceClassify extends PureComponent {
         <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
           <StandardFormRow title="关系型数据库" block style={{ paddingBottom: 5 }}>
             <FormItem style={{ marginBottom: 0 }}>
-              {getFieldDecorator('category')(
+              {getFieldDecorator('relationDb')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="cat1">MySQL</TagSelect.Option>
-                  <TagSelect.Option value="cat2">Oracle</TagSelect.Option>
-                  <TagSelect.Option value="cat3">SQLServer</TagSelect.Option>
-                  <TagSelect.Option value="cat4">DB2</TagSelect.Option>
+                  <TagSelect.Option value="gxxsjl_MySQL">MySQL</TagSelect.Option>
+                  <TagSelect.Option value="gxxsjl_Oracle">Oracle</TagSelect.Option>
+                  <TagSelect.Option value="gxxsjl_SQLServer">SQLServer</TagSelect.Option>
+                  <TagSelect.Option value="gxxsjl_DB2">DB2</TagSelect.Option>
                 </TagSelect>,
               )}
             </FormItem>
@@ -744,10 +765,10 @@ export default class ResourceClassify extends PureComponent {
         <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
           <StandardFormRow title="非关系型数据库" block style={{ paddingBottom: 5 }}>
             <FormItem style={{ marginBottom: 0 }}>
-              {getFieldDecorator('category')(
+              {getFieldDecorator('unrelationDb')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="cat1">MongoDB</TagSelect.Option>
-                  <TagSelect.Option value="cat2">Hbase</TagSelect.Option>
+                  <TagSelect.Option value="fgxxsjl_MongoDB">MongoDB</TagSelect.Option>
+                  <TagSelect.Option value="fgxxsjl_Hbase">Hbase</TagSelect.Option>
                 </TagSelect>,
               )}
             </FormItem>
@@ -756,12 +777,12 @@ export default class ResourceClassify extends PureComponent {
         <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
           <StandardFormRow title="API" block style={{ paddingBottom: 5 }}>
             <FormItem style={{ marginBottom: 0 }}>
-              {getFieldDecorator('category')(
+              {getFieldDecorator('api')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="cat1">HTTP</TagSelect.Option>
-                  <TagSelect.Option value="cat2">HTTPS</TagSelect.Option>
-                  <TagSelect.Option value="cat3">WSDL</TagSelect.Option>
-                  <TagSelect.Option value="cat4">REST</TagSelect.Option>
+                  <TagSelect.Option value="api_HTTP">HTTP</TagSelect.Option>
+                  <TagSelect.Option value="api_HTTPS">HTTPS</TagSelect.Option>
+                  <TagSelect.Option value="api_WSDL">WSDL</TagSelect.Option>
+                  <TagSelect.Option value="api_REST">REST</TagSelect.Option>
                 </TagSelect>,
               )}
             </FormItem>
@@ -770,12 +791,12 @@ export default class ResourceClassify extends PureComponent {
         <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
           <StandardFormRow title="普通文件系统" block style={{ paddingBottom: 5 }}>
             <FormItem style={{ marginBottom: 0 }}>
-              {getFieldDecorator('category')(
+              {getFieldDecorator('file')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="cat1">FTP</TagSelect.Option>
-                  <TagSelect.Option value="cat2">SFTP</TagSelect.Option>
-                  <TagSelect.Option value="cat3">本地磁盘</TagSelect.Option>
-                  <TagSelect.Option value="cat4">共享文件件</TagSelect.Option>
+                  <TagSelect.Option value="file_FTP">FTP</TagSelect.Option>
+                  <TagSelect.Option value="file_SFTP">SFTP</TagSelect.Option>
+                  <TagSelect.Option value="file_bdcp">本地磁盘</TagSelect.Option>
+                  <TagSelect.Option value="file_gxwjj">共享文件件</TagSelect.Option>
                 </TagSelect>,
               )}
             </FormItem>
@@ -792,9 +813,10 @@ export default class ResourceClassify extends PureComponent {
 
   handleTree = data => {
     const { dispatch } = this.props;
+    createItemData.resourceId = data[0];
     dispatch({
       type: 'centersource/fetch',
-      payload: data,
+      payload: {resourceId:createItemData.resourceId},
     });
   };
 
@@ -804,7 +826,7 @@ export default class ResourceClassify extends PureComponent {
       classify: { treeData },
       loading,
     } = this.props;
-    const { selectedRows, modalVisible, testModalVisible, updateModalVisible, listItemData, item } = this.state;
+    const { selectedRows, modalVisible, testModalVisible, updateModalVisible,listItemData, item } = this.state;
 
     const columns = [
       {
@@ -845,17 +867,11 @@ export default class ResourceClassify extends PureComponent {
           return (
             <Fragment>
               <a onClick={() => {
-                this.updateHandleModalVisible(true);
-                this.setState({
-                  listItemData: text,
-                });
+                this.updateHandleModal(text,1);
               }}>配置详情</a>
               <Divider type="vertical"/>
               <a onClick={() => {
-                this.updateHandleModalVisible(true);
-                this.setState({
-                  listItemData: text,
-                });
+                this.updateHandleModal(text,2);
               }}>修改配置</a>
             </Fragment>
           );

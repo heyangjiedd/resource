@@ -34,7 +34,7 @@ const getValue = obj =>
     .join(',');
 let itemDataStatus = 0;
 let listItemData = {};
-let treeSelect = {}
+let treeSelect = '';
 
 const CreateForm = Form.create()(props => {
   const { modalVisible, form, handleAdd, handleModalVisible } = props;
@@ -261,7 +261,7 @@ export default class ResourceClassify extends PureComponent {
     } else {
       dispatch({
         type: 'dervieClassify/add',
-        payload: {...fields,...treeSelect},
+        payload: {...fields,parentId:treeSelect},
         callback: () => {
           dispatch({
             type: 'dervieClassify/fetch',
@@ -308,7 +308,7 @@ export default class ResourceClassify extends PureComponent {
     }
   };
   handleTree = data => {
-    treeSelect = data
+    treeSelect = data[0]
   };
 
   render() {

@@ -49,7 +49,7 @@ let treeSelect = {};
 let selectValue = [];
 
 const CreateForm = Form.create()(props => {
-  const { modalVisible, form, handleAdd, handleModalVisible, data, handleItem, item } = props;
+  const { modalVisible, form, handleAdd, handleModalVisible, data, handleItem, item, dataList, searchHandle, getListBuyId } = props;
   const okHandle = () => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
@@ -71,8 +71,8 @@ const CreateForm = Form.create()(props => {
       value: 'gxxsjk_DB2', label: 'DB2',
     }],
   }, {
-    value: '非关系型数据库',
-    label: 'fgxxsjk',
+    value: 'fgxxsjk',
+    label: '非关系型数据库',
     children: [{
       value: 'fgxxsjk_MongoDB', label: 'MongoDB',
     }, {
@@ -106,27 +106,24 @@ const CreateForm = Form.create()(props => {
   const columns = [
     {
       title: '数据源名称',
-      dataIndex: 'no',
+      dataIndex: 'sourceName',
     },
     {
       title: '数据源类型',
-      dataIndex: 'status',
-      render(val) {
-        return <Badge status={statusMap[val]} text={status[val]}/>;
-      },
+      dataIndex: 'sourceType',
     },
     {
       title: '数据源描述',
-      dataIndex: 'no',
+      dataIndex: 'content',
     },
     {
       title: '最近连接时间',
-      dataIndex: 'updatedAt1',
+      dataIndex: 'createTime',
       render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
     },
     {
       title: '连接状态',
-      dataIndex: 'updatedAt2',
+      dataIndex: 'linkStatus',
       render(val) {
         return <Badge status={val ? 'success' : 'error'} text={val}/>;
       },
@@ -149,7 +146,7 @@ const CreateForm = Form.create()(props => {
   const firstFooter = (<Row>
     <Col md={24} sm={24}>
       <Button type="primary" onClick={() => {
-        handleItem(2);
+        getListBuyId(choiceSelectedRows[0], 2);
       }}>
         下一步
       </Button>
@@ -178,19 +175,23 @@ const CreateForm = Form.create()(props => {
     </Col>
   </Row>);
   let selectedRows = [];
+  let choiceSelectedRows = [];
 
-  function onChange(value) {
-    selectValue = value;
-  }
+  const onChange = (index) => {
+    sourceType = index[0] + '/' + index[1];
+  };
 
-  function handleSelectRows() {
-
+  function handleSelectRows(data, d) {
+    choiceSelectedRows = data;
   }
 
   function handleStandardTableChange() {
 
   }
 
+  const handleSubmit = () => {
+
+  };
   const formItemLayout = {
     labelCol: {
       xs: { span: 24 },
@@ -210,14 +211,14 @@ const CreateForm = Form.create()(props => {
       onOk={handleItem}
       onCancel={() => handleModalVisible(false)}
     >
-      {item === 1 ? <div>
+      {item === 1 ? <Form onSubmit={handleSubmit}>
         <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
           <Col md={12} sm={24}>
             <FormItem {...formItemLayout} label="资源分类">
-              {getFieldDecorator('status')(
+              {getFieldDecorator('sourceType')(
                 <Select placeholder="选择资源分类" style={{ width: '100%' }}>
-                  <Option value="0">关系型数据库</Option>
-                  <Option value="1">非关系型数据库</Option>
+                  <Option value="gxxsjk">关系型数据库</Option>
+                  <Option value="fgxxsjk">非关系型数据库</Option>
                 </Select>,
               )}
             </FormItem>
@@ -232,7 +233,7 @@ const CreateForm = Form.create()(props => {
           </Col>
           <Col md={8} sm={24}>
             <FormItem>
-              {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
+              {getFieldDecorator('sourceName')(<Input placeholder="请输入数据源名称"/>)}
             </FormItem>
           </Col>
           <Col md={4} sm={24}>
@@ -244,19 +245,19 @@ const CreateForm = Form.create()(props => {
           </Col>
         </Row><Row gutter={{ md: 8, lg: 24, xl: 48 }}>
         <StandardTableRadio
-          selectedRows={selectedRows}
+          selectedRows={choiceSelectedRows}
           data={data}
           columns={columns}
           onSelectRow={handleSelectRows}
           onChange={handleStandardTableChange}
         />
-      </Row></div> : <div><Row gutter={{ md: 8, lg: 24, xl: 48 }}>
+      </Row></Form> : <div><Row gutter={{ md: 8, lg: 24, xl: 48 }}>
         <Col md={12} sm={24}>
           <FormItem {...formItemLayout} label="新增类型">
             {getFieldDecorator('status')(
               <Select placeholder="选择新增类型" style={{ width: '100%' }}>
-                <Option value="0">关系型数据库</Option>
-                <Option value="1">非关系型数据库</Option>
+                <Option value="gxxsjk">关系型数据库</Option>
+                <Option value="fgxxsjk">非关系型数据库</Option>
               </Select>,
             )}
           </FormItem>
@@ -264,8 +265,8 @@ const CreateForm = Form.create()(props => {
         <Col md={12} sm={24}>
           <FormItem {...formItemLayout} label="请选择表/视图">
             <RadioGroup onChange={this.onChange}>
-              <Radio value={1}>表</Radio>
-              <Radio value={2}>视图</Radio>
+              <Radio value='table'>表</Radio>
+              <Radio value='view'>视图</Radio>
             </RadioGroup>
           </FormItem>
         </Col>
@@ -283,8 +284,9 @@ const CreateForm = Form.create()(props => {
   );
 });
 
-@connect(({ dervieSource, dervieClassify, loading }) => ({
+@connect(({ dervieSource, centersource, dervieClassify, loading }) => ({
   dervieSource,
+  centersource,
   dervieClassify,
   loading: loading.models.dervieSource,
 }))
@@ -417,17 +419,32 @@ export default class ResourceClassify extends PureComponent {
     });
   };
   handleDelete = () => {
-    confirm({
-      title: '确定删除选中数据?',
-      content: '删除数据不可恢复，请悉知！！！',
-      onOk() {
-        return new Promise((resolve, reject) => {
-          setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
-        }).catch(() => console.log('Oops errors!'));
-      },
-      onCancel() {
-      },
-    });
+    const { dispatch } = this.props;
+    if (this.state.selectedRows.length > 0) {
+      this.state.selectedRows.forEach((item, index) => {
+        if (index === this.state.selectedRows.length - 1) {
+          dispatch({
+            type: 'dervieSource/remove',
+            payload: {
+              id: item.id,
+            }, callback: () => {
+              dispatch({
+                type: 'dervieSource/fetch',
+              });
+            },
+          });
+          message.success('删除成功');
+
+        } else {
+          dispatch({
+            type: 'dervieSource/remove',
+            payload: {
+              id: item.id,
+            },
+          });
+        }
+      });
+    }
   };
   handleAdd = fields => {
     const { dispatch } = this.props;
@@ -456,11 +473,31 @@ export default class ResourceClassify extends PureComponent {
       payload: data,
     });
   };
+  addHandle = data => {
+    this.handleModalVisible(true);
+    this.searchHandle(data);
+  };
+  getListBuyId = (data, index) => {
+    this.handleItem(index);
+    const { dispatch} = this.props;
+    dispatch({
+      type: 'centersource/fetch',
+      payload: data,
+    });
+  };
+  searchHandle = data => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'centersource/fetch',
+      payload: data,
+    });
+  };
 
   render() {
     const {
       dervieSource: { data },
       dervieClassify: { treeData },
+      centersource: { data: formData, dataList },
       loading,
     } = this.props;
     const { selectedRows, modalVisible, listItemData, item } = this.state;
@@ -468,30 +505,23 @@ export default class ResourceClassify extends PureComponent {
     const columns = [
       {
         title: '序号',
-        dataIndex: 'no',
+        dataIndex: 'id',
       },
       {
         title: '数据名称',
-        dataIndex: 'status',
-        render(val) {
-          return <Badge status={statusMap[val]} text={status[val]}/>;
-        },
+        dataIndex: 'name',
       },
       {
         title: '所属数据源',
-        dataIndex: 'updatedAt1',
-        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
+        dataIndex: 'dataSourceName',
       },
       {
         title: '数据源类型',
-        dataIndex: 'updatedAt2',
-        sorter: true,
-        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
+        dataIndex: 'dataSourceType',
       },
       {
         title: '数据来源',
-        dataIndex: 'updatedAt3',
-        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
+        dataIndex: 'dataSourceId',
       },
       {
         title: '操作',
@@ -512,6 +542,9 @@ export default class ResourceClassify extends PureComponent {
 
     const parentMethods = {
       handleAdd: this.handleAdd,
+      searchHandle: this.searchHandle,
+      getListBuyId: this.getListBuyId,
+      handleItem: this.handleItem,
       handleModalVisible: this.handleModalVisible,
     };
 
@@ -526,7 +559,7 @@ export default class ResourceClassify extends PureComponent {
           <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
               <div className={styles.tableListOperator}>
-                <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
+                <Button icon="plus" type="primary" onClick={() => this.addHandle(true)}>
                   新增
                 </Button>
                 <Button icon="delete" onClick={() => this.handleDelete(true)}>
@@ -544,7 +577,7 @@ export default class ResourceClassify extends PureComponent {
             </div>
           </Card>
         </div>
-        <CreateForm {...parentMethods} data={data} handleItem={this.handleItem} item={item}
+        <CreateForm {...parentMethods} data={formData} dataList={dataList} item={item}
                     modalVisible={modalVisible}/>
         {/*<StepNoTitle {...parentMethods} data={data} modalVisible={modalVisible}/>*/}
       </PageHeaderLayout>

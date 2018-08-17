@@ -18,7 +18,8 @@ import {
   message,
   Badge,
   Divider,
-  Cascader
+  Cascader,
+  Progress
 } from 'antd';
 import StandardTable from 'components/StandardTable';
 import SimpleTree from 'components/SimpleTree';
@@ -40,6 +41,7 @@ const statusMap = ['default', 'processing', 'success', 'error'];
 const status = ['关闭', '运行中', '已上线', '异常'];
 let itemDataStatus = 0;
 let listItemData = {};
+let createItemData = {};
 let treeSelect = {};
 
 const CreateForm = Form.create()(props => {
@@ -142,26 +144,66 @@ const CreateForm = Form.create()(props => {
     </Modal>
   );
 });
-
-@connect(({ resource_db,classify, loading }) => ({
+const TestForm = Form.create()(props => {
+  const { modalVisible, form , selectedRows, testList, handleModalVisible } = props;
+  let percent = 50;
+  return (
+    <Modal
+      title="测试连通性"
+      visible={modalVisible}
+      onOk={() => handleModalVisible()}
+      destroyOnClose={true}
+      onCancel={() => handleModalVisible()}
+    >
+      <Row>
+        <Progress percent={(testList.length / selectedRows.length)*100}/>
+      </Row>
+      <Row>
+        <Col xl={16} lg={12} md={12} sm={24} xs={24}>
+          <div>
+            测试连通：<span style={{ marginLeft: '10px' }}>{testList.filter(item => {
+            return item;
+          }).length}</span>条
+          </div>
+        </Col>
+        <Col xl={16} lg={12} md={12} sm={24} xs={24}>
+          <div>
+            测试未连通：<span style={{ color: 'red', marginLeft: '10px' }}>{testList.filter(item => {
+            return !item;
+          }).length}</span>条
+          </div>
+        </Col>
+      </Row>
+      <Row>
+        <Col xl={16} lg={12} md={12} sm={24} xs={24}>
+          <Button type="primary">重试</Button>
+        </Col>
+      </Row>
+    </Modal>
+  );
+});
+@connect(({ resource_db,classify,centersource, loading }) => ({
   resource_db,
   classify,
+  centersource,
   loading: loading.models.resource_db,
 }))
 @Form.create()
 export default class ResourceClassify extends PureComponent {
   state = {
     modalVisible: false,
+    testModalVisible: false,
     expandForm: false,
     selectedRows: [],
     formValues: {},
     listItemData: {},
+    testList: [],
   };
 
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
-      type: 'resource_db/fetch',
+      type: 'centersource/fetch',
     });
     dispatch({
       type: 'classify/tree',
@@ -189,7 +231,7 @@ export default class ResourceClassify extends PureComponent {
     }
 
     dispatch({
-      type: 'resource_db/fetch',
+      type: 'centersource/fetch',
       payload: params,
     });
   };
@@ -201,7 +243,7 @@ export default class ResourceClassify extends PureComponent {
       formValues: {},
     });
     dispatch({
-      type: 'resource_db/fetch',
+      type: 'centersource/fetch',
       payload: {},
     });
   };
@@ -262,7 +304,7 @@ export default class ResourceClassify extends PureComponent {
       });
 
       dispatch({
-        type: 'resource_db/fetch',
+        type: 'centersource/fetch',
         payload: values,
       });
     });
@@ -297,6 +339,11 @@ export default class ResourceClassify extends PureComponent {
     message.success('添加成功');
     this.setState({
       modalVisible: false,
+    });
+  };
+  testHandleModalVisible = flag => {
+    this.setState({
+      testModalVisible: !!flag,
     });
   };
 
@@ -473,62 +520,78 @@ export default class ResourceClassify extends PureComponent {
     const { expandForm } = this.state;
     return expandForm ? this.renderAdvancedForm() : this.renderSimpleForm();
   }
+  testHandleAdd = fields => {
+    const { dispatch } = this.props;
+    this.setState({
+      testModalVisible: true,
+    });
+    this.state.selectedRows.forEach((item, index) => {
+      dispatch({
+        type: 'centersource/test',
+        payload: {
+          id: item.id,
+        },
+        callback: (index) => {
+          this.state.testList.push(index);
+          this.setState({
+            testList: this.state.testList,
+          });
+          if (index === this.state.selectedRows.length - 1) {
+            message.success('测试完毕');
+          }
+        },
+      });
+    });
+  };
   handleTree = data => {
     const { dispatch } = this.props;
+    createItemData.resourceId = data[0];
     dispatch({
-      type: 'resource_db/fetch',
-      payload: data,
+      type: 'centersource/fetch',
+      payload: {resourceId:createItemData.resourceId},
     });
   }
   render() {
     const {
-      resource_db: { data },
+      centersource: { data },
       loading,
       classify: { treeData },
       form
     } = this.props;
-    const { selectedRows, modalVisible,listItemData } = this.state;
+    const { selectedRows, modalVisible,listItemData,testModalVisible } = this.state;
 
     const columns = [
       {
         title: '数据源名称',
-        dataIndex: 'no',
+        dataIndex: 'sourceName',
       },
       {
         title: '数据源类型',
-        dataIndex: 'description',
+        dataIndex: 'sourceType',
       },
       {
         title: '所属组织机构',
-        dataIndex: 'callNo',
-        sorter: true,
-        align: 'right',
-        render: val => `${val} 万`,
-        // mark to display a total number
-        needTotal: true,
+        dataIndex: 'orgId',
       },
       {
         title: '所属资源分类',
         dataIndex: 'status',
         render(val) {
-          return <Badge status={statusMap[val]} text={status[val]} />;
+          return <Badge status={statusMap[val]} text={status[val]}/>;
         },
       },
       {
-        title: '数据源描述',
-        dataIndex: 'updatedAt1',
-        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
-      },
-      {
         title: '最近连接时间',
-        dataIndex: 'updatedAt2',
+        dataIndex: 'createTime',
         sorter: true,
         render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
       },
       {
         title: '连通状态',
-        dataIndex: 'updatedAt3',
-        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
+        dataIndex: 'linkStatus',
+        render(val) {
+          return <Badge status={val ? 'success' : 'error'}/>;
+        },
       },
       {
         title: '操作',
@@ -536,21 +599,11 @@ export default class ResourceClassify extends PureComponent {
           return (
             <Fragment>
               <a onClick={() => {
-                this.handleModalVisible(true);
-                this.setState({
-                  listItemData: text
-                });
-              }}>配置详情</a>
-              <Divider type="vertical"/>
-              <a onClick={() => {
-                this.handleModalVisible(true);
-                this.setState({
-                  listItemData: text
-                });
-              }}>修改配置</a>
+                this.updateHandleModal(text);
+              }}>详情</a>
             </Fragment>
-          )
-        }
+          );
+        },
       },
     ];
 
@@ -558,60 +611,65 @@ export default class ResourceClassify extends PureComponent {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
     };
+    const testParentMethods = {
+      handleModalVisible: this.testHandleModalVisible,
+      selectedRows: this.state.selectedRows,
+      testList: this.state.testList,
+    };
     const options = [{
-      value: '关系型数据库',
+      value: 'gxxsjk',
       label: '关系型数据库',
       children: [{
-        value: 'MySQL', label: 'MySQL',
+        value: 'gxxsjk_MySQL', label: 'MySQL',
       }, {
-        value: 'Oracle', label: 'Oracle',
+        value: 'gxxsjk_Oracle', label: 'Oracle',
       }, {
-        value: 'SQLServer', label: 'SQLServer',
+        value: 'gxxsjk_SQLServer', label: 'SQLServer',
       }, {
-        value: 'DB2', label: 'DB2',
+        value: 'gxxsjk_DB2', label: 'DB2',
       }],
     }, {
-      value: '非关系型数据库',
+      value: 'fgxxsjk',
       label: '非关系型数据库',
       children: [{
-        value: 'MongoDB', label: 'MongoDB',
+        value: 'fgxxsjk_MongoDB', label: 'MongoDB',
       }, {
-        value: 'Hbase', label: 'Hbase',
+        value: 'fgxxsjk_Hbase', label: 'Hbase',
       }],
     }, {
       value: 'API',
       label: 'API',
       children: [{
-        value: 'HTTP', label: 'HTTP',
+        value: 'API_HTTP', label: 'HTTP',
       }, {
-        value: 'HTTPS', label: 'HTTPS',
+        value: 'API_HTTPS', label: 'HTTPS',
       }, {
-        value: 'WSDL', label: 'WSDL',
+        value: 'API_WSDL', label: 'WSDL',
       }, {
-        value: 'REST', label: 'REST',
+        value: 'API_REST', label: 'REST',
       }],
     }, {
-      value: '普通文件',
+      value: 'ptwj',
       label: '普通文件',
       children: [{
-        value: 'FTP', label: 'FTP',
+        value: 'ptwj_FTP', label: 'FTP',
       }, {
-        value: 'SFTP', label: 'SFTP',
+        value: 'ptwj_SFTP', label: 'SFTP',
       }, {
-        value: '本地磁盘', label: '本地磁盘',
+        value: 'ptwj_bdcp', label: '本地磁盘',
       }, {
-        value: '共享文件夹', label: '共享文件夹',
+        value: 'ptwj_gxwjj', label: '共享文件夹',
       }],
     }];
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },
-        sm: { span: 6 },
+        sm: { span: 8 },
       },
       wrapperCol: {
         xs: { span: 24 },
-        sm: { span: 18 },
-        md: { span: 18 },
+        sm: { span: 16 },
+        md: { span: 16 },
       },
     };
     const onChange = (value)=> {
@@ -630,7 +688,7 @@ export default class ResourceClassify extends PureComponent {
             <Row gutter={{ md: 2, lg:6, xl: 12 }}>
               <Col md={6} sm={24}>
                 <FormItem>
-                  <Button icon="desktop" type="primary" onClick={() => this.handleModalVisible(true)}>
+                  <Button icon="desktop" type="primary" onClick={() => this.testHandleAdd(true)}>
                     测试连通性
                   </Button>
                 </FormItem>
@@ -665,6 +723,7 @@ export default class ResourceClassify extends PureComponent {
           </div>
         </Card>
         </div>
+        <TestForm {...testParentMethods} modalVisible={testModalVisible}/>
         <CreateForm {...parentMethods} modalVisible={modalVisible} />
       </PageHeaderLayout>
     );

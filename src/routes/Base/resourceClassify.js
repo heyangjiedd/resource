@@ -183,7 +183,7 @@ export default class ResourceClassify extends PureComponent {
     } else {
       dispatch({
         type: 'classify/add',
-        payload: {...fields,...treeSelect},
+        payload: {...fields,parentId:treeSelect},
         callback: () => {
           dispatch({
             type: 'classify/fetch',
@@ -227,7 +227,7 @@ export default class ResourceClassify extends PureComponent {
     }
   };
   handleTree = (data,e) => {
-    treeSelect = data
+    treeSelect = data[0];
   };
 
   render() {

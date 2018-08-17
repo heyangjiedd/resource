@@ -108,8 +108,7 @@ class SimpleTree extends PureComponent {
       dispatch({
         type: 'catalog/tree',
         payload: {
-          type :treeNode.props.dataRef.type,
-          region:treeNode.props.dataRef.region
+          id :treeNode.props.dataRef.id,
         },
         callback: (list) => {
           treeNode.props.dataRef.children = list;

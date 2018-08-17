@@ -1,4 +1,4 @@
-import { deriveList,getderivecatalog,removederivecatalog,deriveApi,deriveCollection,deriveFile} from '../services/api';
+import { deriveList,getderivecatalog,removederivecatalog,deriveApi,deriveCollection,deriveFile,deriveField} from '../services/api';
 
 export default {
   namespace: 'dervieSource',
@@ -55,7 +55,7 @@ export default {
       if (callback) callback();
     },
     *field({ payload, callback }, { call, put }) {
-      const response = yield call(deriveFilederiveField, payload);
+      const response = yield call(deriveField, payload);
       yield put({
         type: 'save',
         payload: response,
