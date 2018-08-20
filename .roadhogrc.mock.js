@@ -138,6 +138,7 @@ const proxy = {
 };
 
 const apiurl = 'http://120.77.155.17:8011/';
+// const apiurl = 'http://192.168.1.15:8011/';
 
 export default (noProxy ?{'GET /(.*)': apiurl,
   'POST /(.*)': apiurl,'PUT /(.*)': apiurl,'DELETE /(.*)': apiurl,} : delay(proxy, 1000));

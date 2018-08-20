@@ -283,7 +283,7 @@ class BasicLayout extends React.PureComponent {
               // ]}
               copyright={
                 <Fragment>
-                  Copyright <Icon type="copyright" /> 2018 智勤数码科技有限股份有限公司出品
+                  Copyright <Icon type="copyright" /> 2018 智勤数码科技有限股份出品
                 </Fragment>
               }
             />

@@ -180,7 +180,7 @@ export default class ResourceClassify extends PureComponent {
     }, {});
 
     const params = {
-      currentPage: pagination.current,
+      pageNum: pagination.current,
       pageSize: pagination.pageSize,
       ...formValues,
       ...filters,
@@ -417,10 +417,10 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="cat1">MySQL</TagSelect.Option>
-                  <TagSelect.Option value="cat2">Oracle</TagSelect.Option>
-                  <TagSelect.Option value="cat3">SQLServer</TagSelect.Option>
-                  <TagSelect.Option value="cat4">DB2</TagSelect.Option>
+                  <TagSelect.Option value="mysql">mysql</TagSelect.Option>
+                  <TagSelect.Option value="oracle">oracle</TagSelect.Option>
+                  <TagSelect.Option value="sqlserver">sqlserver</TagSelect.Option>
+                  <TagSelect.Option value="db2">db2</TagSelect.Option>
                 </TagSelect>
               )}
             </FormItem>
@@ -431,8 +431,8 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="cat1">MongoDB</TagSelect.Option>
-                  <TagSelect.Option value="cat2">Hbase</TagSelect.Option>
+                  <TagSelect.Option value="mongodb">mongodb</TagSelect.Option>
+                  <TagSelect.Option value="hbase">hbase</TagSelect.Option>
                 </TagSelect>
               )}
             </FormItem>
@@ -443,10 +443,10 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
                 <TagSelect onChange={this.handleFormSubmit} >
-                  <TagSelect.Option value="cat1">HTTP</TagSelect.Option>
-                  <TagSelect.Option value="cat2">HTTPS</TagSelect.Option>
-                  <TagSelect.Option value="cat3">WSDL</TagSelect.Option>
-                  <TagSelect.Option value="cat4">REST</TagSelect.Option>
+                  <TagSelect.Option value="http">http</TagSelect.Option>
+                  <TagSelect.Option value="https">https</TagSelect.Option>
+                  <TagSelect.Option value="wsdl">wsdl</TagSelect.Option>
+                  <TagSelect.Option value="rest">rest</TagSelect.Option>
                 </TagSelect>
               )}
             </FormItem>
@@ -457,10 +457,10 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
                 <TagSelect onChange={this.handleFormSubmit} >
-                  <TagSelect.Option value="cat1">FTP</TagSelect.Option>
-                  <TagSelect.Option value="cat2">SFTP</TagSelect.Option>
-                  <TagSelect.Option value="cat3">本地磁盘</TagSelect.Option>
-                  <TagSelect.Option value="cat4">共享文件件</TagSelect.Option>
+                  <TagSelect.Option value="ftp">ftp</TagSelect.Option>
+                  <TagSelect.Option value="sftp">sftp</TagSelect.Option>
+                  <TagSelect.Option value="本地磁盘">本地磁盘</TagSelect.Option>
+                  <TagSelect.Option value="共享文件件">共享文件件</TagSelect.Option>
                 </TagSelect>
               )}
             </FormItem>
@@ -504,13 +504,13 @@ export default class ResourceClassify extends PureComponent {
         title: '服务类型',
         dataIndex: 'createTime',
         sorter: true,
-        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
+        render: val => <span>{val?moment(val).format('YYYY-MM-DD HH:mm:ss'):'-'}</span>,
       },
       {
         title: '服务描述',
         dataIndex: 'linkStatus',
         render(val) {
-          return <Badge status={val ? 'success' : 'error'}/>;
+          return <Badge status={val ? 'success' : 'error'} text={val||'未连通'}/>;
         },
       },
       {

@@ -298,7 +298,7 @@ export default class TableList extends PureComponent {
     }, {});
 
     const params = {
-      currentPage: pagination.current,
+      pageNum: pagination.current,
       pageSize: pagination.pageSize,
       ...formValues,
       ...filters,
@@ -580,7 +580,7 @@ export default class TableList extends PureComponent {
         title: '更新时间',
         dataIndex: 'updatedAt',
         sorter: true,
-        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
+        render: val => <span>{val?moment(val).format('YYYY-MM-DD HH:mm:ss'):'-'}</span>,
       },
       {
         title: '操作',

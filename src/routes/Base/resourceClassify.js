@@ -137,7 +137,7 @@ export default class ResourceClassify extends PureComponent {
     }, {});
 
     const params = {
-      currentPage: pagination.current,
+      pageNum: pagination.current,
       pageSize: pagination.pageSize,
       ...formValues,
       ...filters,

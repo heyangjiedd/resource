@@ -67,27 +67,24 @@ class StandardTable extends PureComponent {
   render() {
     const { selectedRowKeys, needTotalList } = this.state;
     const {
-      data: { list,total,pages,pageSize,pageNum},
+      data:list,
       loading,
       columns,
       rowKey,
     } = this.props;
-    let pagination = {
-      current:pageNum,
-      total:total,
-      pageSize:pageSize,
-    };
     const paginationProps = {
       showSizeChanger: true,
       showQuickJumper: true,
-      ...pagination,
+      // ...pagination,
     };
+
     const rowSelection = {
       selectedRowKeys,
       onChange: this.handleRowSelectChange,
       getCheckboxProps: record => ({
         disabled: record.disabled,
       }),
+      type:'radio',
     };
 
     return (
@@ -98,7 +95,7 @@ class StandardTable extends PureComponent {
           rowSelection={rowSelection}
           dataSource={list}
           columns={columns}
-          pagination={paginationProps}
+          pagination={false}
           onChange={this.handleTableChange}
         />
       </div>

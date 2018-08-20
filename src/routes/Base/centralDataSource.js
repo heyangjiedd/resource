@@ -59,8 +59,23 @@ const CreateForm = Form.create()(props => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
       if(index != 4){
+        if(index == 3){
+          if (createItemData.sourceType === 'mysql' || createItemData.sourceType === 'oracle' || createItemData.sourceType === 'sqlserver'
+            || createItemData.sourceType === 'db2') {
+            handleItem(11)
+          } else if (createItemData.sourceType === 'mongodb' || createItemData.sourceType === 'hbase') {
+            handleItem(12)
+          } else if (createItemData.sourceType === 'http' || createItemData.sourceType === 'https' || createItemData.sourceType === 'wsdl'
+            || createItemData.sourceType === 'rest') {
+            handleItem(13)
+          } else if (createItemData.sourceType === 'ftp' || createItemData.sourceType === 'sftp' || createItemData.sourceType === '本地磁盘'
+            || createItemData.sourceType === '共享文件夹') {
+            handleItem(14)
+          }
+        }else{
+          handleItem(index)
+        }
         createItemData = {...createItemData,...fieldsValue}
-        handleItem(index)
       }else{
         createItemData = {...createItemData,...fieldsValue}
         handleAdd(createItemData)
@@ -68,51 +83,51 @@ const CreateForm = Form.create()(props => {
     });
   };
   const onChange = (index)=>{
-    createItemData.sourceType = index[0]+'/'+index[1];
+    createItemData.sourceType = index[1];
   }
   const options = [{
-    value: 'gxxsjk',
+    value: '关系型数据库',
     label: '关系型数据库',
     children: [{
-      value: 'gxxsjk_MySQL', label: 'MySQL',
+      value: 'mysql', label: 'mysql',
     }, {
-      value: 'gxxsjk_Oracle', label: 'Oracle',
+      value: 'oracle', label: 'oracle',
     }, {
-      value: 'gxxsjk_SQLServer', label: 'SQLServer',
+      value: 'sqlserver', label: 'sqlserver',
     }, {
-      value: 'gxxsjk_DB2', label: 'DB2',
+      value: 'db2', label: 'db2',
     }],
   }, {
-    value: 'fgxxsjk',
+    value: '非关系型数据库',
     label: '非关系型数据库',
     children: [{
-      value: 'fgxxsjk_MongoDB', label: 'MongoDB',
+      value: 'mongodb', label: 'mongodb',
     }, {
-      value: 'fgxxsjk_Hbase', label: 'Hbase',
+      value: 'hbase', label: 'hbase',
     }],
   }, {
     value: 'API',
     label: 'API',
     children: [{
-      value: 'API_HTTP', label: 'HTTP',
+      value: 'http', label: 'http',
     }, {
-      value: 'API_HTTPS', label: 'HTTPS',
+      value: 'https', label: 'https',
     }, {
-      value: 'API_WSDL', label: 'WSDL',
+      value: 'wsdl', label: 'wsdl',
     }, {
-      value: 'API_REST', label: 'REST',
+      value: 'rest', label: 'rest',
     }],
   }, {
-    value: 'ptwj',
+    value: '普通文件',
     label: '普通文件',
     children: [{
-      value: 'ptwj_FTP', label: 'FTP',
+      value: 'ftp', label: 'ftp',
     }, {
-      value: 'ptwj_SFTP', label: 'SFTP',
+      value: 'sftp', label: 'sftp',
     }, {
-      value: 'ptwj_bdcp', label: '本地磁盘',
+      value: '本地磁盘', label: '本地磁盘',
     }, {
-      value: 'ptwj_gxwjj', label: '共享文件夹',
+      value: '共享文件夹', label: '共享文件夹',
     }],
   }];
   const formItemLayout = {
@@ -180,7 +195,7 @@ const CreateForm = Form.create()(props => {
   </Row>);
   return (
     <Modal
-      title="创建数据源"
+      title="新增数据源"
       visible={modalVisible}
       footer={item === 1 ? firstFooter : item === 2 ? secondFooter : thirdFooter}
       onOk={okHandle}
@@ -207,7 +222,7 @@ const CreateForm = Form.create()(props => {
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="所属组织机构">
-            {form.getFieldDecorator('orgId', {initialValue:createItemData.sourceName
+            {form.getFieldDecorator('orgId', {initialValue:createItemData.orgId
             })(
               <Select placeholder="选择所属组织机构" style={{ width: '100%' }}>
                 <Option value="0">公安局</Option>
@@ -218,7 +233,7 @@ const CreateForm = Form.create()(props => {
             )}
           </FormItem>
           <FormItem {...formItemLayout} label="资源分类">
-            {form.getFieldDecorator('sourceType', {
+            {form.getFieldDecorator('resourceId', {
               rules: [{ required: true, message: 'Please input some description...' }], initialValue:createItemData.resourceId
             })(<Input disable placeholder="请输入"/>)}
           </FormItem>
@@ -238,7 +253,7 @@ const CreateForm = Form.create()(props => {
               />,
             )}
           </FormItem>
-        </div> :
+        </div> :item === 11 ?
         <div>
           <FormItem {...formItemLayout} label="IP地址">
             {form.getFieldDecorator('ip', {
@@ -277,7 +292,109 @@ const CreateForm = Form.create()(props => {
           </FormItem>
           <FormItem {...formItemLayout} label="备注">
             {form.getFieldDecorator('bz', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.bz
+              rules: [{ message: 'Please input some description...' }],initialValue:createItemData.bz
+            })(<Input placeholder="请输入"/>)}
+          </FormItem>
+          <Row>
+            <Col>
+              <Button type="primary">测试连通性</Button>
+            </Col>
+          </Row>
+        </div>:item === 12 ?<div>
+          <FormItem {...formItemLayout} label="IP地址">
+            {form.getFieldDecorator('ip', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.ip
+            })(<Input placeholder="请输入"/>)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="端口">
+            {form.getFieldDecorator('port', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.port
+            })(<Input placeholder="请输入"/>)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="数据库名称">
+            {form.getFieldDecorator('dbName', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.dbName
+            })(<Input placeholder="请输入"/>)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="数据库版本号">
+            {form.getFieldDecorator('dbVersion', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.dbVersion
+            })(<Input placeholder="请输入"/>)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="用户名">
+            {form.getFieldDecorator('account', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.account
+            })(<Input placeholder="请输入"/>)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="密码">
+            {form.getFieldDecorator('password', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.password
+            })(<Input placeholder="请输入"/>)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="备注">
+            {form.getFieldDecorator('bz', {
+              rules: [{  message: 'Please input some description...' }],initialValue:createItemData.bz
+            })(<Input placeholder="请输入"/>)}
+          </FormItem>
+          <Row>
+            <Col>
+              <Button type="primary">测试连通性</Button>
+            </Col>
+          </Row>
+        </div>:item === 13 ?<div>
+          <FormItem {...formItemLayout} label="接口地址">
+            {form.getFieldDecorator('interfaceUrl', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.interfaceUrl
+            })(<Input placeholder="请输入"/>)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="接口类型">
+            {form.getFieldDecorator('interfaceType', {rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.interfaceType
+            })(
+              <Select placeholder="选择接口类型" style={{ width: '100%' }}>
+                <Option value="get">get</Option>
+                <Option value="post">post</Option>
+              </Select>,
+            )}
+          </FormItem>
+          <FormItem {...formItemLayout} label="备注">
+            {form.getFieldDecorator('bz', {
+              rules: [{ message: 'Please input some description...' }],initialValue:createItemData.bz
+            })(<Input placeholder="请输入"/>)}
+          </FormItem>
+          <Row>
+            <Col>
+              <Button type="primary">测试连通性</Button>
+            </Col>
+          </Row>
+        </div>:<div>
+          <FormItem {...formItemLayout} label="IP地址">
+            {form.getFieldDecorator('ip', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.ip
+            })(<Input placeholder="请输入"/>)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="端口">
+            {form.getFieldDecorator('port', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.port
+            })(<Input placeholder="请输入"/>)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="用户名">
+            {form.getFieldDecorator('account', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.account
+            })(<Input placeholder="请输入"/>)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="密码">
+            {form.getFieldDecorator('password', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.password
+            })(<Input placeholder="请输入"/>)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="根路径">
+            {form.getFieldDecorator('path', {
+              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.path
+            })(<Input placeholder="请输入"/>)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="备注">
+            {form.getFieldDecorator('bz', {
+              rules: [{ message: 'Please input some description...' }],initialValue:createItemData.bz
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <Row>
@@ -321,13 +438,13 @@ const UpdateForm = Form.create()(props => {
     >
       <FormItem {...formItemLayout} label="数据源类型">
         {form.getFieldDecorator('sourceType', {
-          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.sourceType,
-        })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+          rules: [{ message: 'Please input some description...' }],initialValue: listItemData.sourceType,
+        })(<Input disabled placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据库类型">
-        {form.getFieldDecorator('dbName', {
-          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.dbName,
-        })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+        {form.getFieldDecorator('sourceType', {
+          rules: [{  message: 'Please input some description...' }],initialValue: listItemData.dbName,
+        })(<Input disabled placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据源名称">
         {form.getFieldDecorator('sourceName', {
@@ -341,7 +458,7 @@ const UpdateForm = Form.create()(props => {
       </FormItem>
       <FormItem {...formItemLayout} label="资源分类">
         {form.getFieldDecorator('resourceId', {
-          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.resourceId,
+          rules: [{ message: 'Please input some description...' }],initialValue: listItemData.resourceId,
         })(<Input disabled placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="IP地址">
@@ -467,7 +584,7 @@ export default class ResourceClassify extends PureComponent {
     }, {});
 
     const params = {
-      currentPage: pagination.current,
+      pageNum: pagination.current,
       pageSize: pagination.pageSize,
       ...formValues,
       ...filters,
@@ -639,6 +756,10 @@ export default class ResourceClassify extends PureComponent {
   };
   testHandleAdd = fields => {
     const { dispatch } = this.props;
+    // 之前信息的置空
+    this.setState({
+      testList: [],
+    });
     this.setState({
       testModalVisible: true,
     });
@@ -753,10 +874,10 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('relationDb')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="gxxsjl_MySQL">MySQL</TagSelect.Option>
-                  <TagSelect.Option value="gxxsjl_Oracle">Oracle</TagSelect.Option>
-                  <TagSelect.Option value="gxxsjl_SQLServer">SQLServer</TagSelect.Option>
-                  <TagSelect.Option value="gxxsjl_DB2">DB2</TagSelect.Option>
+                  <TagSelect.Option value="mysql">mysql</TagSelect.Option>
+                  <TagSelect.Option value="oracle">oracle</TagSelect.Option>
+                  <TagSelect.Option value="sqlserver">sqlserver</TagSelect.Option>
+                  <TagSelect.Option value="db2">db2</TagSelect.Option>
                 </TagSelect>,
               )}
             </FormItem>
@@ -767,8 +888,8 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('unrelationDb')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="fgxxsjl_MongoDB">MongoDB</TagSelect.Option>
-                  <TagSelect.Option value="fgxxsjl_Hbase">Hbase</TagSelect.Option>
+                  <TagSelect.Option value="mongodb">mongodb</TagSelect.Option>
+                  <TagSelect.Option value="hbase">hbase</TagSelect.Option>
                 </TagSelect>,
               )}
             </FormItem>
@@ -779,10 +900,10 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('api')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="api_HTTP">HTTP</TagSelect.Option>
-                  <TagSelect.Option value="api_HTTPS">HTTPS</TagSelect.Option>
-                  <TagSelect.Option value="api_WSDL">WSDL</TagSelect.Option>
-                  <TagSelect.Option value="api_REST">REST</TagSelect.Option>
+                  <TagSelect.Option value="http">http</TagSelect.Option>
+                  <TagSelect.Option value="https">https</TagSelect.Option>
+                  <TagSelect.Option value="wsdl">wsdl</TagSelect.Option>
+                  <TagSelect.Option value="rest">rest</TagSelect.Option>
                 </TagSelect>,
               )}
             </FormItem>
@@ -793,10 +914,10 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('file')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="file_FTP">FTP</TagSelect.Option>
-                  <TagSelect.Option value="file_SFTP">SFTP</TagSelect.Option>
-                  <TagSelect.Option value="file_bdcp">本地磁盘</TagSelect.Option>
-                  <TagSelect.Option value="file_gxwjj">共享文件件</TagSelect.Option>
+                  <TagSelect.Option value="ftp">ftp</TagSelect.Option>
+                  <TagSelect.Option value="sftp">sftp</TagSelect.Option>
+                  <TagSelect.Option value="本地磁盘">本地磁盘</TagSelect.Option>
+                  <TagSelect.Option value="共享文件件">共享文件件</TagSelect.Option>
                 </TagSelect>,
               )}
             </FormItem>
@@ -852,13 +973,13 @@ export default class ResourceClassify extends PureComponent {
         title: '最近连接时间',
         dataIndex: 'createTime',
         sorter: true,
-        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
+        render: val => <span>{val?moment(val).format('YYYY-MM-DD HH:mm:ss'):'-'}</span>,
       },
       {
         title: '连通状态',
         dataIndex: 'linkStatus',
         render(val) {
-          return <Badge status={val ? 'success' : 'error'}/>;
+          return <Badge status={val ? 'success' : 'error'} text={val||'未连通'}/>;
         },
       },
       {
@@ -899,7 +1020,7 @@ export default class ResourceClassify extends PureComponent {
           <SimpleTree
             data={treeData}
             handleTree={this.handleTree}
-            title={'中心数据源'}
+            title={'资源分类'}
           />
           <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>

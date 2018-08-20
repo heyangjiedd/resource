@@ -221,7 +221,7 @@ export default class ResourceClassify extends PureComponent {
     }, {});
 
     const params = {
-      currentPage: pagination.current,
+      pageNum: pagination.current,
       pageSize: pagination.pageSize,
       ...formValues,
       ...filters,
@@ -463,10 +463,10 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="cat1">MySQL</TagSelect.Option>
-                  <TagSelect.Option value="cat2">Oracle</TagSelect.Option>
-                  <TagSelect.Option value="cat3">SQLServer</TagSelect.Option>
-                  <TagSelect.Option value="cat4">DB2</TagSelect.Option>
+                  <TagSelect.Option value="mysql">mysql</TagSelect.Option>
+                  <TagSelect.Option value="oracle">oracle</TagSelect.Option>
+                  <TagSelect.Option value="sqlserver">sqlserver</TagSelect.Option>
+                  <TagSelect.Option value="db2">db2</TagSelect.Option>
                 </TagSelect>
               )}
             </FormItem>
@@ -477,8 +477,8 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="cat1">MongoDB</TagSelect.Option>
-                  <TagSelect.Option value="cat2">Hbase</TagSelect.Option>
+                  <TagSelect.Option value="mongodb">mongodb</TagSelect.Option>
+                  <TagSelect.Option value="hbase">hbase</TagSelect.Option>
                 </TagSelect>
               )}
             </FormItem>
@@ -489,10 +489,10 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
                 <TagSelect onChange={this.handleFormSubmit} >
-                  <TagSelect.Option value="cat1">HTTP</TagSelect.Option>
-                  <TagSelect.Option value="cat2">HTTPS</TagSelect.Option>
-                  <TagSelect.Option value="cat3">WSDL</TagSelect.Option>
-                  <TagSelect.Option value="cat4">REST</TagSelect.Option>
+                  <TagSelect.Option value="http">http</TagSelect.Option>
+                  <TagSelect.Option value="https">https</TagSelect.Option>
+                  <TagSelect.Option value="wsdl">wsdl</TagSelect.Option>
+                  <TagSelect.Option value="rest">rest</TagSelect.Option>
                 </TagSelect>
               )}
             </FormItem>
@@ -503,10 +503,10 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
                 <TagSelect onChange={this.handleFormSubmit} >
-                  <TagSelect.Option value="cat1">FTP</TagSelect.Option>
-                  <TagSelect.Option value="cat2">SFTP</TagSelect.Option>
-                  <TagSelect.Option value="cat3">本地磁盘</TagSelect.Option>
-                  <TagSelect.Option value="cat4">共享文件件</TagSelect.Option>
+                  <TagSelect.Option value="ftp">ftp</TagSelect.Option>
+                  <TagSelect.Option value="sftp">sftp</TagSelect.Option>
+                  <TagSelect.Option value="本地磁盘">本地磁盘</TagSelect.Option>
+                  <TagSelect.Option value="共享文件件">共享文件件</TagSelect.Option>
                 </TagSelect>
               )}
             </FormItem>
@@ -584,13 +584,13 @@ export default class ResourceClassify extends PureComponent {
         title: '最近连接时间',
         dataIndex: 'createTime',
         sorter: true,
-        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
+        render: val => <span>{val?moment(val).format('YYYY-MM-DD HH:mm:ss'):'-'}</span>,
       },
       {
         title: '连通状态',
         dataIndex: 'linkStatus',
         render(val) {
-          return <Badge status={val ? 'success' : 'error'}/>;
+          return <Badge status={val ? 'success' : 'error'} text={val||'未连通'}/>;
         },
       },
       {
@@ -617,48 +617,48 @@ export default class ResourceClassify extends PureComponent {
       testList: this.state.testList,
     };
     const options = [{
-      value: 'gxxsjk',
+      value: '关系型数据库',
       label: '关系型数据库',
       children: [{
-        value: 'gxxsjk_MySQL', label: 'MySQL',
+        value: 'mysql', label: 'mysql',
       }, {
-        value: 'gxxsjk_Oracle', label: 'Oracle',
+        value: 'oracle', label: 'oracle',
       }, {
-        value: 'gxxsjk_SQLServer', label: 'SQLServer',
+        value: 'sqlserver', label: 'sqlserver',
       }, {
-        value: 'gxxsjk_DB2', label: 'DB2',
+        value: 'db2', label: 'db2',
       }],
     }, {
-      value: 'fgxxsjk',
+      value: '非关系型数据库',
       label: '非关系型数据库',
       children: [{
-        value: 'fgxxsjk_MongoDB', label: 'MongoDB',
+        value: 'mongodbB', label: 'mongodbB',
       }, {
-        value: 'fgxxsjk_Hbase', label: 'Hbase',
+        value: 'hbase', label: 'hbase',
       }],
     }, {
       value: 'API',
       label: 'API',
       children: [{
-        value: 'API_HTTP', label: 'HTTP',
+        value: 'http', label: 'http',
       }, {
-        value: 'API_HTTPS', label: 'HTTPS',
+        value: 'https', label: 'https',
       }, {
-        value: 'API_WSDL', label: 'WSDL',
+        value: 'wsdl', label: 'wsdl',
       }, {
-        value: 'API_REST', label: 'REST',
+        value: 'rest', label: 'rest',
       }],
     }, {
-      value: 'ptwj',
+      value: '普通文件',
       label: '普通文件',
       children: [{
-        value: 'ptwj_FTP', label: 'FTP',
+        value: 'ftp', label: 'ftp',
       }, {
-        value: 'ptwj_SFTP', label: 'SFTP',
+        value: 'sftp', label: 'sftp',
       }, {
-        value: 'ptwj_bdcp', label: '本地磁盘',
+        value: '本地磁盘', label: '本地磁盘',
       }, {
-        value: 'ptwj_gxwjj', label: '共享文件夹',
+        value: '共享文件夹', label: '共享文件夹',
       }],
     }];
     const formItemLayout = {

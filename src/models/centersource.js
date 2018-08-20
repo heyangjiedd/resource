@@ -1,5 +1,5 @@
-import { resourcelist,resourcelink,addresource,updateresource,removeresource,
-  resourceapiData,resourcefileLista,mongoDataList,tableDataList} from '../services/api';
+import { resourcelist,resourcelink,addresource,updateresource,removeresource,getresource,
+  resourceapiData,resourcefileLista,mongoDataList,tableDataList,tableList} from '../services/api';
 
 export default {
   namespace: 'centersource',
@@ -11,6 +11,8 @@ export default {
     },
     treeData:[],
     dataList:[],
+    lifelist:[],
+    httpItem:{},
   },
 
   effects: {
@@ -23,9 +25,9 @@ export default {
       });
     },
     *get({ payload }, { call, put }) {
-      const response = yield call(resourcelist, payload);
+      const response = yield call(getresource, payload);
       yield put({
-        type: 'get',
+        type: 'getId',
         payload: response,
       });
     },
@@ -55,7 +57,7 @@ export default {
     *fetchFile({ payload }, { call, put }) {
       const response = yield call(resourcefileLista, payload);
       yield put({
-        type: 'list',
+        type: 'file',
         payload: response,
       });
     },
@@ -67,6 +69,13 @@ export default {
       });
     },
     *fetchTable({ payload }, { call, put }) {
+      const response = yield call(tableList, payload);
+      yield put({
+        type: 'list',
+        payload: response,
+      });
+    },
+    *fetchTableData({ payload }, { call, put }) {
       const response = yield call(tableDataList, payload);
       yield put({
         type: 'list',
@@ -82,16 +91,22 @@ export default {
         data: action.payload,
       };
     },
+    file(state, action) {
+      return {
+        ...state,
+        lifelist: action.payload,
+      };
+    },
     list(state, action) {
       return {
         ...state,
         dataList: action.payload,
       };
     },
-    get(state, action){
+    getId(state, action){
       return {
         ...state,
-        treeData: action.payload,
+        httpItem: action.payload,
       };
     }
   },

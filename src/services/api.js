@@ -57,6 +57,35 @@ export async function catalogList(params) {
 export async function getcatalog(params) {
   return request(`/catalog/${params.id}`);
 }
+// 添加目录库和API的关联关系{目录id:[api id集合]}
+export async function catalogApi(params) {
+  return request(`/catalog/catalogApi`, {
+    method: 'POST',
+    body: {
+      ...params
+    },
+  });
+}
+// 添加目录库和非关系型数据库的关联关系{目录id:[表id集合]}
+export async function catalogCollection(params) {
+  return request(`/catalog/catalogCollection`, {
+    method: 'POST',
+    body: {
+      ...params
+    },
+  });
+}
+
+// 添加目录库和文件的关联关系{目录id:[文件id集合]}
+export async function catalogFile(params) {
+  return request(`/catalog/catalogFile`, {
+    method: 'POST',
+    body: {
+      ...params
+    },
+  });
+}
+
 
 //查询目录库
 export async function querycatalog(params) {
@@ -93,7 +122,6 @@ export async function itemField(params) {
     method: 'POST',
     body: {
       ...params,
-      method: 'post',
     },
   });
 }
@@ -367,6 +395,10 @@ export async function fakeAccountLogin(params) {
     method: 'POST',
     body: params,
   });
+  // return requestToken('http://192.168.1.15:8010/oauth/token', {
+  //   method: 'POST',
+  //   body: params,
+  // });
 }
 
 export async function fakeRegister(params) {
