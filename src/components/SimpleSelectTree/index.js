@@ -85,7 +85,7 @@ class SimpleTree extends PureComponent {
           style={{ width: 300 }}
           value={this.state.value}
           dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-          placeholder="Please select"
+          placeholder="请选择资源分类"
           allowClear
           treeDefaultExpandAll
           onChange={this.onChange}

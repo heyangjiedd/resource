@@ -98,19 +98,13 @@ export async function querycatalog(params) {
   });
 }
 
-// 修改关联的表字段
-export async function catalogTableAndTableField(params) {
-  return request(`/itemField/catalogTableAndTableField`, {
-    method: 'POST',
-    body: {
-      ...params,
-      method: 'post',
-    },
-  });
+// 查询操作日志
+export async function operateLog(params) {
+  return request(`/operate/list?${stringify(params)}`);
 }
 // 查询资源详情
-export async function catalogTableField(params) {
-  return request(`/itemField/catalogTableField?${stringify(params)}`);
+export async function catalogTableAndTableField(params) {
+  return request(`/itemField/catalogTableAndTableField?${stringify(params)}`);
 }
 // 查询目录项
 export async function querycatalogItem(params) {
@@ -204,7 +198,7 @@ export async function resourcelist(params) {
 }
 // 查询视图数据
 export async function mongoDataList(params) {
-  return request(`/datasource/mongoDataList`, {
+  return request(`/datasource/viewDataList`, {
     method: 'POST',
     body: {
       ...params,

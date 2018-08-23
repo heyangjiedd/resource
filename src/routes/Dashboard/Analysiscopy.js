@@ -398,112 +398,112 @@ export default class Analysis extends Component {
           </div>
         </Card>
 
-        {/*<Row gutter={24}>*/}
-          {/*<Col xl={12} lg={24} md={24} sm={24} xs={24}>*/}
-            {/*<Card*/}
-              {/*loading={loading}*/}
-              {/*bordered={false}*/}
-              {/*title="线上热门搜索"*/}
-              {/*extra={iconGroup}*/}
-              {/*style={{ marginTop: 24 }}*/}
-            {/*>*/}
-              {/*<Row gutter={68}>*/}
-                {/*<Col sm={12} xs={24} style={{ marginBottom: 24 }}>*/}
-                  {/*<NumberInfo*/}
-                    {/*subTitle={*/}
-                      {/*<span>*/}
-                        {/*搜索用户数*/}
-                        {/*<Tooltip title="指标文案">*/}
-                          {/*<Icon style={{ marginLeft: 8 }} type="info-circle-o" />*/}
-                        {/*</Tooltip>*/}
-                      {/*</span>*/}
-                    {/*}*/}
-                    {/*gap={8}*/}
-                    {/*total={numeral(12321).format('0,0')}*/}
-                    {/*status="up"*/}
-                    {/*subTotal={17.1}*/}
-                  {/*/>*/}
-                  {/*<MiniArea line height={45} data={visitData2} />*/}
-                {/*</Col>*/}
-                {/*<Col sm={12} xs={24} style={{ marginBottom: 24 }}>*/}
-                  {/*<NumberInfo*/}
-                    {/*subTitle="人均搜索次数"*/}
-                    {/*total={2.7}*/}
-                    {/*status="down"*/}
-                    {/*subTotal={26.2}*/}
-                    {/*gap={8}*/}
-                  {/*/>*/}
-                  {/*<MiniArea line height={45} data={visitData2} />*/}
-                {/*</Col>*/}
-              {/*</Row>*/}
-              {/*<Table*/}
-                {/*rowKey={record => record.index}*/}
-                {/*size="small"*/}
-                {/*columns={columns}*/}
-                {/*dataSource={searchData}*/}
-                {/*pagination={{*/}
-                  {/*style: { marginBottom: 0 },*/}
-                  {/*pageSize: 5,*/}
-                {/*}}*/}
-              {/*/>*/}
-            {/*</Card>*/}
-          {/*</Col>*/}
-          {/*<Col xl={12} lg={24} md={24} sm={24} xs={24}>*/}
-            {/*<Card*/}
-              {/*loading={loading}*/}
-              {/*className={styles.salesCard}*/}
-              {/*bordered={false}*/}
-              {/*title="销售额类别占比"*/}
-              {/*bodyStyle={{ padding: 24 }}*/}
-              {/*extra={*/}
-                {/*<div className={styles.salesCardExtra}>*/}
-                  {/*{iconGroup}*/}
-                  {/*<div className={styles.salesTypeRadio}>*/}
-                    {/*<Radio.Group value={salesType} onChange={this.handleChangeSalesType}>*/}
-                      {/*<Radio.Button value="all">全部渠道</Radio.Button>*/}
-                      {/*<Radio.Button value="online">线上</Radio.Button>*/}
-                      {/*<Radio.Button value="offline">门店</Radio.Button>*/}
-                    {/*</Radio.Group>*/}
-                  {/*</div>*/}
-                {/*</div>*/}
-              {/*}*/}
-              {/*style={{ marginTop: 24, minHeight: 509 }}*/}
-            {/*>*/}
-              {/*<h4 style={{ marginTop: 8, marginBottom: 32 }}>销售额</h4>*/}
-              {/*<Pie*/}
-                {/*hasLegend*/}
-                {/*subTitle="销售额"*/}
-                {/*total={() => <Yuan>{salesPieData.reduce((pre, now) => now.y + pre, 0)}</Yuan>}*/}
-                {/*data={salesPieData}*/}
-                {/*valueFormat={value => <Yuan>{value}</Yuan>}*/}
-                {/*height={248}*/}
-                {/*lineWidth={4}*/}
-              {/*/>*/}
-            {/*</Card>*/}
-          {/*</Col>*/}
-        {/*</Row>*/}
+        <Row gutter={24}>
+          <Col xl={12} lg={24} md={24} sm={24} xs={24}>
+            <Card
+              loading={loading}
+              bordered={false}
+              title="线上热门搜索"
+              extra={iconGroup}
+              style={{ marginTop: 24 }}
+            >
+              <Row gutter={68}>
+                <Col sm={12} xs={24} style={{ marginBottom: 24 }}>
+                  <NumberInfo
+                    subTitle={
+                      <span>
+                        搜索用户数
+                        <Tooltip title="指标文案">
+                          <Icon style={{ marginLeft: 8 }} type="info-circle-o" />
+                        </Tooltip>
+                      </span>
+                    }
+                    gap={8}
+                    total={numeral(12321).format('0,0')}
+                    status="up"
+                    subTotal={17.1}
+                  />
+                  <MiniArea line height={45} data={visitData2} />
+                </Col>
+                <Col sm={12} xs={24} style={{ marginBottom: 24 }}>
+                  <NumberInfo
+                    subTitle="人均搜索次数"
+                    total={2.7}
+                    status="down"
+                    subTotal={26.2}
+                    gap={8}
+                  />
+                  <MiniArea line height={45} data={visitData2} />
+                </Col>
+              </Row>
+              <Table
+                rowKey={record => record.index}
+                size="small"
+                columns={columns}
+                dataSource={searchData}
+                pagination={{
+                  style: { marginBottom: 0 },
+                  pageSize: 5,
+                }}
+              />
+            </Card>
+          </Col>
+          <Col xl={12} lg={24} md={24} sm={24} xs={24}>
+            <Card
+              loading={loading}
+              className={styles.salesCard}
+              bordered={false}
+              title="销售额类别占比"
+              bodyStyle={{ padding: 24 }}
+              extra={
+                <div className={styles.salesCardExtra}>
+                  {iconGroup}
+                  <div className={styles.salesTypeRadio}>
+                    <Radio.Group value={salesType} onChange={this.handleChangeSalesType}>
+                      <Radio.Button value="all">全部渠道</Radio.Button>
+                      <Radio.Button value="online">线上</Radio.Button>
+                      <Radio.Button value="offline">门店</Radio.Button>
+                    </Radio.Group>
+                  </div>
+                </div>
+              }
+              style={{ marginTop: 24, minHeight: 509 }}
+            >
+              <h4 style={{ marginTop: 8, marginBottom: 32 }}>销售额</h4>
+              <Pie
+                hasLegend
+                subTitle="销售额"
+                total={() => <Yuan>{salesPieData.reduce((pre, now) => now.y + pre, 0)}</Yuan>}
+                data={salesPieData}
+                valueFormat={value => <Yuan>{value}</Yuan>}
+                height={248}
+                lineWidth={4}
+              />
+            </Card>
+          </Col>
+        </Row>
 
-        {/*<Card*/}
-          {/*loading={loading}*/}
-          {/*className={styles.offlineCard}*/}
-          {/*bordered={false}*/}
-          {/*bodyStyle={{ padding: '0 0 32px 0' }}*/}
-          {/*style={{ marginTop: 32 }}*/}
-        {/*>*/}
-          {/*<Tabs activeKey={activeKey} onChange={this.handleTabChange}>*/}
-            {/*{offlineData.map(shop => (*/}
-              {/*<TabPane tab={<CustomTab data={shop} currentTabKey={activeKey} />} key={shop.name}>*/}
-                {/*<div style={{ padding: '0 24px' }}>*/}
-                  {/*<TimelineChart*/}
-                    {/*height={400}*/}
-                    {/*data={offlineChartData}*/}
-                    {/*titleMap={{ y1: '客流量', y2: '支付笔数' }}*/}
-                  {/*/>*/}
-                {/*</div>*/}
-              {/*</TabPane>*/}
-            {/*))}*/}
-          {/*</Tabs>*/}
-        {/*</Card>*/}
+        <Card
+          loading={loading}
+          className={styles.offlineCard}
+          bordered={false}
+          bodyStyle={{ padding: '0 0 32px 0' }}
+          style={{ marginTop: 32 }}
+        >
+          <Tabs activeKey={activeKey} onChange={this.handleTabChange}>
+            {offlineData.map(shop => (
+              <TabPane tab={<CustomTab data={shop} currentTabKey={activeKey} />} key={shop.name}>
+                <div style={{ padding: '0 24px' }}>
+                  <TimelineChart
+                    height={400}
+                    data={offlineChartData}
+                    titleMap={{ y1: '客流量', y2: '支付笔数' }}
+                  />
+                </div>
+              </TabPane>
+            ))}
+          </Tabs>
+        </Card>
       </Fragment>
     );
   }

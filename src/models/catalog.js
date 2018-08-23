@@ -1,5 +1,7 @@
-import { catalogList,catalogListTree,querycatalogItem ,tableField,itemField,
-  catalogApi,catalogCollection,catalogFile,} from '../services/api';
+import {
+  catalogList, catalogListTree, querycatalogItem, tableField, itemField,operateLog,
+  catalogApi, catalogCollection, catalogFile, catalogTableAndTableField,
+} from '../services/api';
 
 export default {
   namespace: 'catalog',
@@ -9,20 +11,28 @@ export default {
       list: [],
       pagination: {},
     },
-    treeData:[],
-    catalogItem:[],
-    field:[],
+    treeData: [],
+    catalogItem: [],
+    field: [],
+    tableAndField: [{
+      sourceTable:{},
+      tableFieldList:[]
+    }],
+    operateLog:{
+      list: [],
+      pagination: {},
+    }
   },
 
   effects: {
-    *fetch({ payload }, { call, put }) {
+    * fetch({ payload }, { call, put }) {
       const response = yield call(catalogList, payload);
       yield put({
         type: 'save',
         payload: response,
       });
     },
-    *tree({ payload,callback }, { call, put }) {
+    * tree({ payload, callback }, { call, put }) {
       const response = yield call(catalogListTree, payload);
       yield put({
         type: 'treeData',
@@ -30,44 +40,51 @@ export default {
       });
       if (callback) callback(response);
     },
-    *querycatalogItem({ payload }, { call, put }) {
+    * querycatalogItem({ payload }, { call, put }) {
       const response = yield call(querycatalogItem, payload);
       yield put({
         type: 'catalogItem',
         payload: response,
       });
     },
-    *tableField({ payload }, { call, put }) {
+    * tableField({ payload }, { call, put }) {
       const response = yield call(tableField, payload);
       yield put({
         type: 'field',
         payload: response,
       });
     },
-    *get({ payload }, { call, put }) {
+    * operateLog({ payload }, { call, put }) {
+      const response = yield call(operateLog, payload);
+      yield put({
+        type: 'log',
+        payload: response,
+      });
+    },
+    * get({ payload }, { call, put }) {
       const response = yield call(getresourceclassify, payload);
       yield put({
         type: 'get',
         payload: response,
       });
     },
-    *add({ payload, callback }, { call, put }) {
+    * add({ payload, callback }, { call, put }) {
       const response = yield call(itemField, payload);
       if (callback) callback();
     },
-    *catalogApi({ payload, callback }, { call, put }) {
+    * catalogApi({ payload, callback }, { call, put }) {
       const response = yield call(catalogApi, payload);
       if (callback) callback();
     },
-    *catalogCollection({ payload, callback }, { call, put }) {
+    * catalogCollection({ payload, callback }, { call, put }) {
       const response = yield call(catalogCollection, payload);
       if (callback) callback();
     },
-    *catalogFile({ payload, callback }, { call, put }) {
+    * catalogFile({ payload, callback }, { call, put }) {
       const response = yield call(catalogFile, payload);
       if (callback) callback();
     },
-    *remove({ payload, callback }, { call, put }) {
+    * remove({ payload, callback }, { call, put }) {
       const response = yield call(removeresourceclassify, payload);
       yield put({
         type: 'save',
@@ -75,7 +92,7 @@ export default {
       });
       if (callback) callback();
     },
-    *update({ payload, callback }, { call, put }) {
+    * update({ payload, callback }, { call, put }) {
       const response = yield call(updateresourceclassify, payload);
       yield put({
         type: 'save',
@@ -83,10 +100,17 @@ export default {
       });
       if (callback) callback();
     },
-    *querycatalogItemCopy({ payload, callback }, { call, put }) {
+    * querycatalogItemCopy({ payload, callback }, { call, put }) {
       yield put({
         type: 'catalogItemCopy',
         payload: payload,
+      });
+    },
+    * catalogTableAndTableField({ payload, callback }, { call, put }) {
+      const response = yield call(catalogTableAndTableField, payload);
+      yield put({
+        type: 'tablefield',
+        payload: response,
       });
     },
   },
@@ -98,35 +122,47 @@ export default {
         data: action.payload,
       };
     },
-    catalogItem(state, action){
+    log(state, action) {
+      return {
+        ...state,
+        logdata: action.payload,
+      };
+    },
+    catalogItem(state, action) {
       return {
         ...state,
         catalogItem: action.payload,
       };
     },
-    catalogItemCopy(state, action){
+    tablefield(state, action) {
+      return {
+        ...state,
+        tableAndField: action.payload,
+      };
+    },
+    catalogItemCopy(state, action) {
       return {
         ...state,
         catalogItem: action.payload,
       };
     },
-    field(state, action){
+    field(state, action) {
       return {
         ...state,
         field: action.payload,
       };
     },
-    treeData(state, action){
+    treeData(state, action) {
       return {
         ...state,
         treeData: action.payload,
       };
     },
-    get(state, action){
+    get(state, action) {
       return {
         ...state,
         treeData: action.payload,
       };
-    }
+    },
   },
 };

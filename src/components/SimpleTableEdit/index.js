@@ -1,4 +1,5 @@
-import { Table, Input, Button, Popconfirm, Form ,Row,Select} from 'antd';
+import { Table, Input, Button, Popconfirm, Form ,Row,Col,Select} from 'antd';
+import React, { Fragment } from 'react';
 import SimpleTree from '../SimpleTree';
 import moment from 'moment/moment';
 
@@ -53,52 +54,85 @@ class EditableCell extends React.Component {
       if (error) {
         return;
       }
-      for(let i in values){
-        values[i] = value;
+      this.toggleEdit();
+      handleSave({ ...record, ...values});
+    });
+  }
+  saveCopy = (value,option) => {
+    const { record, handleSave } = this.props;
+    this.form.validateFields((error, values) => {
+      if (error) {
+        return;
       }
       this.toggleEdit();
+      handleSave({ ...record, ...values,tableId:value,field:option.props.children});
+    });
+  }
+  saveInput = () => {
+    const { record, handleSave } = this.props;
+    this.form.validateFields((error, values) => {
+      if (error) {
+        return;
+      }
+      this.toggleEdit();
+      debugger
       handleSave({ ...record, ...values });
     });
   }
-
   render() {
     const { editing } = this.state;
     const {
       editable,
       dataIndex,
       selectItemFeild,
+      title,
       ...restProps
     } = this.props;
-    debugger
+    const condition = [{id:'>=',name:'>='},{id:'==',name:'=='},{id:'>',name:'>'},{id:'<',name:'<'},
+      {id:'<=',name:'<='},{id:'!=',name:'!='},{id:'null',name:'null'},{id:'包含',name:'包含'},
+      {id:'不包含',name:'不包含'},{id:'是',name:'是'},{id:'不是',name:'不是'}];
+    const valueType = [{id:'字符串',name:'字符串'},{id:'数组',name:'数组'}];
+    let list = title == '字段'?selectItemFeild:title == '条件'?condition:valueType;
     return (
       <td ref={node => (this.cell = node)} {...restProps}>
         {editable ? (
           <EditableContext.Consumer>
             {(form) => {
               this.form = form;
-              return (
-                editing ? (
+              return (title == '值'?( (
                   <FormItem style={{ margin: 0 }}>
                     {form.getFieldDecorator(dataIndex, {
-                    initialValue: selectItemFeild[0].id,
+                      initialValue: '',
+                    })(
+                      <Input
+                        ref={node => (this.input = node)}
+                        onPressEnter={this.saveInput}
+                      />
+                    )}
+                  </FormItem>
+                ) ):title == '字段'?(<FormItem style={{ margin: 0 }}>
+                  {form.getFieldDecorator(dataIndex, {
+                    initialValue: list[0].name,
+                  })(<Select placeholder={'请选择'} onSelect={this.saveCopy}>
+                    {list.map(item=>{
+                      return (
+                        <Option title={item.name} value={item.tableId}>{item.name}</Option>
+                      )
+                    })}
+                  </Select>)}
+                </FormItem>
+              ):(<FormItem style={{ margin: 0 }}>
+                    {form.getFieldDecorator(dataIndex, {
+                    initialValue: list[0].name,
                     })(<Select placeholder={'请选择'} onSelect={this.save}>
-                      {selectItemFeild.map(item=>{
+                      {list.map(item=>{
                         return (
-                          <Option title={item.name} value={item.id}>{item.name}</Option>
+                          <Option title={item.name} value={item.name}>{item.name}</Option>
                         )
                       })}
                     </Select>)}
                   </FormItem>
-                ) : (
-                  <div
-                    className="editable-cell-value-wrap"
-                    style={{ paddingRight: 24 }}
-                    onClick={this.toggleEdit}
-                  >
-                    {restProps.children}
-                  </div>
-                )
-              );
+              ));
             }}
           </EditableContext.Consumer>
         ) : restProps.children}
@@ -114,8 +148,31 @@ class EditableTable extends React.Component {
     this.state = {
       dataSource: data,
       count:0,
+      andOr:'$and'
     };
   }
+  handleDelete = (key) => {
+    const dataSource = [...this.state.dataSource];
+    // this.setState({ dataSource: dataSource.filter(item => !selectedRowKeys.includes(item.key)) });
+    this.setState({ dataSource: dataSource.filter(item => item.key !== key.key) });
+  }
+  deleteAll = ()=>{
+    this.setState({ dataSource: [] });
+  }
+  handleAdd = () => {
+    const { count, dataSource } = this.state;
+    const newData = {
+      key:count,
+      field:'',
+      condition: '',
+      valueType:'',
+      value: '',
+    };
+    this.setState({
+      dataSource: [...dataSource, newData],
+      count: count + 1,
+    });
+  };
   handleSave = (row) => {
     const newData = [...this.state.dataSource];
     const index = newData.findIndex(item => row.key === item.key);
@@ -124,60 +181,55 @@ class EditableTable extends React.Component {
       ...item,
       ...row,
     });
-    this.props.transMsg(newData);
+    this.props.transMsg(newData,this.state.andOr);
     this.setState({ dataSource: newData });
   };
   save = (text,record)=>{
     debugger
   }
-
   render() {
-    const { selectItemFeild } = this.props;
-    const {dataSource} = this.state;
+    const { selectItemFeild,search } = this.props;
+    const {dataSource,andOr} = this.state;
     const components = {
       body: {
         row: EditableFormRow,
         cell: EditableCell,
       },
     };
-    this.columns = [{
-      title: '信息源',
-      dataIndex: 'name',
+    this.columns = [
+      {
+      title: '字段',
+      dataIndex: 'field',
+      editable: true,
     }, {
-      title: '信息源描述',
-      dataIndex: 'description',
+      title: '条件',
+      dataIndex: 'condition',
+      editable: true,
     },{
-      title: '信息源类型',
-      dataIndex: 'type',
+      title: '值类型',
+      dataIndex: 'valueType',
+      editable: true,
     },{
-      title: '信息源长度',
-      dataIndex: 'len',
+      title: '值',
+      dataIndex: 'value',
+      editable: true,
     }, {
-      title: '字段名',
-      dataIndex: 'feild_id',
-      render:(text,record)=>(<Select style={{width:120,maxHeight:120}} placeholder={'请选择'} onSelect={(text,record)=>{this.save(text,record)}}>
-        {selectItemFeild.map(item=>{
-          return (
-            <Option title={item.name} value={item.id}>{item.name}</Option>
-          )
-        })}
-      </Select>)
-    },{
-      title: '字段描述',
-      dataIndex: 'feild_description',
-    },{
-      title: '字段类型',
-      dataIndex: 'feild_type',
-    },{
-      title: '字段长度',
-      dataIndex: 'feild_len',
+      title: '操作',
+      render: (text, record, index) => {
+        return (
+          <Fragment>
+            <a onClick={() => {
+              this.handleDelete(text)
+            }}>删除</a>
+          </Fragment>
+        );
+      },
     },
     ];
     const columns = this.columns.map((col) => {
       if (!col.editable) {
         return col;
       }
-      debugger
       return {
         ...col,
         onCell: record => ({
@@ -192,6 +244,23 @@ class EditableTable extends React.Component {
     });
     return (
       <div>
+        <Row>
+          <Col md={12} sm={12}>
+            <span>符合</span><Select defaultValue={andOr} placeholder="请选择" style={{ width: 80,marginLeft:10,marginRight:10}}>
+            <Option value="$and">全部</Option>
+            <Option value="$or">任何</Option>
+          </Select><span>以下条件</span>
+          </Col>
+          <Col md={12} sm={12}>
+            <Button size="small" type="primary" style={{ marginRight: 20 }} onClick={this.handleAdd}>
+              添加条件
+            </Button> <Button size="small" type="danger" style={{ marginRight: 20 }} onClick={this.deleteAll}>
+            清除全部
+          </Button> <Button size="small" style={{ marginRight: 20 }} onClick={search}>
+            查询数据
+          </Button>
+          </Col>
+        </Row>
         <Table
           components={components}
           rowClassName={() => 'editable-row'}

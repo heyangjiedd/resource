@@ -61,12 +61,13 @@ export default {
         payload: response,
       });
     },
-    *fetchView({ payload }, { call, put }) {
+    *fetchView({ payload,callback }, { call, put }) {
       const response = yield call(mongoDataList, payload);
       yield put({
-        type: 'list',
+        type: 'sqlList',
         payload: response,
       });
+      if (callback) callback();
     },
     *fetchTable({ payload }, { call, put }) {
       const response = yield call(tableList, payload);
@@ -78,7 +79,7 @@ export default {
     *fetchTableData({ payload }, { call, put }) {
       const response = yield call(tableDataList, payload);
       yield put({
-        type: 'list',
+        type: 'sqlList',
         payload: response,
       });
     },
@@ -95,6 +96,12 @@ export default {
       return {
         ...state,
         lifelist: action.payload,
+      };
+    },
+    sqlList(state, action) {
+      return {
+        ...state,
+        sqlList: action.payload,
       };
     },
     list(state, action) {
