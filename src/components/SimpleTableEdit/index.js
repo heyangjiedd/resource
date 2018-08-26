@@ -75,7 +75,6 @@ class EditableCell extends React.Component {
         return;
       }
       this.toggleEdit();
-      debugger
       handleSave({ ...record, ...values });
     });
   }
@@ -88,9 +87,9 @@ class EditableCell extends React.Component {
       title,
       ...restProps
     } = this.props;
-    const condition = [{id:'>=',name:'>='},{id:'==',name:'=='},{id:'>',name:'>'},{id:'<',name:'<'},
-      {id:'<=',name:'<='},{id:'!=',name:'!='},{id:'null',name:'null'},{id:'包含',name:'包含'},
-      {id:'不包含',name:'不包含'},{id:'是',name:'是'},{id:'不是',name:'不是'}];
+    const condition = [{id:'$gte',name:'>='},{id:'$eq',name:'=='},{id:'$gt',name:'>'},{id:'$lt',name:'<'},
+      {id:'$lte',name:'<='},{id:'$ne',name:'!='},{id:'$null',name:'null'},{id:'$in',name:'包含'},
+      {id:'$nin',name:'不包含'},{id:'$and',name:'是'},{id:'$or',name:'不是'}];
     const valueType = [{id:'字符串',name:'字符串'},{id:'数组',name:'数组'}];
     let list = title == '字段'?selectItemFeild:title == '条件'?condition:valueType;
     return (
@@ -127,7 +126,7 @@ class EditableCell extends React.Component {
                     })(<Select placeholder={'请选择'} onSelect={this.save}>
                       {list.map(item=>{
                         return (
-                          <Option title={item.name} value={item.name}>{item.name}</Option>
+                          <Option title={item.name} value={item.id}>{item.name}</Option>
                         )
                       })}
                     </Select>)}
@@ -263,6 +262,7 @@ class EditableTable extends React.Component {
         </Row>
         <Table
           components={components}
+          rowKey={'key'}
           rowClassName={() => 'editable-row'}
           pagination={false}
           dataSource={dataSource}

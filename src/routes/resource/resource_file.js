@@ -19,9 +19,12 @@ import {
   Badge,
   Divider,
   Progress,
+  List,
 } from 'antd';
+import DescriptionList from 'components/DescriptionList';
 import StandardTable from 'components/StandardTable';
 import SimpleTree from 'components/SimpleTree';
+import StandardTableNoCheck from 'components/StandardTableNoCheck';
 import TagSelect from 'components/TagSelect';
 import StandardFormRow from 'components/StandardFormRow';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
@@ -36,6 +39,7 @@ const FormItem = Form.Item;
 const confirm = Modal.confirm;
 const { TextArea } = Input;
 const { Option } = Select;
+const { Description } = DescriptionList;
 const getValue = obj =>
   Object.keys(obj)
     .map(key => obj[key])
@@ -144,8 +148,8 @@ const CreateForm = Form.create()(props => {
   );
 });
 const TestForm = Form.create()(props => {
-  const { modalVisible, form, selectedRows, testList, handleModalVisible } = props;
-  let percent = 50;
+  const { modalVisible, form, selectedRows,testHandleAdd, testList, handleModalVisible } = props;
+  let percent = parseInt((testList.length / selectedRows.length) * 100);
   return (
     <Modal
       title="测试连通性"
@@ -155,7 +159,7 @@ const TestForm = Form.create()(props => {
       onCancel={() => handleModalVisible()}
     >
       <Row>
-        <Progress percent={(testList.length / selectedRows.length)*100}/>
+        <Progress percent={percent}/>
       </Row>
       <Row>
         <Col xl={16} lg={12} md={12} sm={24} xs={24}>
@@ -175,14 +179,102 @@ const TestForm = Form.create()(props => {
       </Row>
       <Row>
         <Col xl={16} lg={12} md={12} sm={24} xs={24}>
-          <Button type="primary">重试</Button>
+          <Button type="primary" onClick={testHandleAdd}>重试</Button>
         </Col>
       </Row>
     </Modal>
   );
 });
-@connect(({ resource_file,classify, centersource,loading }) => ({
+const ResourceDetail = Form.create()(props => {
+  const {
+    modalVisible, form, handleModalVisible, loading, data, columns, detailType, tableAndField,
+    radioSwitch, radioSwitcHandle, operateLog, lifelist, httpItem,searchHandle,sqlList,excSql
+  } = props;
+  const formItemLayout = {
+    labelCol: {
+      xs: { span: 24 },
+      sm: { span: 8 },
+    },
+    wrapperCol: {
+      xs: { span: 24 },
+      sm: { span: 16 },
+      md: { span: 16 },
+    },
+  };
+  const filelogcolumns = [
+    {
+      title: '序号',
+      render: (text, record, index) => <span>{index+1}</span>
+    },
+    {
+      title: '文件名称',
+      dataIndex: 'content',
+    }, {
+      title: '服务调用用户',
+      dataIndex: 'content',
+    }, {
+      title: '最近一次数据调用开始时间',
+      dataIndex: 'content',
+    }, {
+      title: '最近一次数据调用结束时间',
+      dataIndex: 'content',
+    }, {
+      title: '累积调用次数',
+      dataIndex: 'content',
+    }, {
+      title: '调用方式',
+      dataIndex: 'content',
+    }];
+  return (
+    <Modal
+      title="资源详情"
+      visible={modalVisible}
+      footer={null}
+      destroyOnClose={true}
+      width={900}
+      onCancel={() => handleModalVisible()}
+    >
+          <div>
+            <DescriptionList size="large" title="文件信息" style={{ marginBottom: 32 }}>
+              <List
+                rowKey="id"
+                grid={{ gutter: 24, lg: 3, md: 2, sm: 1, xs: 1 }}
+                dataSource={lifelist}
+                renderItem={item =>
+                  <List.Item key={item.id}>
+                    <Card hoverable className={styles.card}>
+                      <Card.Meta
+                        description={
+                          <DescriptionList size="large"  col={1} title="" style={{ marginBottom: 12 }}>
+                            {/*<div>文件名称:<span>{item.sourceName}</span></div>*/}
+                            {/*<div>文件类型:<span>{item.sourceName}</span></div>*/}
+                            {/*<div>文件类型:<span>{item.interfaceType}</span></div>*/}
+                            <Description term="文件名称">{item.sourceName}</Description>
+                            <Description term="文件类型">{item.sourceName}</Description>
+                            <Description term="文件描述">{item.interfaceType}</Description>
+                          </DescriptionList>
+                        }
+                      />
+                    </Card>
+                  </List.Item>
+                }
+              />
+            </DescriptionList>
+            <DescriptionList size="large" title="数据调用记录" style={{ marginBottom: 32 }}>
+              <StandardTableNoCheck
+                selectedRows={[]}
+                onSelectRow={[]}
+                loading={loading}
+                data={operateLog}
+                columns={filelogcolumns}
+              /></DescriptionList>
+          </div>
+    </Modal>
+  );
+});
+@connect(({ resource_file,catalog,classify, centersource,loading }) => ({
   resource_file,
+  catalog,
   classify,
   centersource,
   loading: loading.models.resource_file,
@@ -197,6 +289,7 @@ export default class ResourceClassify extends PureComponent {
     formValues: {},
     listItemData: {},
     testList: [],
+    isFileDetail:false,
   };
 
   componentDidMount() {
@@ -522,8 +615,50 @@ export default class ResourceClassify extends PureComponent {
       payload: {resourceId:createItemData.resourceId},
     });
   }
+  testHandleModalVisible = flag => {
+    this.setState({
+      testModalVisible: !!flag,
+    });
+  };
+  getFileListHandle = (index,flag) => {
+    const { dispatch } = this.props;
+    listItemData = index;
+    dispatch({
+      type: 'centersource/fetchFile',
+      payload: {
+        id: listItemData.id,
+        catalogId: listItemData.id,
+      },
+    });
+    // dispatch({
+    //   type: 'catalog/operateLog',
+    //   payload: { id: listItemData.id, type: 'file' },
+    // });
+    this.getFileListHandleModalVisible(flag);
+  };
+  getFileDetailHandle = (index,flag) => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'catalog/operateLog',
+      payload: { id: index.id, type: 'file' },
+    });
+    this.handleModalVisible(flag);
+  };
+  getFileListHandleModalVisible = (flag) => {
+    this.setState({
+      isFileDetail: !!flag,
+    });
+  };
   testHandleAdd = fields => {
     const { dispatch } = this.props;
+    // 之前信息的置空
+    this.setState({
+      testList: [],
+    });
+    this.setState({
+      testSuccess: 0,
+      testFail: 0,
+    });
     this.setState({
       testModalVisible: true,
     });
@@ -533,27 +668,83 @@ export default class ResourceClassify extends PureComponent {
         payload: {
           id: item.id,
         },
-        callback: (index) => {
-          this.state.testList.push(index);
+        callback: (res) => {
+          this.state.testList.push(res);
           this.setState({
             testList: this.state.testList,
           });
-          if (index === this.state.selectedRows.length - 1) {
+          if(res){
+            this.setState({
+              testSuccess: this.state.testSuccess++,
+            });
+          }else{
+            this.setState({
+              testFail: this.state.testFail++,
+            });
+          }
+          if (this.state.testList.length === this.state.selectedRows.length) {
             message.success('测试完毕');
           }
         },
       });
     });
   };
+
   render() {
     const {
-      centersource: { data },
+      centersource: { data ,lifelist},
       loading,
       classify: { treeData },
+      catalog: { catalogItem, field, tableAndField, operateLog },
       form
     } = this.props;
-    const { selectedRows, modalVisible,listItemData,testModalVisible } = this.state;
-
+    const { selectedRows, modalVisible,lifelistlistItemData,testModalVisible,isFileDetail } = this.state;
+    const detailColumns = [
+      {
+        title: '序号',
+        render: (text, record, index) => <span>{index+1}</span>
+      },
+      {
+        title: '文件名称',
+        dataIndex: 'sourceType',
+      },
+      {
+        title: '所属数据源',
+        dataIndex: 'orgId',
+      },
+      {
+        title: '数据源类型',
+        dataIndex: 'status',
+      },
+      {
+        title: '文件储存路劲',
+        dataIndex: 'status1',
+      },
+      {
+        title: '文件大小',
+        dataIndex: 'status2',
+      },
+      {
+        title: '文件描述',
+        dataIndex: 'status3',
+      },
+      {
+        title: '操作',
+        render: (text, record, index) => {
+          return (
+            <Fragment>
+              <a onClick={() => {
+                this.getFileDetailHandle(text,true);
+              }}>查看</a>
+              <Divider type="vertical"/>
+              <a onClick={() => {
+                this.download(text);
+              }}>下载</a>
+            </Fragment>
+          );
+        },
+      },
+    ];
     const columns = [
       {
         title: '数据源名称',
@@ -593,7 +784,7 @@ export default class ResourceClassify extends PureComponent {
           return (
             <Fragment>
               <a onClick={() => {
-                this.updateHandleModal(text,1);
+                this.getFileListHandle(text,true);
               }}>文件详情</a>
             </Fragment>
           );
@@ -619,6 +810,10 @@ export default class ResourceClassify extends PureComponent {
       handleModalVisible: this.testHandleModalVisible,
       selectedRows: this.state.selectedRows,
       testList: this.state.testList,
+      testHandleAdd:this.testHandleAdd,
+    };
+    const parentMethodsResource = {
+      operateLog: operateLog,
     };
     const { getFieldDecorator } = form;
     return (
@@ -629,17 +824,37 @@ export default class ResourceClassify extends PureComponent {
           handleTree={this.handleTree}
           title={'资源库'}
         />
-        <Card bordered={false}  className={styles.flexTable}>
-          <div className={styles.tableList}>
-            <Row gutter={{ md: 2, lg:6, xl: 12 }}>
-              <Col md={6} sm={24}>
-                <FormItem>
-                  <Button icon="desktop" type="primary" onClick={() => this.testHandleAdd(true)}>
-                    测试连通性
-                  </Button>
-                </FormItem>
-              </Col>
-              <Col md={8} sm={24}>
+          {isFileDetail?<Card bordered={false}  className={styles.flexTable}>
+            <div className={styles.tableList}>
+              <Row gutter={{ md: 2, lg:6, xl: 12 }}>
+                <Col md={6} sm={24}>
+                  <FormItem>
+                    <Button onClick={()=>{this.getFileListHandleModalVisible(false)}}>
+                      返回
+                    </Button>
+                  </FormItem>
+                </Col>
+              </Row>
+              <StandardTable
+                selectedRows={[]}
+                loading={loading}
+                data={lifelist}
+                columns={detailColumns}
+                onSelectRow={this.handleSelectRows}
+                onChange={this.handleStandardTableChange}
+              />
+            </div>
+          </Card>:<Card bordered={false}  className={styles.flexTable}>
+            <div className={styles.tableList}>
+              <Row gutter={{ md: 2, lg:6, xl: 12 }}>
+                <Col md={6} sm={24}>
+                  <FormItem>
+                    <Button icon="desktop" type="primary" onClick={() => this.testHandleAdd(true)}>
+                      测试连通性
+                    </Button>
+                  </FormItem>
+                </Col>
+                <Col md={8} sm={24}>
                   <FormItem {...formItemLayout}  label="数据源类型" style={{ marginBottom: 0 }}>
                     {getFieldDecorator('status')(
                       <Select placeholder="数据库类型" style={{ width: '100%' }}>
@@ -648,33 +863,34 @@ export default class ResourceClassify extends PureComponent {
                       </Select>
                     )}
                   </FormItem>
-              </Col>
-              <Col md={8} sm={24}>
-                <FormItem>
-                  {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
-                </FormItem>
-              </Col>
-              <Col md={2} sm={24}>
-                <FormItem>
-                  <Button type="primary" htmlType="submit">
-                    查询
-                  </Button>
-                </FormItem>
-              </Col>
-            </Row>
-            <StandardTable
-              selectedRows={selectedRows}
-              loading={loading}
-              data={data}
-              columns={columns}
-              onSelectRow={this.handleSelectRows}
-              onChange={this.handleStandardTableChange}
-            />
-          </div>
-        </Card>
+                </Col>
+                <Col md={8} sm={24}>
+                  <FormItem>
+                    {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
+                  </FormItem>
+                </Col>
+                <Col md={2} sm={24}>
+                  <FormItem>
+                    <Button type="primary" htmlType="submit">
+                      查询
+                    </Button>
+                  </FormItem>
+                </Col>
+              </Row>
+              <StandardTable
+                selectedRows={selectedRows}
+                loading={loading}
+                data={data}
+                columns={columns}
+                onSelectRow={this.handleSelectRows}
+                onChange={this.handleStandardTableChange}
+              />
+            </div>
+          </Card>}
         </div>
         <TestForm {...testParentMethods} modalVisible={testModalVisible}/>
         <CreateForm {...parentMethods} modalVisible={modalVisible} />
+        <ResourceDetail {...parentMethodsResource} modalVisible={modalVisible}/>
       </PageHeaderLayout>
     );
   }

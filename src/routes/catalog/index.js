@@ -321,7 +321,7 @@ const CreateForm = Form.create()(props => {
   const {
     modalVisible, form, handleAdd, handleModalVisible, data, handleItem, item, catalogItem, dataList, handleItemSearch,
     searchHandle, getListBuyId, choiseFeild, choiseList, type, handleType, choiceFeild, choiceFeildCount, catalogItemChange,
-    selectHttpItem, httpItem, lifelist,
+    selectHttpItem, httpItem, lifelist,handleStandardTableChange
   } = props;
   const { getFieldDecorator } = form;
   const options = [
@@ -453,21 +453,24 @@ const CreateForm = Form.create()(props => {
       dataIndex: 'len',
     },
   ];
-  const fgxxsjkcolumns = [{
+  const fgxxsjkcolumns = [
+    {
     title: '文件名称',
     dataIndex: 'name',
   }, {
     title: '文件类型',
     dataIndex: 'type',
   }];
-  const filecolumns = [{
+  const filecolumns = [
+    {
     title: '序号',
     dataIndex: 'id',
   }, {
     title: '集合',
     dataIndex: 'name',
   }];
-  const columnscatalogfeild = [{
+  const columnscatalogfeild = [
+    {
     title: '信息源',
     dataIndex: 'name',
   }, {
@@ -609,10 +612,6 @@ const CreateForm = Form.create()(props => {
   };
   const handleSelectRows = (data) => {
     choiceSelectedRows = data;
-  };
-
-  const handleStandardTableChange = () => {
-
   };
   const handleSubmit = () => {
     form.validateFields((err, fieldsValue) => {
@@ -918,6 +917,10 @@ const ResourceDetail = Form.create()(props => {
     }];
   const apilogcolumns = [
     {
+      title: '序号',
+      render: (text, record, index) => <span>{index+1}</span>
+    },
+    {
       title: '服务调用用户',
       dataIndex: 'content',
     }, {
@@ -935,6 +938,10 @@ const ResourceDetail = Form.create()(props => {
     },
   ];
   const filelogcolumns = [
+    {
+      title: '序号',
+      render: (text, record, index) => <span>{index+1}</span>
+    },
     {
       title: '文件名称',
       dataIndex: 'content',
@@ -957,13 +964,13 @@ const ResourceDetail = Form.create()(props => {
   const fgxxsjkdatacolumns = [
     {
       title: 'Key',
-      dataIndex: 'content',
+      dataIndex: 'key',
     }, {
       title: 'Value',
-      dataIndex: 'content',
+      dataIndex: 'value',
     }, {
       title: 'Type',
-      dataIndex: 'content',
+      dataIndex: 'type',
     },
   ];
   let indexList = [];
@@ -1059,11 +1066,11 @@ const ResourceDetail = Form.create()(props => {
             <Description term="集合名称">{httpItem.sourceName}</Description>
             <Description term="所属数据源">{httpItem.sourceName}</Description>
           </DescriptionList>
-          {/*<StandardTableNoCheck*/}
-          {/*loading={loading}*/}
-          {/*data={data}*/}
-          {/*columns={fgxxsjkdatacolumns}*/}
-          {/*/>*/}
+          <StandardTableNothing
+            loading={loading}
+            data={sqlList}
+            columns={fgxxsjkdatacolumns}
+          />
         </div> : detailType == 3 ?
           <div>
             <DescriptionList size="large" col={2} title="基本信息详情" style={{ marginBottom: 32 }}>
@@ -1109,7 +1116,7 @@ const ResourceDetail = Form.create()(props => {
                 }
               />
             </DescriptionList>
-            <DescriptionList size="large" title="接口调用记录" style={{ marginBottom: 32 }}>
+            <DescriptionList size="large" title="数据调用记录" style={{ marginBottom: 32 }}>
               <StandardTableNoCheck
                 selectedRows={[]}
                 onSelectRow={[]}
@@ -1156,7 +1163,30 @@ export default class ResourceClassify extends PureComponent {
     //   payload: {region:'000000',type:'7'},
     // });
   }
+  handleStandardTableChangeDataSource = (pagination, filtersArg, sorter) => {
+    const { dispatch } = this.props;
+    const { formValues } = this.state;
 
+    const filters = Object.keys(filtersArg).reduce((obj, key) => {
+      const newObj = { ...obj };
+      newObj[key] = getValue(filtersArg[key]);
+      return newObj;
+    }, {});
+
+    const params = {
+      pageNum: pagination.current,
+      pageSize: pagination.pageSize,
+      ...formValues,
+      ...filters,
+    };
+    if (sorter.field) {
+      params.sorter = `${sorter.field}_${sorter.order}`;
+    }
+    dispatch({
+      type: 'centersource/fetch',
+      payload: params,
+    });
+  };
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
     const { dispatch } = this.props;
     const { formValues } = this.state;
@@ -1176,7 +1206,6 @@ export default class ResourceClassify extends PureComponent {
     if (sorter.field) {
       params.sorter = `${sorter.field}_${sorter.order}`;
     }
-
     dispatch({
       type: 'catalog/fetch',
       payload: params,
@@ -1298,6 +1327,10 @@ export default class ResourceClassify extends PureComponent {
         type: 'catalog/catalogTableAndTableField',
         payload: { catalogId: listItemData.id },
       });
+      dispatch({
+        type: 'centersource/fetchView',
+        payload: { catalogId: listItemData.id },
+      });
       this.setState({
         detailType: 2,
       });
@@ -1334,6 +1367,7 @@ export default class ResourceClassify extends PureComponent {
     this.handleModalVisibleResource(true);
   };
   handleItemSearch = (index) => {
+    const { dispatch } = this.props;
     dispatch({
       type: 'centersource/fetch',
       payload: index,
@@ -1680,7 +1714,6 @@ export default class ResourceClassify extends PureComponent {
       "catalogId": listItemData.id,
       "params":param
     };
-    debugger
     dispatch({
       type: 'centersource/fetchView',
       payload: params,
@@ -1696,6 +1729,7 @@ export default class ResourceClassify extends PureComponent {
     const { selectedRows, modalVisible, modalVisibleCatlog, radioSwitch, modalVisibleResource, modalVisibleChoice, item, type, choiceFeild, choiceFeildCount, detailType } = this.state;
     const parentMethods = {
       httpItem: httpItem,
+      handleStandardTableChange:this.handleStandardTableChangeDataSource,
       lifelist: lifelist,
       handleAdd: this.handleAdd,
       handleItem: this.handleItem,
@@ -1740,10 +1774,10 @@ export default class ResourceClassify extends PureComponent {
       handleModalVisible: this.handleModalVisibleResource,
     };
     const columns = [
-      // {
-      //   title: '序号',
-      //   dataIndex: 'sort',
-      // },
+      {
+        title: '序号',
+        render: (text, record, index) => <span>{index+1}</span>
+      },
       {
         title: '信息资源名称',
         dataIndex: 'datasetName',

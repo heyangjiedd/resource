@@ -663,6 +663,10 @@ const ResourceDetail = Form.create()(props => {
   };
   const gxxsjkdatacolumns = [
     {
+      title: '序号',
+      render: (text, record, index) => <span>{index+1}</span>
+    },
+    {
       title: '姓名',
       dataIndex: 'sourceName',
     },
@@ -1191,7 +1195,7 @@ export default class ResourceClassify extends PureComponent {
             modalVisible: false,
           });
           dispatch({
-            type: 'catalog/fetch',
+            type: 'dervieSource/fetch',
             payload: params,
           });
         },
@@ -1203,7 +1207,7 @@ export default class ResourceClassify extends PureComponent {
       let params = {};
       params[listItemData.id] = itemFieldList;
       dispatch({
-        type: 'catalog/catalogCollection',
+        type: 'dervieSource/collection',
         payload: params,
         callback: () => {
           message.success('添加成功');
@@ -1211,7 +1215,7 @@ export default class ResourceClassify extends PureComponent {
             modalVisible: false,
           });
           dispatch({
-            type: 'catalog/fetch',
+            type: 'dervieSource/fetch',
             payload: params,
           });
         },
@@ -1223,7 +1227,7 @@ export default class ResourceClassify extends PureComponent {
       let params = {};
       params[listItemData.id] = itemFieldList;
       dispatch({
-        type: 'catalog/catalogFile',
+        type: 'dervieSource/file',
         payload: params,
         callback: () => {
           message.success('添加成功');
@@ -1231,7 +1235,7 @@ export default class ResourceClassify extends PureComponent {
             modalVisible: false,
           });
           dispatch({
-            type: 'catalog/fetch',
+            type: 'dervieSource/fetch',
             payload: params,
           });
         },
@@ -1240,7 +1244,7 @@ export default class ResourceClassify extends PureComponent {
       let params = {};
       params[listItemData.id] = modalListData.id;
       dispatch({
-        type: 'catalog/catalogApi',
+        type: 'dervieSource/api',
         payload: params,
         callback: () => {
           message.success('添加成功');
@@ -1248,7 +1252,7 @@ export default class ResourceClassify extends PureComponent {
             modalVisible: false,
           });
           dispatch({
-            type: 'catalog/fetch',
+            type: 'dervieSource/fetch',
             payload: params,
           });
         },

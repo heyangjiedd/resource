@@ -236,6 +236,7 @@ class EditableTable extends React.Component {
         <Table
           components={components}
           rowClassName={() => 'editable-row'}
+          rowKey={'key'}
           rowSelection={rowSelection}
           pagination={false}
           dataSource={dataSource}

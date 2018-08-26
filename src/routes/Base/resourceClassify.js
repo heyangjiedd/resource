@@ -243,7 +243,7 @@ export default class ResourceClassify extends PureComponent {
     const columns = [
       {
         title: '序号',
-        dataIndex: 'sort',
+        render: (text, record, index) => <span>{index+1}</span>
       },
       {
         title: '分类名称',

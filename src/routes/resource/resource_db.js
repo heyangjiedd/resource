@@ -19,9 +19,18 @@ import {
   Badge,
   Divider,
   Cascader,
-  Progress
+  Progress,
 } from 'antd';
 import StandardTable from 'components/StandardTable';
+import StandardTableNoCheck from 'components/StandardTableNoCheck';
+import StandardTableNothing from 'components/StandardTableNothing';
+import StandardTableNoPage from 'components/StandardTableNoPage';
+import StandardTableRadio from 'components/StandardTableRadio';
+import StandardTableEdit from 'components/StandardTableEdit';
+import SimpleTableEdit from 'components/SimpleTableEdit';
+import StandardTableRadioNopage from 'components/StandardTableRadioNopage';
+import AnycSimpleTree from 'components/AnycSimpleTree';
+import SimpleSelectTree from 'components/SimpleSelectTree';
 import SimpleTree from 'components/SimpleTree';
 import TagSelect from 'components/TagSelect';
 import StandardFormRow from 'components/StandardFormRow';
@@ -74,56 +83,56 @@ const CreateForm = Form.create()(props => {
       <FormItem {...formItemLayout} label="数据源类型">
         {form.getFieldDecorator('desc', {
           rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
+        })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据库类型">
         {form.getFieldDecorator('desc1', {
           rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
+        })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据源名称">
         {form.getFieldDecorator('desc2', {
           rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
+        })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="所属组织机构">
         {form.getFieldDecorator('desc3', {
           rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
+        })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="资源分类">
         {form.getFieldDecorator('desc4', {
           rules: [{ required: true, message: 'Please input some description...' }],
         })(
           <Select placeholder="请选择" style={{ width: '100%' }}>
-          <Option value="0">关闭</Option>
-          <Option value="1">运行中</Option>
-        </Select>,)}
+            <Option value="0">关闭</Option>
+            <Option value="1">运行中</Option>
+          </Select>)}
       </FormItem>
       <FormItem {...formItemLayout} label="IP地址">
         {form.getFieldDecorator('desc5', {
           rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
+        })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="端口">
         {form.getFieldDecorator('desc6', {
           rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
+        })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据库名称/SID">
         {form.getFieldDecorator('desc7', {
           rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
+        })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="用户名">
         {form.getFieldDecorator('desc8', {
           rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
+        })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="密码">
         {form.getFieldDecorator('desc9', {
           rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入" />)}
+        })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据源描述">
         {form.getFieldDecorator('flms', {
@@ -132,21 +141,21 @@ const CreateForm = Form.create()(props => {
               required: true,
               message: '请输入数据源描述',
             },
-          ],initialValue:listItemData.owner
+          ], initialValue: listItemData.owner,
         })(
           <TextArea
             style={{ minHeight: 32 }}
             placeholder="请输入你的数据源描述"
             rows={4}
-          />
+          />,
         )}
       </FormItem>
     </Modal>
   );
 });
 const TestForm = Form.create()(props => {
-  const { modalVisible, form , selectedRows, testList, handleModalVisible } = props;
-  let percent = 50;
+  const { modalVisible, form, selectedRows,testHandleAdd, testList,testSuccess, testFail,handleModalVisible } = props;
+  let percent = parseInt((testList.length / selectedRows.length) * 100);
   return (
     <Modal
       title="测试连通性"
@@ -156,7 +165,7 @@ const TestForm = Form.create()(props => {
       onCancel={() => handleModalVisible()}
     >
       <Row>
-        <Progress percent={(testList.length / selectedRows.length)*100}/>
+        <Progress percent={percent}/>
       </Row>
       <Row>
         <Col xl={16} lg={12} md={12} sm={24} xs={24}>
@@ -176,13 +185,13 @@ const TestForm = Form.create()(props => {
       </Row>
       <Row>
         <Col xl={16} lg={12} md={12} sm={24} xs={24}>
-          <Button type="primary">重试</Button>
+          <Button type="primary" onClick={testHandleAdd}>重试</Button>
         </Col>
       </Row>
     </Modal>
   );
 });
-@connect(({ resource_db,classify,centersource, loading }) => ({
+@connect(({ resource_db, classify, centersource, loading }) => ({
   resource_db,
   classify,
   centersource,
@@ -198,6 +207,9 @@ export default class ResourceClassify extends PureComponent {
     formValues: {},
     listItemData: {},
     testList: [],
+    testSuccess: 0,
+    testFail: 0,
+    isFileDetail:false,
   };
 
   componentDidMount() {
@@ -324,9 +336,10 @@ export default class ResourceClassify extends PureComponent {
           setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
         }).catch(() => console.log('Oops errors!'));
       },
-      onCancel() {},
+      onCancel() {
+      },
     });
-  }
+  };
   handleAdd = fields => {
     const { dispatch } = this.props;
     dispatch({
@@ -354,38 +367,38 @@ export default class ResourceClassify extends PureComponent {
       <Form onSubmit={this.handleSearch} layout="inline">
         <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
           <Col md={6} sm={24}>
-            <FormItem >
+            <FormItem>
               {getFieldDecorator('status')(
                 <Select placeholder="数据库类型" style={{ width: '100%' }}>
                   <Option value="0">关系型数据库</Option>
                   <Option value="1">非关系型数据库</Option>
-                </Select>
+                </Select>,
               )}
             </FormItem>
           </Col>
           <Col md={3} sm={24}>
-            <FormItem >
+            <FormItem>
               {getFieldDecorator('status')(
                 <Select placeholder="连通状态" style={{ width: '100%' }}>
                   <Option value="0">已连通</Option>
                   <Option value="1">未连通</Option>
-                </Select>
+                </Select>,
               )}
             </FormItem>
           </Col>
           <Col md={3} sm={24}>
-            <FormItem >
+            <FormItem>
               {getFieldDecorator('status')(
                 <Select placeholder="同步状态" style={{ width: '100%' }}>
                   <Option value="0">已同步</Option>
                   <Option value="1">未同步</Option>
-                </Select>
+                </Select>,
               )}
             </FormItem>
           </Col>
           <Col md={6} sm={24}>
             <FormItem>
-              {getFieldDecorator('no')(<Input placeholder="请输入数据源名称" />)}
+              {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
             </FormItem>
           </Col>
           <Col md={6} sm={24}>
@@ -394,7 +407,7 @@ export default class ResourceClassify extends PureComponent {
                 查询
               </Button>
               <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
-                展开 <Icon type="down" />
+                展开 <Icon type="down"/>
               </a>
             </span>
           </Col>
@@ -410,38 +423,38 @@ export default class ResourceClassify extends PureComponent {
       <Form onSubmit={this.handleSearch} layout="inline">
         <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
           <Col md={6} sm={24}>
-            <FormItem >
+            <FormItem>
               {getFieldDecorator('status')(
                 <Select placeholder="数据库类型" style={{ width: '100%' }}>
                   <Option value="0">关系型数据库</Option>
                   <Option value="1">非关系型数据库</Option>
-                </Select>
+                </Select>,
               )}
             </FormItem>
           </Col>
           <Col md={3} sm={24}>
-            <FormItem >
+            <FormItem>
               {getFieldDecorator('status')(
                 <Select placeholder="连通状态" style={{ width: '100%' }}>
                   <Option value="0">已连通</Option>
                   <Option value="1">未连通</Option>
-                </Select>
+                </Select>,
               )}
             </FormItem>
           </Col>
           <Col md={3} sm={24}>
-            <FormItem >
+            <FormItem>
               {getFieldDecorator('status')(
                 <Select placeholder="同步状态" style={{ width: '100%' }}>
                   <Option value="0">已同步</Option>
                   <Option value="1">未同步</Option>
-                </Select>
+                </Select>,
               )}
             </FormItem>
           </Col>
           <Col md={6} sm={24}>
             <FormItem>
-              {getFieldDecorator('no')(<Input placeholder="请输入数据源名称" />)}
+              {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
             </FormItem>
           </Col>
           <Col md={6} sm={24}>
@@ -453,7 +466,7 @@ export default class ResourceClassify extends PureComponent {
               重置
               </Button>
               <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
-              收起 <Icon type="up" />
+              收起 <Icon type="up"/>
             </a>
             </span>
           </Col>
@@ -467,7 +480,7 @@ export default class ResourceClassify extends PureComponent {
                   <TagSelect.Option value="oracle">oracle</TagSelect.Option>
                   <TagSelect.Option value="sqlserver">sqlserver</TagSelect.Option>
                   <TagSelect.Option value="db2">db2</TagSelect.Option>
-                </TagSelect>
+                </TagSelect>,
               )}
             </FormItem>
           </StandardFormRow>
@@ -479,7 +492,7 @@ export default class ResourceClassify extends PureComponent {
                 <TagSelect onChange={this.handleFormSubmit}>
                   <TagSelect.Option value="mongodb">mongodb</TagSelect.Option>
                   <TagSelect.Option value="hbase">hbase</TagSelect.Option>
-                </TagSelect>
+                </TagSelect>,
               )}
             </FormItem>
           </StandardFormRow>
@@ -488,12 +501,12 @@ export default class ResourceClassify extends PureComponent {
           <StandardFormRow title="API" block style={{ paddingBottom: 5 }}>
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
-                <TagSelect onChange={this.handleFormSubmit} >
+                <TagSelect onChange={this.handleFormSubmit}>
                   <TagSelect.Option value="http">http</TagSelect.Option>
                   <TagSelect.Option value="https">https</TagSelect.Option>
                   <TagSelect.Option value="wsdl">wsdl</TagSelect.Option>
                   <TagSelect.Option value="rest">rest</TagSelect.Option>
-                </TagSelect>
+                </TagSelect>,
               )}
             </FormItem>
           </StandardFormRow>
@@ -502,12 +515,12 @@ export default class ResourceClassify extends PureComponent {
           <StandardFormRow title="普通文件系统" block style={{ paddingBottom: 5 }}>
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
-                <TagSelect onChange={this.handleFormSubmit} >
+                <TagSelect onChange={this.handleFormSubmit}>
                   <TagSelect.Option value="ftp">ftp</TagSelect.Option>
                   <TagSelect.Option value="sftp">sftp</TagSelect.Option>
                   <TagSelect.Option value="本地磁盘">本地磁盘</TagSelect.Option>
                   <TagSelect.Option value="共享文件件">共享文件件</TagSelect.Option>
-                </TagSelect>
+                </TagSelect>,
               )}
             </FormItem>
           </StandardFormRow>
@@ -520,8 +533,17 @@ export default class ResourceClassify extends PureComponent {
     const { expandForm } = this.state;
     return expandForm ? this.renderAdvancedForm() : this.renderSimpleForm();
   }
+
   testHandleAdd = fields => {
     const { dispatch } = this.props;
+    // 之前信息的置空
+    this.setState({
+      testList: [],
+    });
+    this.setState({
+      testSuccess: 0,
+      testFail: 0,
+    });
     this.setState({
       testModalVisible: true,
     });
@@ -531,34 +553,57 @@ export default class ResourceClassify extends PureComponent {
         payload: {
           id: item.id,
         },
-        callback: (index) => {
-          this.state.testList.push(index);
+        callback: (res) => {
+          this.state.testList.push(res);
           this.setState({
             testList: this.state.testList,
           });
-          if (index === this.state.selectedRows.length - 1) {
+          if(res){
+            this.setState({
+              testSuccess: this.state.testSuccess++,
+            });
+          }else{
+            this.setState({
+              testFail: this.state.testFail++,
+            });
+          }
+          if (this.state.testList.length === this.state.selectedRows.length) {
             message.success('测试完毕');
           }
         },
       });
     });
   };
+
   handleTree = data => {
     const { dispatch } = this.props;
     createItemData.resourceId = data[0];
     dispatch({
       type: 'centersource/fetch',
-      payload: {resourceId:createItemData.resourceId},
+      payload: { resourceId: createItemData.resourceId },
     });
-  }
+  };
+  getFileDetailHandle = (index,flag) => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'catalog/operateLog',
+      payload: { id: index.id, type: 'file' },
+    });
+    this.handleModalVisible(flag);
+  };
+  getFileListHandleModalVisible = (flag) => {
+    this.setState({
+      isFileDetail: !!flag,
+    });
+  };
   render() {
     const {
       centersource: { data },
       loading,
       classify: { treeData },
-      form
+      form,
     } = this.props;
-    const { selectedRows, modalVisible,listItemData,testModalVisible } = this.state;
+    const { selectedRows, modalVisible, listItemData, testModalVisible, testList } = this.state;
 
     const columns = [
       {
@@ -584,13 +629,13 @@ export default class ResourceClassify extends PureComponent {
         title: '最近连接时间',
         dataIndex: 'createTime',
         sorter: true,
-        render: val => <span>{val?moment(val).format('YYYY-MM-DD HH:mm:ss'):'-'}</span>,
+        render: val => <span>{val ? moment(val).format('YYYY-MM-DD HH:mm:ss') : '-'}</span>,
       },
       {
         title: '连通状态',
         dataIndex: 'linkStatus',
         render(val) {
-          return <Badge status={val ? 'success' : 'error'} text={val||'未连通'}/>;
+          return <Badge status={val ? 'success' : 'error'} text={val || '未连通'}/>;
         },
       },
       {
@@ -599,7 +644,7 @@ export default class ResourceClassify extends PureComponent {
           return (
             <Fragment>
               <a onClick={() => {
-                this.updateHandleModal(text);
+
               }}>详情</a>
             </Fragment>
           );
@@ -615,52 +660,54 @@ export default class ResourceClassify extends PureComponent {
       handleModalVisible: this.testHandleModalVisible,
       selectedRows: this.state.selectedRows,
       testList: this.state.testList,
+      testHandleAdd:this.testHandleAdd,
     };
-    const options = [{
-      value: '关系型数据库',
-      label: '关系型数据库',
-      children: [{
-        value: 'mysql', label: 'mysql',
+    const options = [
+      {
+        value: '关系型数据库',
+        label: '关系型数据库',
+        children: [{
+          value: 'mysql', label: 'mysql',
+        }, {
+          value: 'oracle', label: 'oracle',
+        }, {
+          value: 'sqlserver', label: 'sqlserver',
+        }, {
+          value: 'db2', label: 'db2',
+        }],
       }, {
-        value: 'oracle', label: 'oracle',
+        value: '非关系型数据库',
+        label: '非关系型数据库',
+        children: [{
+          value: 'mongodbB', label: 'mongodbB',
+        }, {
+          value: 'hbase', label: 'hbase',
+        }],
       }, {
-        value: 'sqlserver', label: 'sqlserver',
+        value: 'API',
+        label: 'API',
+        children: [{
+          value: 'http', label: 'http',
+        }, {
+          value: 'https', label: 'https',
+        }, {
+          value: 'wsdl', label: 'wsdl',
+        }, {
+          value: 'rest', label: 'rest',
+        }],
       }, {
-        value: 'db2', label: 'db2',
-      }],
-    }, {
-      value: '非关系型数据库',
-      label: '非关系型数据库',
-      children: [{
-        value: 'mongodbB', label: 'mongodbB',
-      }, {
-        value: 'hbase', label: 'hbase',
-      }],
-    }, {
-      value: 'API',
-      label: 'API',
-      children: [{
-        value: 'http', label: 'http',
-      }, {
-        value: 'https', label: 'https',
-      }, {
-        value: 'wsdl', label: 'wsdl',
-      }, {
-        value: 'rest', label: 'rest',
-      }],
-    }, {
-      value: '普通文件',
-      label: '普通文件',
-      children: [{
-        value: 'ftp', label: 'ftp',
-      }, {
-        value: 'sftp', label: 'sftp',
-      }, {
-        value: '本地磁盘', label: '本地磁盘',
-      }, {
-        value: '共享文件夹', label: '共享文件夹',
-      }],
-    }];
+        value: '普通文件',
+        label: '普通文件',
+        children: [{
+          value: 'ftp', label: 'ftp',
+        }, {
+          value: 'sftp', label: 'sftp',
+        }, {
+          value: '本地磁盘', label: '本地磁盘',
+        }, {
+          value: '共享文件夹', label: '共享文件夹',
+        }],
+      }];
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },
@@ -672,59 +719,59 @@ export default class ResourceClassify extends PureComponent {
         md: { span: 16 },
       },
     };
-    const onChange = (value)=> {
-    }
+    const onChange = (value) => {
+    };
     const { getFieldDecorator } = form;
     return (
       <PageHeaderLayout>
         <div className={styles.flexMain}>
-        <SimpleTree
-          data={treeData}
-          handleTree={this.handleTree}
-          title={'数据库'}
-        />
-        <Card bordered={false}  className={styles.flexTable}>
-          <div className={styles.tableList}>
-            <Row gutter={{ md: 2, lg:6, xl: 12 }}>
-              <Col md={6} sm={24}>
-                <FormItem>
-                  <Button icon="desktop" type="primary" onClick={() => this.testHandleAdd(true)}>
-                    测试连通性
-                  </Button>
-                </FormItem>
-              </Col>
-              <Col md={8} sm={24}>
-                <FormItem {...formItemLayout}  label="数据源类型">
-                  <Cascader style={{ width: 100 + '%' }} options={options} onChange={onChange}
-                            placeholder="请选择数据源/数据库"/>
-                </FormItem>
-              </Col>
-              <Col md={8} sm={24}>
-                <FormItem>
-                  {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
-                </FormItem>
-              </Col>
-              <Col md={2} sm={24}>
-                <FormItem>
-                  <Button type="primary" htmlType="submit">
-                    查询
-                  </Button>
-                </FormItem>
-              </Col>
-            </Row>
-            <StandardTable
-              selectedRows={selectedRows}
-              loading={loading}
-              data={data}
-              columns={columns}
-              onSelectRow={this.handleSelectRows}
-              onChange={this.handleStandardTableChange}
-            />
-          </div>
-        </Card>
+          <SimpleTree
+            data={treeData}
+            handleTree={this.handleTree}
+            title={'数据库'}
+          />
+          <Card bordered={false} className={styles.flexTable}>
+            <div className={styles.tableList}>
+              <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
+                <Col md={6} sm={24}>
+                  <FormItem>
+                    <Button icon="desktop" type="primary" onClick={() => this.testHandleAdd(true)}>
+                      测试连通性
+                    </Button>
+                  </FormItem>
+                </Col>
+                <Col md={8} sm={24}>
+                  <FormItem {...formItemLayout} label="数据源类型">
+                    <Cascader style={{ width: 100 + '%' }} options={options} onChange={onChange}
+                              placeholder="请选择数据源/数据库"/>
+                  </FormItem>
+                </Col>
+                <Col md={8} sm={24}>
+                  <FormItem>
+                    {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
+                  </FormItem>
+                </Col>
+                <Col md={2} sm={24}>
+                  <FormItem>
+                    <Button type="primary" htmlType="submit">
+                      查询
+                    </Button>
+                  </FormItem>
+                </Col>
+              </Row>
+              <StandardTable
+                selectedRows={selectedRows}
+                loading={loading}
+                data={data}
+                columns={columns}
+                onSelectRow={this.handleSelectRows}
+                onChange={this.handleStandardTableChange}
+              />
+            </div>
+          </Card>
         </div>
         <TestForm {...testParentMethods} modalVisible={testModalVisible}/>
-        <CreateForm {...parentMethods} modalVisible={modalVisible} />
+        <CreateForm {...parentMethods} modalVisible={modalVisible}/>
       </PageHeaderLayout>
     );
   }

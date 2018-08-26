@@ -76,7 +76,8 @@ class SimpleTree extends PureComponent {
       searchValue: '',
       autoExpandParent: true,
       ss: { width: '220px' },
-      treeData:[]
+      treeData:[],
+      open:false
     };
   }
   componentDidMount() {
@@ -97,9 +98,12 @@ class SimpleTree extends PureComponent {
       autoExpandParent: false,
     });
   };
-  toggle = () => {
+  toggle = (index) => {
     this.setState({
-      ss: { transform: 'translate(50px)' },
+      ss: { width: index?'25px':'220px' },
+    });
+    this.setState({
+      open: !this.state.open,
     });
   };
   onLoadData = (treeNode) => {
@@ -130,7 +134,7 @@ class SimpleTree extends PureComponent {
     });
   }
   render() {
-    const { searchValue, expandedKeys, autoExpandParent, ss, title } = this.state;
+    const { searchValue, expandedKeys, autoExpandParent, ss, title,open } = this.state;
     const { handleTree, data ,catalog: {treeData}, } = this.props;
     // let treeData = this.groupTree(data);
     const loop = data => data.map((item) => {
@@ -146,19 +150,24 @@ class SimpleTree extends PureComponent {
     });
     return (
       <div className={styles.tree_back_ground} style={ss}>
-        <div className={styles.tree_title}>{title}
-          <Icon
+        <div className={styles.tree_title}>{!open&&title}
+          {open?<Icon
+            className={styles.trigger}
+            type={'menu-unfold'}
+            onClick={()=>{this.toggle(false)}}
+          />:<Icon
             className={styles.trigger}
             type={'menu-fold'}
-            onClick={this.toggle}
-          /></div>
-        <Tree
+            onClick={()=>{this.toggle(true)}}
+          />}
+        </div>
+        {!open&&<Tree
           onSelect={handleTree}
           loadData={this.onLoadData}
         >
           {this.renderTreeNodes(this.state.treeData)}
           {/*{loop(treeData)}*/}
-        </Tree>
+        </Tree>}
       </div>
     );
   }

@@ -20,7 +20,7 @@ import {
   Divider,
   Progress,
   Cascader,
-  Steps
+  Steps,
 } from 'antd';
 import StandardTable from 'components/StandardTable';
 import SimpleTree from 'components/SimpleTree';
@@ -58,33 +58,33 @@ const CreateForm = Form.create()(props => {
   const exHandle = (index) => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
-      if(index != 4){
-        if(index == 3){
+      if (index != 4) {
+        if (index == 3) {
           if (createItemData.sourceType === 'mysql' || createItemData.sourceType === 'oracle' || createItemData.sourceType === 'sqlserver'
             || createItemData.sourceType === 'db2') {
-            handleItem(11)
+            handleItem(11);
           } else if (createItemData.sourceType === 'mongodb' || createItemData.sourceType === 'hbase') {
-            handleItem(12)
+            handleItem(12);
           } else if (createItemData.sourceType === 'http' || createItemData.sourceType === 'https' || createItemData.sourceType === 'wsdl'
             || createItemData.sourceType === 'rest') {
-            handleItem(13)
+            handleItem(13);
           } else if (createItemData.sourceType === 'ftp' || createItemData.sourceType === 'sftp' || createItemData.sourceType === '本地磁盘'
             || createItemData.sourceType === '共享文件夹') {
-            handleItem(14)
+            handleItem(14);
           }
-        }else{
-          handleItem(index)
+        } else {
+          handleItem(index);
         }
-        createItemData = {...createItemData,...fieldsValue}
-      }else{
-        createItemData = {...createItemData,...fieldsValue}
-        handleAdd(createItemData)
+        createItemData = { ...createItemData, ...fieldsValue };
+      } else {
+        createItemData = { ...createItemData, ...fieldsValue };
+        handleAdd(createItemData);
       }
     });
   };
-  const onChange = (index)=>{
+  const onChange = (index) => {
     createItemData.sourceType = index[1];
-  }
+  };
   const options = [{
     value: '关系型数据库',
     label: '关系型数据库',
@@ -203,11 +203,11 @@ const CreateForm = Form.create()(props => {
       onCancel={() => handleModalVisible()}
     >
       <Row>
-      <Steps current={item-1} labelPlacement={'vertical'}>
-        <Step key={1} title={'选择数据源类型'} />
-        <Step key={2} title={'录入基本信息'} />
-        <Step key={3} title={'配置技术参数'} />
-      </Steps>
+        <Steps current={item - 1} labelPlacement={'vertical'}>
+          <Step key={1} title={'选择数据源类型'}/>
+          <Step key={2} title={'录入基本信息'}/>
+          <Step key={3} title={'配置技术参数'}/>
+        </Steps>
       </Row>
       {item === 1 ? <div><Row gutter={{ md: 8, lg: 24, xl: 48 }}>
         <Col md={24} sm={24}>
@@ -216,83 +216,92 @@ const CreateForm = Form.create()(props => {
                                                                 placeholder="请选择数据源/数据库"/>
           </FormItem>
         </Col></Row></div> : item === 2 ? <div>
-          <FormItem {...formItemLayout} label="数据源名称">
-            {form.getFieldDecorator('sourceName', {
-              rules: [{ required: true, message: 'Please input some description...' }], initialValue:createItemData.sourceName
-            })(<Input placeholder="请输入"/>)}
-          </FormItem>
-          <FormItem {...formItemLayout} label="所属组织机构">
-            {form.getFieldDecorator('orgId', {initialValue:createItemData.orgId
-            })(
-              <Select placeholder="选择所属组织机构" style={{ width: '100%' }}>
-                <Option value="0">公安局</Option>
-                <Option value="1">刑侦科</Option>
-                <Option value="2">户籍科</Option>
-                <Option value="3">办公室</Option>
-              </Select>,
-            )}
-          </FormItem>
-          <FormItem {...formItemLayout} label="资源分类">
-            {form.getFieldDecorator('resourceId', {
-              rules: [{ required: true, message: 'Please input some description...' }], initialValue:createItemData.resourceId
-            })(<Input disable placeholder="请输入"/>)}
-          </FormItem>
-          <FormItem {...formItemLayout} label="数据源描述">
-            {form.getFieldDecorator('content', {
-              rules: [
-                {
-                  required: true,
-                  message: '请输入数据源描述',
-                },
-              ], initialValue: listItemData.content,
-            })(
-              <TextArea
-                style={{ minHeight: 32 }}
-                placeholder="请输入你的数据源描述"
-                rows={4}
-              />,
-            )}
-          </FormItem>
-        </div> :item === 11 ?
+        <FormItem {...formItemLayout} label="数据源名称">
+          {form.getFieldDecorator('sourceName', {
+            rules: [{ required: true, message: 'Please input some description...' }],
+            initialValue: createItemData.sourceName,
+          })(<Input placeholder="请输入"/>)}
+        </FormItem>
+        <FormItem {...formItemLayout} label="所属组织机构">
+          {form.getFieldDecorator('orgId', {
+            initialValue: createItemData.orgId,
+          })(
+            <Select placeholder="选择所属组织机构" style={{ width: '100%' }}>
+              <Option value="0">公安局</Option>
+              <Option value="1">刑侦科</Option>
+              <Option value="2">户籍科</Option>
+              <Option value="3">办公室</Option>
+            </Select>,
+          )}
+        </FormItem>
+        <FormItem {...formItemLayout} label="资源分类">
+          {form.getFieldDecorator('resourceId', {
+            rules: [{ required: true, message: 'Please input some description...' }],
+            initialValue: createItemData.resourceId,
+          })(<Input disable placeholder="请输入"/>)}
+        </FormItem>
+        <FormItem {...formItemLayout} label="数据源描述">
+          {form.getFieldDecorator('content', {
+            rules: [
+              {
+                required: true,
+                message: '请输入数据源描述',
+              },
+            ], initialValue: listItemData.content,
+          })(
+            <TextArea
+              style={{ minHeight: 32 }}
+              placeholder="请输入你的数据源描述"
+              rows={4}
+            />,
+          )}
+        </FormItem>
+      </div> : item === 11 ?
         <div>
           <FormItem {...formItemLayout} label="IP地址">
             {form.getFieldDecorator('ip', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.ip
+              rules: [{ required: true, message: 'Please input some description...' }], initialValue: createItemData.ip,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="端口">
             {form.getFieldDecorator('port', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.port
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.port,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="SID">
             {form.getFieldDecorator('sid', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.sid
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.sid,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据库名称/服务名称">
             {form.getFieldDecorator('dbName', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.dbName
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.dbName,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据库版本号">
             {form.getFieldDecorator('dbVersion', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.dbVersion
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.dbVersion,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="用户名">
             {form.getFieldDecorator('account', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.account
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.account,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="密码">
             {form.getFieldDecorator('password', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.password
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.password,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="备注">
             {form.getFieldDecorator('bz', {
-              rules: [{ message: 'Please input some description...' }],initialValue:createItemData.bz
+              rules: [{ message: 'Please input some description...' }], initialValue: createItemData.bz,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <Row>
@@ -300,40 +309,45 @@ const CreateForm = Form.create()(props => {
               <Button type="primary">测试连通性</Button>
             </Col>
           </Row>
-        </div>:item === 12 ?<div>
+        </div> : item === 12 ? <div>
           <FormItem {...formItemLayout} label="IP地址">
             {form.getFieldDecorator('ip', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.ip
+              rules: [{ required: true, message: 'Please input some description...' }], initialValue: createItemData.ip,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="端口">
             {form.getFieldDecorator('port', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.port
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.port,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据库名称">
             {form.getFieldDecorator('dbName', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.dbName
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.dbName,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据库版本号">
             {form.getFieldDecorator('dbVersion', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.dbVersion
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.dbVersion,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="用户名">
             {form.getFieldDecorator('account', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.account
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.account,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="密码">
             {form.getFieldDecorator('password', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.password
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.password,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="备注">
             {form.getFieldDecorator('bz', {
-              rules: [{  message: 'Please input some description...' }],initialValue:createItemData.bz
+              rules: [{ message: 'Please input some description...' }], initialValue: createItemData.bz,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <Row>
@@ -341,14 +355,17 @@ const CreateForm = Form.create()(props => {
               <Button type="primary">测试连通性</Button>
             </Col>
           </Row>
-        </div>:item === 13 ?<div>
+        </div> : item === 13 ? <div>
           <FormItem {...formItemLayout} label="接口地址">
             {form.getFieldDecorator('interfaceUrl', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.interfaceUrl
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.interfaceUrl,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="接口类型">
-            {form.getFieldDecorator('interfaceType', {rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.interfaceType
+            {form.getFieldDecorator('interfaceType', {
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.interfaceType,
             })(
               <Select placeholder="选择接口类型" style={{ width: '100%' }}>
                 <Option value="get">get</Option>
@@ -358,7 +375,7 @@ const CreateForm = Form.create()(props => {
           </FormItem>
           <FormItem {...formItemLayout} label="备注">
             {form.getFieldDecorator('bz', {
-              rules: [{ message: 'Please input some description...' }],initialValue:createItemData.bz
+              rules: [{ message: 'Please input some description...' }], initialValue: createItemData.bz,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <Row>
@@ -366,35 +383,39 @@ const CreateForm = Form.create()(props => {
               <Button type="primary">测试连通性</Button>
             </Col>
           </Row>
-        </div>:<div>
+        </div> : <div>
           <FormItem {...formItemLayout} label="IP地址">
             {form.getFieldDecorator('ip', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.ip
+              rules: [{ required: true, message: 'Please input some description...' }], initialValue: createItemData.ip,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="端口">
             {form.getFieldDecorator('port', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.port
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.port,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="用户名">
             {form.getFieldDecorator('account', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.account
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.account,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="密码">
             {form.getFieldDecorator('password', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.password
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.password,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="根路径">
             {form.getFieldDecorator('path', {
-              rules: [{ required: true, message: 'Please input some description...' }],initialValue:createItemData.path
+              rules: [{ required: true, message: 'Please input some description...' }],
+              initialValue: createItemData.path,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="备注">
             {form.getFieldDecorator('bz', {
-              rules: [{ message: 'Please input some description...' }],initialValue:createItemData.bz
+              rules: [{ message: 'Please input some description...' }], initialValue: createItemData.bz,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <Row>
@@ -427,7 +448,7 @@ const UpdateForm = Form.create()(props => {
       md: { span: 16 },
     },
   };
-  let title = itemDataStatus===1?"配置详情":"修改配置";
+  let title = itemDataStatus === 1 ? '配置详情' : '修改配置';
   return (
     <Modal
       title={title}
@@ -438,52 +459,53 @@ const UpdateForm = Form.create()(props => {
     >
       <FormItem {...formItemLayout} label="数据源类型">
         {form.getFieldDecorator('sourceType', {
-          rules: [{ message: 'Please input some description...' }],initialValue: listItemData.sourceType,
+          rules: [{ message: 'Please input some description...' }], initialValue: listItemData.sourceType,
         })(<Input disabled placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据库类型">
         {form.getFieldDecorator('sourceType', {
-          rules: [{  message: 'Please input some description...' }],initialValue: listItemData.dbName,
+          rules: [{ message: 'Please input some description...' }], initialValue: listItemData.dbName,
         })(<Input disabled placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据源名称">
         {form.getFieldDecorator('sourceName', {
-          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.sourceName,
+          rules: [{ required: true, message: 'Please input some description...' }],
+          initialValue: listItemData.sourceName,
         })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="所属组织机构">
         {form.getFieldDecorator('orgId', {
-          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.orgId,
+          rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.orgId,
         })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="资源分类">
         {form.getFieldDecorator('resourceId', {
-          rules: [{ message: 'Please input some description...' }],initialValue: listItemData.resourceId,
+          rules: [{ message: 'Please input some description...' }], initialValue: listItemData.resourceId,
         })(<Input disabled placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="IP地址">
         {form.getFieldDecorator('ip', {
-          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.ip,
+          rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.ip,
         })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="端口">
         {form.getFieldDecorator('port', {
-          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.port,
+          rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.port,
         })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据库名称/SID">
         {form.getFieldDecorator('sid', {
-          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.sid,
+          rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.sid,
         })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="用户名">
         {form.getFieldDecorator('account', {
-          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.account,
+          rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.account,
         })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="密码">
         {form.getFieldDecorator('password', {
-          rules: [{ required: true, message: 'Please input some description...' }],initialValue: listItemData.password,
+          rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.password,
         })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据源描述">
@@ -507,8 +529,8 @@ const UpdateForm = Form.create()(props => {
   );
 });
 const TestForm = Form.create()(props => {
-  const { modalVisible, form, handleAdd, selectedRows, testList, handleModalVisible } = props;
-  let percent = 50;
+  const { modalVisible, form, handleAdd, selectedRows, testHandleAdd,testList, handleModalVisible } = props;
+  let percent = parseInt((testList.length / selectedRows.length) * 100);
   return (
     <Modal
       title="测试连通性"
@@ -518,7 +540,7 @@ const TestForm = Form.create()(props => {
       onCancel={() => handleModalVisible()}
     >
       <Row>
-        <Progress percent={(testList.length / selectedRows.length)*100}/>
+        <Progress percent={percent}/>
       </Row>
       <Row>
         <Col xl={16} lg={12} md={12} sm={24} xs={24}>
@@ -538,7 +560,7 @@ const TestForm = Form.create()(props => {
       </Row>
       <Row>
         <Col xl={16} lg={12} md={12} sm={24} xs={24}>
-          <Button type="primary">重试</Button>
+          <Button type="primary" onClick={testHandleAdd}>重试</Button>
         </Col>
       </Row>
     </Modal>
@@ -560,6 +582,8 @@ export default class ResourceClassify extends PureComponent {
     formValues: {},
     listItemData: {},
     testList: [],
+    testSuccess: 0,
+    testFail: 0,
     item: 1,
   };
 
@@ -668,17 +692,17 @@ export default class ResourceClassify extends PureComponent {
       this.setState({
         formValues: values,
       });
-      if(values.relationDb&&values.relationDb.length>0){
-        values.relationDb = values.relationDb.join(',')
+      if (values.relationDb && values.relationDb.length > 0) {
+        values.relationDb = values.relationDb.join(',');
       }
-      if(values.unrelationDb&&values.unrelationDb.length>0){
-        values.unrelationDb = values.unrelationDb.join(',')
+      if (values.unrelationDb && values.unrelationDb.length > 0) {
+        values.unrelationDb = values.unrelationDb.join(',');
       }
-      if(values.api&&values.api.length>0){
-        values.api = values.api.join(',')
+      if (values.api && values.api.length > 0) {
+        values.api = values.api.join(',');
       }
-      if(values.file&&values.file.length>0){
-        values.file = values.file.join(',')
+      if (values.file && values.file.length > 0) {
+        values.file = values.file.join(',');
       }
       dispatch({
         type: 'centersource/fetch',
@@ -701,7 +725,7 @@ export default class ResourceClassify extends PureComponent {
       updateModalVisible: !!flag,
     });
   };
-  updateHandleModal = (item,index) => {
+  updateHandleModal = (item, index) => {
     listItemData = item;
     itemDataStatus = index;
     this.setState({
@@ -743,11 +767,11 @@ export default class ResourceClassify extends PureComponent {
     dispatch({
       type: 'centersource/add',
       payload: fields,
-      callback:()=>{
+      callback: () => {
         dispatch({
           type: 'centersource/fetch',
         });
-      }
+      },
     });
     message.success('添加成功');
     this.setState({
@@ -761,6 +785,10 @@ export default class ResourceClassify extends PureComponent {
       testList: [],
     });
     this.setState({
+      testSuccess: 0,
+      testFail: 0,
+    });
+    this.setState({
       testModalVisible: true,
     });
     this.state.selectedRows.forEach((item, index) => {
@@ -769,12 +797,21 @@ export default class ResourceClassify extends PureComponent {
         payload: {
           id: item.id,
         },
-        callback: (index) => {
-          this.state.testList.push(index);
+        callback: (res) => {
+          this.state.testList.push(res);
           this.setState({
             testList: this.state.testList,
           });
-          if (index === this.state.selectedRows.length - 1) {
+          if(res){
+            this.setState({
+              testSuccess: this.state.testSuccess++,
+            });
+          }else{
+            this.setState({
+              testFail: this.state.testFail++,
+            });
+          }
+          if (this.state.testList.length === this.state.selectedRows.length) {
             message.success('测试完毕');
           }
         },
@@ -785,12 +822,12 @@ export default class ResourceClassify extends PureComponent {
     const { dispatch } = this.props;
     dispatch({
       type: 'centersource/update',
-      payload: {...listItemData,...fields},
-      callback:()=>{
+      payload: { ...listItemData, ...fields },
+      callback: () => {
         dispatch({
           type: 'centersource/fetch',
         });
-      }
+      },
     });
     message.success('修改成功');
     this.setState({
@@ -937,7 +974,7 @@ export default class ResourceClassify extends PureComponent {
     createItemData.resourceId = data[0];
     dispatch({
       type: 'centersource/fetch',
-      payload: {resourceId:createItemData.resourceId},
+      payload: { resourceId: createItemData.resourceId },
     });
   };
 
@@ -947,7 +984,7 @@ export default class ResourceClassify extends PureComponent {
       classify: { treeData },
       loading,
     } = this.props;
-    const { selectedRows, modalVisible, testModalVisible, updateModalVisible,listItemData, item } = this.state;
+    const { selectedRows, testList, modalVisible, testModalVisible, updateModalVisible, listItemData, item } = this.state;
 
     const columns = [
       {
@@ -973,13 +1010,13 @@ export default class ResourceClassify extends PureComponent {
         title: '最近连接时间',
         dataIndex: 'createTime',
         sorter: true,
-        render: val => <span>{val?moment(val).format('YYYY-MM-DD HH:mm:ss'):'-'}</span>,
+        render: val => <span>{val ? moment(val).format('YYYY-MM-DD HH:mm:ss') : '-'}</span>,
       },
       {
         title: '连通状态',
         dataIndex: 'linkStatus',
         render(val) {
-          return <Badge status={val ? 'success' : 'error'} text={val||'未连通'}/>;
+          return <Badge status={val ? 'success' : 'error'} text={val || '未连通'}/>;
         },
       },
       {
@@ -988,11 +1025,11 @@ export default class ResourceClassify extends PureComponent {
           return (
             <Fragment>
               <a onClick={() => {
-                this.updateHandleModal(text,1);
+                this.updateHandleModal(text, 1);
               }}>配置详情</a>
               <Divider type="vertical"/>
               <a onClick={() => {
-                this.updateHandleModal(text,2);
+                this.updateHandleModal(text, 2);
               }}>修改配置</a>
             </Fragment>
           );
@@ -1007,8 +1044,9 @@ export default class ResourceClassify extends PureComponent {
     const testParentMethods = {
       handleAdd: this.testHandleAdd,
       handleModalVisible: this.testHandleModalVisible,
-      selectedRows: this.state.selectedRows,
-      testList: this.state.testList,
+      selectedRows: selectedRows,
+      testHandleAdd:this.testHandleAdd,
+      testList: testList,
     };
     const updateParentMethods = {
       handleAdd: this.updateHandleAdd,
