@@ -341,7 +341,7 @@ const CreateForm = Form.create()(props => {
     value: '非关系型数据库',
     label: '非关系型数据库',
     children: [{
-      value: 'mongodb', label: 'mongodb',
+      value: 'mongo', label: 'mongo',
     }, {
       value: 'hbase', label: 'hbase',
     }],
@@ -565,7 +565,7 @@ const CreateForm = Form.create()(props => {
         if (choiceSelectedRows[0].sourceType === 'mysql' || choiceSelectedRows[0].sourceType === 'oracle' || choiceSelectedRows[0].sourceType === 'sqlserver'
           || choiceSelectedRows[0].sourceType === 'db2') {
           getListBuyId(choiceSelectedRows[0], 2);
-        } else if (choiceSelectedRows[0].sourceType === 'mongodb' || choiceSelectedRows[0].sourceType === 'mongo' || choiceSelectedRows[0].sourceType === 'hbase') {
+        } else if (choiceSelectedRows[0].sourceType === 'mongo' || choiceSelectedRows[0].sourceType === 'mongo' || choiceSelectedRows[0].sourceType === 'hbase') {
           getListBuyId(choiceSelectedRows[0], 3);
         } else if (choiceSelectedRows[0].sourceType === 'http' || choiceSelectedRows[0].sourceType === 'https' || choiceSelectedRows[0].sourceType === 'wsdl'
           || choiceSelectedRows[0].sourceType === 'rest') {
@@ -1322,7 +1322,7 @@ export default class ResourceClassify extends PureComponent {
       this.setState({
         detailType: 1,
       });
-    } else if (listItemData.sourceType === 'mongodb' || listItemData.sourceType === 'mongo' || listItemData.sourceType === 'hbase') {
+    } else if (listItemData.sourceType === 'mongo' || listItemData.sourceType === 'mongo' || listItemData.sourceType === 'hbase') {
       dispatch({
         type: 'catalog/catalogTableAndTableField',
         payload: { catalogId: listItemData.id },

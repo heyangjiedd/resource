@@ -30,7 +30,7 @@ import StandardFormRow from 'components/StandardFormRow';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 let itemDataStatus = 0;
 let listItemData = {};
-let treeSelect = {};
+let itemData = {};
 let createItemData = {};
 
 import styles from './resource_file.less';
@@ -235,30 +235,9 @@ const ResourceDetail = Form.create()(props => {
       onCancel={() => handleModalVisible()}
     >
           <div>
-            <DescriptionList size="large" title="文件信息" style={{ marginBottom: 32 }}>
-              <List
-                rowKey="id"
-                grid={{ gutter: 24, lg: 3, md: 2, sm: 1, xs: 1 }}
-                dataSource={lifelist}
-                renderItem={item =>
-                  <List.Item key={item.id}>
-                    <Card hoverable className={styles.card}>
-                      <Card.Meta
-                        description={
-                          <DescriptionList size="large"  col={1} title="" style={{ marginBottom: 12 }}>
-                            {/*<div>文件名称:<span>{item.sourceName}</span></div>*/}
-                            {/*<div>文件类型:<span>{item.sourceName}</span></div>*/}
-                            {/*<div>文件类型:<span>{item.interfaceType}</span></div>*/}
-                            <Description term="文件名称">{item.sourceName}</Description>
-                            <Description term="文件类型">{item.sourceName}</Description>
-                            <Description term="文件描述">{item.interfaceType}</Description>
-                          </DescriptionList>
-                        }
-                      />
-                    </Card>
-                  </List.Item>
-                }
-              />
+            <DescriptionList size="large" col={1}  title="文件信息" style={{ marginBottom: 32 }}>
+              <Description term="文件名称">{itemData.name}</Description>
+              <Description term="文件描述">{itemData.description}</Description>
             </DescriptionList>
             <DescriptionList size="large" title="数据调用记录" style={{ marginBottom: 32 }}>
               <StandardTableNoCheck
@@ -294,9 +273,10 @@ export default class ResourceClassify extends PureComponent {
 
   componentDidMount() {
     const { dispatch } = this.props;
-    dispatch({
-      type: 'centersource/fetch',
-    });
+    // dispatch({
+    //   type: 'centersource/fetch',
+    // });
+    this.fetchHandle()
     dispatch({
       type: 'classify/tree',
     });
@@ -321,23 +301,55 @@ export default class ResourceClassify extends PureComponent {
     if (sorter.field) {
       params.sorter = `${sorter.field}_${sorter.order}`;
     }
-
+    this.fetchHandle(params)
+    // dispatch({
+    //   type: 'centersource/fetch',
+    //   payload: params,
+    // });
+  };
+  fetchHandle(params) {
+    const { dispatch } = this.props;
+    params = {...params,file:'ftp,sftp,本地磁盘,共享文件件',}
     dispatch({
       type: 'centersource/fetch',
       payload: params,
     });
-  };
+  }
+  handleStandardTableChangeDetail = (pagination, filtersArg, sorter) => {
+    const { dispatch } = this.props;
+    const { formValues } = this.state;
 
+    const filters = Object.keys(filtersArg).reduce((obj, key) => {
+      const newObj = { ...obj };
+      newObj[key] = getValue(filtersArg[key]);
+      return newObj;
+    }, {});
+
+    const params = {
+      pageNum: pagination.current,
+      pageSize: pagination.pageSize,
+      ...formValues,
+      ...filters,
+    };
+    if (sorter.field) {
+      params.sorter = `${sorter.field}_${sorter.order}`;
+    }
+    dispatch({
+      type: 'centersource/fetchTablePage',
+      payload: {...params,id: listItemData.id},
+    });
+  };
   handleFormReset = () => {
     const { form, dispatch } = this.props;
     form.resetFields();
     this.setState({
       formValues: {},
     });
-    dispatch({
-      type: 'centersource/fetch',
-      payload: {},
-    });
+    this.fetchHandle()
+    // dispatch({
+    //   type: 'centersource/fetch',
+    //   payload: {},
+    // });
   };
 
   toggleForm = () => {
@@ -394,11 +406,11 @@ export default class ResourceClassify extends PureComponent {
       this.setState({
         formValues: values,
       });
-
-      dispatch({
-        type: 'centersource/fetch',
-        payload: values,
-      });
+      this.fetchHandle(values)
+      // dispatch({
+      //   type: 'centersource/fetch',
+      //   payload: values,
+      // });
     });
   };
 
@@ -564,7 +576,7 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="mongodb">mongodb</TagSelect.Option>
+                  <TagSelect.Option value="mongo">mongo</TagSelect.Option>
                   <TagSelect.Option value="hbase">hbase</TagSelect.Option>
                 </TagSelect>
               )}
@@ -610,10 +622,11 @@ export default class ResourceClassify extends PureComponent {
   handleTree = data => {
     const { dispatch } = this.props;
     createItemData.resourceId = data[0];
-    dispatch({
-      type: 'centersource/fetch',
-      payload: {resourceId:createItemData.resourceId},
-    });
+    this.fetchHandle({resourceId:createItemData.resourceId})
+    // dispatch({
+    //   type: 'centersource/fetch',
+    //   payload: {resourceId:createItemData.resourceId},
+    // });
   }
   testHandleModalVisible = flag => {
     this.setState({
@@ -624,10 +637,9 @@ export default class ResourceClassify extends PureComponent {
     const { dispatch } = this.props;
     listItemData = index;
     dispatch({
-      type: 'centersource/fetchFile',
+      type: 'centersource/fetchTablePage',
       payload: {
         id: listItemData.id,
-        catalogId: listItemData.id,
       },
     });
     // dispatch({
@@ -637,6 +649,7 @@ export default class ResourceClassify extends PureComponent {
     this.getFileListHandleModalVisible(flag);
   };
   getFileDetailHandle = (index,flag) => {
+    itemData = index;
     const { dispatch } = this.props;
     dispatch({
       type: 'catalog/operateLog',
@@ -692,7 +705,7 @@ export default class ResourceClassify extends PureComponent {
 
   render() {
     const {
-      centersource: { data ,lifelist},
+      centersource: { data ,lifelist,dataListPage},
       loading,
       classify: { treeData },
       catalog: { catalogItem, field, tableAndField, operateLog },
@@ -706,27 +719,27 @@ export default class ResourceClassify extends PureComponent {
       },
       {
         title: '文件名称',
-        dataIndex: 'sourceType',
+        dataIndex: 'name',
       },
       {
         title: '所属数据源',
-        dataIndex: 'orgId',
+        render: (text, record, index) => <span>{listItemData.sourceName}</span>
       },
       {
         title: '数据源类型',
-        dataIndex: 'status',
+        render: (text, record, index) => <span>{listItemData.sourceType}</span>
       },
       {
         title: '文件储存路劲',
-        dataIndex: 'status1',
+        dataIndex: 'selectedFieldNum',
       },
       {
         title: '文件大小',
-        dataIndex: 'status2',
+        dataIndex: 'fieldNum',
       },
       {
         title: '文件描述',
-        dataIndex: 'status3',
+        dataIndex: 'description',
       },
       {
         title: '操作',
@@ -814,6 +827,7 @@ export default class ResourceClassify extends PureComponent {
     };
     const parentMethodsResource = {
       operateLog: operateLog,
+      handleModalVisible: this.handleModalVisible,
     };
     const { getFieldDecorator } = form;
     return (
@@ -838,10 +852,10 @@ export default class ResourceClassify extends PureComponent {
               <StandardTable
                 selectedRows={[]}
                 loading={loading}
-                data={lifelist}
+                data={dataListPage}
                 columns={detailColumns}
                 onSelectRow={this.handleSelectRows}
-                onChange={this.handleStandardTableChange}
+                onChange={this.handleStandardTableChangeDetail}
               />
             </div>
           </Card>:<Card bordered={false}  className={styles.flexTable}>
@@ -889,7 +903,7 @@ export default class ResourceClassify extends PureComponent {
           </Card>}
         </div>
         <TestForm {...testParentMethods} modalVisible={testModalVisible}/>
-        <CreateForm {...parentMethods} modalVisible={modalVisible} />
+        {/*<CreateForm {...parentMethods} modalVisible={modalVisible} />*/}
         <ResourceDetail {...parentMethodsResource} modalVisible={modalVisible}/>
       </PageHeaderLayout>
     );

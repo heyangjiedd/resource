@@ -63,7 +63,7 @@ const CreateForm = Form.create()(props => {
           if (createItemData.sourceType === 'mysql' || createItemData.sourceType === 'oracle' || createItemData.sourceType === 'sqlserver'
             || createItemData.sourceType === 'db2') {
             handleItem(11);
-          } else if (createItemData.sourceType === 'mongodb' || createItemData.sourceType === 'hbase') {
+          } else if (createItemData.sourceType === 'mongo' || createItemData.sourceType === 'hbase') {
             handleItem(12);
           } else if (createItemData.sourceType === 'http' || createItemData.sourceType === 'https' || createItemData.sourceType === 'wsdl'
             || createItemData.sourceType === 'rest') {
@@ -101,7 +101,7 @@ const CreateForm = Form.create()(props => {
     value: '非关系型数据库',
     label: '非关系型数据库',
     children: [{
-      value: 'mongodb', label: 'mongodb',
+      value: 'mongo', label: 'mongo',
     }, {
       value: 'hbase', label: 'hbase',
     }],
@@ -925,7 +925,7 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('unrelationDb')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="mongodb">mongodb</TagSelect.Option>
+                  <TagSelect.Option value="mongo">mongo</TagSelect.Option>
                   <TagSelect.Option value="hbase">hbase</TagSelect.Option>
                 </TagSelect>,
               )}

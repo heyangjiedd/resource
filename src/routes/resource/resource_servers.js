@@ -262,14 +262,22 @@ export default class ResourceClassify extends PureComponent {
 
   componentDidMount() {
     const { dispatch } = this.props;
-    dispatch({
-      type: 'centersource/fetch',
-    });
+    // dispatch({
+    //   type: 'centersource/fetch',
+    // });
+    this.fetchHandle();
     dispatch({
       type: 'classify/tree',
     });
   }
-
+  fetchHandle(params) {
+    const { dispatch } = this.props;
+    params = {...params,file:'http,https,wsdl,rest',}
+    dispatch({
+      type: 'centersource/fetch',
+      payload: params,
+    });
+  }
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
     const { dispatch } = this.props;
     const { formValues } = this.state;
@@ -289,11 +297,11 @@ export default class ResourceClassify extends PureComponent {
     if (sorter.field) {
       params.sorter = `${sorter.field}_${sorter.order}`;
     }
-
-    dispatch({
-      type: 'centersource/fetch',
-      payload: params,
-    });
+    this.fetchHandle(params);
+    // dispatch({
+    //   type: 'centersource/fetch',
+    //   payload: params,
+    // });
   };
 
   handleFormReset = () => {
@@ -302,10 +310,11 @@ export default class ResourceClassify extends PureComponent {
     this.setState({
       formValues: {},
     });
-    dispatch({
-      type: 'centersource/fetch',
-      payload: {},
-    });
+    this.fetchHandle();
+    // dispatch({
+    //   type: 'centersource/fetch',
+    //   payload: {},
+    // });
   };
 
   toggleForm = () => {
@@ -362,11 +371,11 @@ export default class ResourceClassify extends PureComponent {
       this.setState({
         formValues: values,
       });
-
-      dispatch({
-        type: 'centersource/fetch',
-        payload: values,
-      });
+      this.fetchHandle(values);
+      // dispatch({
+      //   type: 'centersource/fetch',
+      //   payload: values,
+      // });
     });
   };
 
@@ -551,7 +560,7 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="mongodb">mongodb</TagSelect.Option>
+                  <TagSelect.Option value="mongo">mongo</TagSelect.Option>
                   <TagSelect.Option value="hbase">hbase</TagSelect.Option>
                 </TagSelect>,
               )}
@@ -598,10 +607,12 @@ export default class ResourceClassify extends PureComponent {
   handleTree = data => {
     const { dispatch } = this.props;
     createItemData.resourceId = data[0];
-    dispatch({
-      type: 'centersource/fetch',
-      payload: { resourceId: createItemData.resourceId },
-    });
+    this.fetchHandle({ resourceId: createItemData.resourceId });
+
+    // dispatch({
+    //   type: 'centersource/fetch',
+    //   payload: { resourceId: createItemData.resourceId },
+    // });
   };
 
   render() {

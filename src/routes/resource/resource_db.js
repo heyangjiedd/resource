@@ -20,7 +20,10 @@ import {
   Divider,
   Cascader,
   Progress,
+  Tabs,
+  Radio,
 } from 'antd';
+import DescriptionList from 'components/DescriptionList';
 import StandardTable from 'components/StandardTable';
 import StandardTableNoCheck from 'components/StandardTableNoCheck';
 import StandardTableNothing from 'components/StandardTableNothing';
@@ -42,6 +45,9 @@ const FormItem = Form.Item;
 const confirm = Modal.confirm;
 const { TextArea } = Input;
 const { Option } = Select;
+const TabPane = Tabs.TabPane;
+const RadioGroup = Radio.Group;
+const { Description } = DescriptionList;
 const getValue = obj =>
   Object.keys(obj)
     .map(key => obj[key])
@@ -51,6 +57,7 @@ const status = ['关闭', '运行中', '已上线', '异常'];
 let itemDataStatus = 0;
 let listItemData = {};
 let createItemData = {};
+let itemData = {};
 let treeSelect = {};
 
 const CreateForm = Form.create()(props => {
@@ -154,7 +161,7 @@ const CreateForm = Form.create()(props => {
   );
 });
 const TestForm = Form.create()(props => {
-  const { modalVisible, form, selectedRows,testHandleAdd, testList,testSuccess, testFail,handleModalVisible } = props;
+  const { modalVisible, form, selectedRows, testHandleAdd, testList, testSuccess, testFail, handleModalVisible } = props;
   let percent = parseInt((testList.length / selectedRows.length) * 100);
   return (
     <Modal
@@ -191,8 +198,182 @@ const TestForm = Form.create()(props => {
     </Modal>
   );
 });
-@connect(({ resource_db, classify, centersource, loading }) => ({
+const ResourceDetail = Form.create()(props => {
+  const {
+    modalVisible, form, handleModalVisible, loading, data, columns, detailType, tableAndField,
+    radioSwitch, radioSwitcHandle, operateLog, lifelist, httpItem, searchHandle, sqlList, excSql, field,
+  } = props;
+  const formItemLayout = {
+    labelCol: {
+      xs: { span: 24 },
+      sm: { span: 8 },
+    },
+    wrapperCol: {
+      xs: { span: 24 },
+      sm: { span: 16 },
+      md: { span: 16 },
+    },
+  };
+  const exHandle = (index) => {
+    form.validateFields((err, fieldsValue) => {
+      if (err) return;
+      excSql(fieldsValue);
+    });
+  };
+  const onChange = (value) => {
+    radioSwitcHandle(value.target.value);
+  };
+  const gxxsjkdatacolumns = [
+    {
+      title: '姓名',
+      dataIndex: 'sourceName',
+    },
+    {
+      title: '性别',
+      dataIndex: 'sourceType',
+    },
+    {
+      title: '年龄',
+      dataIndex: 'content',
+    }, {
+      title: '身份证号码',
+      dataIndex: 'content',
+    }, {
+      title: '地址',
+      dataIndex: 'content',
+    }];
+  const gxxsjkfieldcolumns = [
+    {
+      title: '字段名',
+      dataIndex: 'name',
+    }, {
+      title: '字段描述',
+      dataIndex: 'tableDesc',
+    }, {
+      title: '类型',
+      dataIndex: 'type',
+    }, {
+      title: '长度',
+      dataIndex: 'len',
+    }];
+  const fgxxsjkdatacolumns = [
+    {
+      title: 'Key',
+      dataIndex: 'key',
+    }, {
+      title: 'Value',
+      dataIndex: 'value',
+    }, {
+      title: 'Type',
+      dataIndex: 'type',
+    },
+  ];
+  let indexList = [];
+  let indexAndOr = '';
+  return (
+    <Modal
+      title="资源详情"
+      visible={modalVisible}
+      footer={null}
+      destroyOnClose={true}
+      width={900}
+      onCancel={() => handleModalVisible()}
+    >
+      {detailType == 1 ?
+        <div><Tabs defaultActiveKey="2">
+          <TabPane tab="数据详情" key="1">
+            <DescriptionList size="large" title="过滤条件" style={{ marginBottom: 0 }}>
+            </DescriptionList>
+            <Row>
+              <Col md={12} sm={24}>
+                <FormItem {...formItemLayout} label="请选择表/视图">
+                  <RadioGroup onChange={onChange} defaultValue={radioSwitch}>
+                    <Radio value='view' defaultChecked={true}>视图操作</Radio>
+                    <Radio value='sql'>SQL操作</Radio>
+                  </RadioGroup>
+                </FormItem>
+              </Col>
+            </Row>
+            {radioSwitch == 'view' ? <div>
+                <SimpleTableEdit
+                  scroll={{ y: 180 }}
+                  search={() => {
+                    searchHandle(indexList, indexAndOr);
+                  }
+                  }
+                  data={[]}
+                  selectItemFeild={field}
+                  transMsg={(index, andOr) => {
+                    indexList = index;
+                    indexAndOr = andOr;
+                  }}
+                />
+                <DescriptionList size="large" col={1} title="描述" style={{ marginBottom: 32 }}>
+                  <Description></Description>
+                </DescriptionList>
+              </div> :
+              <div>
+                <DescriptionList size="large" title="请编写SQL语句" style={{ marginBottom: 0 }}>
+                </DescriptionList>
+                <FormItem>
+                  {form.getFieldDecorator('sql')(
+                    <TextArea
+                      style={{ minHeight: 32 }}
+                      rows={4}
+                    />,
+                  )}
+                </FormItem>
+                {/*<Button size="small" style={{ marginRight: 20 }} onClick={() => {*/}
+                {/*}}>*/}
+                {/*SQL语法检测*/}
+                {/*</Button>*/}
+                <Button size='small' style={{ marginBottom: 10 }} type="primary" onClick={exHandle}>
+                  执行SQL语句
+                </Button>
+              </div>}
+            <DescriptionList size="large" title="数据详情" style={{ marginBottom: 32 }}>
+            </DescriptionList>
+            <StandardTableNothing
+              loading={loading}
+              data={sqlList}
+              columns={gxxsjkdatacolumns}
+            />
+          </TabPane>
+          <TabPane tab="表结构" key="2">
+            {tableAndField.map(item => {
+              return (<div>
+                <DescriptionList size="large" col={1} title="信息资源详情" style={{ marginBottom: 32 }}>
+                  <Description term="表名">{itemData.name}</Description>
+                  <Description term="表类型">{itemData.type}</Description>
+                  <Description term="表注释">{itemData.description}</Description>
+                </DescriptionList>
+                <DescriptionList size="large" title="字段信息" style={{ marginBottom: 32 }}>
+                  <StandardTableNothing
+                    loading={loading}
+                    data={field}
+                    columns={gxxsjkfieldcolumns}
+                  /></DescriptionList></div>);
+            })}
+
+          </TabPane>
+        </Tabs></div> :
+        <div>
+          <DescriptionList size="large" col={2} title="" style={{ marginBottom: 32 }}>
+            <Description term="集合名称">{itemData.name}</Description>
+            <Description term="所属数据源">{listItemData.sourceName}</Description>
+          </DescriptionList>
+          <StandardTableNothing
+            loading={loading}
+            data={sqlList}
+            columns={fgxxsjkdatacolumns}
+          />
+        </div>}
+    </Modal>
+  );
+});
+@connect(({ resource_db, catalog, classify, centersource, loading }) => ({
   resource_db,
+  catalog,
   classify,
   centersource,
   loading: loading.models.resource_db,
@@ -205,20 +386,30 @@ export default class ResourceClassify extends PureComponent {
     expandForm: false,
     selectedRows: [],
     formValues: {},
-    listItemData: {},
     testList: [],
     testSuccess: 0,
     testFail: 0,
-    isFileDetail:false,
+    isFileDetail: false,
+    detailType: 1,
+    choiceFeild: [],
+    choiceFeildCount: 0,
+    radioSwitch: 'view',
   };
 
   componentDidMount() {
     const { dispatch } = this.props;
-    dispatch({
-      type: 'centersource/fetch',
-    });
+    this.fetchHandle();
     dispatch({
       type: 'classify/tree',
+    });
+  }
+
+  fetchHandle(params) {
+    const { dispatch } = this.props;
+    params = { ...params, file: 'mysql,oracle,sqlserver,db2', unrelationDb: 'mongo,hbase' };
+    dispatch({
+      type: 'centersource/fetch',
+      payload: params,
     });
   }
 
@@ -241,23 +432,43 @@ export default class ResourceClassify extends PureComponent {
     if (sorter.field) {
       params.sorter = `${sorter.field}_${sorter.order}`;
     }
+    this.fetchHandle(params);
+    // dispatch({
+    //   type: 'centersource/fetch',
+    //   payload: params,
+    // });
+  };
+  handleStandardTableChangeDetail = (pagination, filtersArg, sorter) => {
+    const { dispatch } = this.props;
+    const { formValues } = this.state;
 
+    const filters = Object.keys(filtersArg).reduce((obj, key) => {
+      const newObj = { ...obj };
+      newObj[key] = getValue(filtersArg[key]);
+      return newObj;
+    }, {});
+
+    const params = {
+      pageNum: pagination.current,
+      pageSize: pagination.pageSize,
+      ...formValues,
+      ...filters,
+    };
+    if (sorter.field) {
+      params.sorter = `${sorter.field}_${sorter.order}`;
+    }
     dispatch({
-      type: 'centersource/fetch',
-      payload: params,
+      type: 'centersource/fetchTablePage',
+      payload: { ...params, id: listItemData.id },
     });
   };
-
   handleFormReset = () => {
     const { form, dispatch } = this.props;
     form.resetFields();
     this.setState({
       formValues: {},
     });
-    dispatch({
-      type: 'centersource/fetch',
-      payload: {},
-    });
+    this.fetchHandle(params);
   };
 
   toggleForm = () => {
@@ -314,11 +525,11 @@ export default class ResourceClassify extends PureComponent {
       this.setState({
         formValues: values,
       });
-
-      dispatch({
-        type: 'centersource/fetch',
-        payload: values,
-      });
+      this.fetchHandle(values);
+      // dispatch({
+      //   type: 'centersource/fetch',
+      //   payload: values,
+      // });
     });
   };
 
@@ -490,7 +701,7 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('category')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="mongodb">mongodb</TagSelect.Option>
+                  <TagSelect.Option value="mongo">mongo</TagSelect.Option>
                   <TagSelect.Option value="hbase">hbase</TagSelect.Option>
                 </TagSelect>,
               )}
@@ -558,11 +769,11 @@ export default class ResourceClassify extends PureComponent {
           this.setState({
             testList: this.state.testList,
           });
-          if(res){
+          if (res) {
             this.setState({
               testSuccess: this.state.testSuccess++,
             });
-          }else{
+          } else {
             this.setState({
               testFail: this.state.testFail++,
             });
@@ -578,16 +789,39 @@ export default class ResourceClassify extends PureComponent {
   handleTree = data => {
     const { dispatch } = this.props;
     createItemData.resourceId = data[0];
-    dispatch({
-      type: 'centersource/fetch',
-      payload: { resourceId: createItemData.resourceId },
-    });
+    this.fetchHandle({ resourceId: createItemData.resourceId });
+    // dispatch({
+    //   type: 'centersource/fetch',
+    //   payload: { resourceId: createItemData.resourceId },
+    // });
   };
-  getFileDetailHandle = (index,flag) => {
+  getFileListHandle = (index, flag) => {
     const { dispatch } = this.props;
+    listItemData = index;
     dispatch({
-      type: 'catalog/operateLog',
-      payload: { id: index.id, type: 'file' },
+      type: 'centersource/fetchTablePage',
+      payload: {
+        id: listItemData.id,
+      },
+    });
+    this.getFileListHandleModalVisible(flag);
+  };
+  getFileDetailHandle = (index, flag) => {
+    const { dispatch } = this.props;
+    itemData = index;
+    if (listItemData.sourceType == 'hbase' || listItemData.sourceType == 'mongo') {
+      this.setState({
+        detailType: 2,
+      });
+    }
+    else {
+      this.setState({
+        detailType: 1,
+      });
+    }
+    dispatch({
+      type: 'catalog/tableField',
+      payload: { tableId: index.id },
     });
     this.handleModalVisible(flag);
   };
@@ -596,14 +830,53 @@ export default class ResourceClassify extends PureComponent {
       isFileDetail: !!flag,
     });
   };
+  radioSwitcHandle = (index) => {
+    this.setState({
+      radioSwitch: index,
+    });
+  };
+  excSql = (index) => {
+    const { dispatch } = this.props;
+    let params = {
+      'params': index.sql,
+      'tableId': itemData.id,
+    };
+    dispatch({
+      type: 'centersource/fetchTableData',
+      payload: params,
+    });
+  };
+  searchHandle = (list, value) => {
+    const { dispatch } = this.props;
+    let param = list.map(item => {
+      return {
+        'fieldName': item.field,
+        'operation': item.condition,
+        'value': item.value,
+        'tableId': item.tableId,
+        'valueType': item.valueType,
+      };
+    });
+    let params = {
+      'accordWith': value || '$and',
+      'tableId': itemData.id,
+      'params': param,
+    };
+    dispatch({
+      type: 'centersource/fetchView',
+      payload: params,
+    });
+  };
+
   render() {
     const {
-      centersource: { data },
+      centersource: { sqlList, data, dataListPage, dataList, lifelist: { list: lifelist }, httpItem },
       loading,
       classify: { treeData },
+      catalog: { catalogItem, field, tableAndField, operateLog },
       form,
     } = this.props;
-    const { selectedRows, modalVisible, listItemData, testModalVisible, testList } = this.state;
+    const { selectedRows, modalVisible, testModalVisible, testList, isFileDetail, detailType, radioSwitch } = this.state;
 
     const columns = [
       {
@@ -628,7 +901,6 @@ export default class ResourceClassify extends PureComponent {
       {
         title: '最近连接时间',
         dataIndex: 'createTime',
-        sorter: true,
         render: val => <span>{val ? moment(val).format('YYYY-MM-DD HH:mm:ss') : '-'}</span>,
       },
       {
@@ -640,18 +912,60 @@ export default class ResourceClassify extends PureComponent {
       },
       {
         title: '操作',
+        width: 10,
         render: (text, record, index) => {
           return (
             <Fragment>
               <a onClick={() => {
-
+                this.getFileListHandle(text, true);
               }}>详情</a>
             </Fragment>
           );
         },
       },
     ];
-
+    const detailColumns = [
+      {
+        title: '序号',
+        render: (text, record, index) => <span>{index + 1}</span>,
+      },
+      {
+        title: '表名',
+        dataIndex: 'name',
+      },
+      {
+        title: '表描述',
+        dataIndex: 'description',
+      },
+      {
+        title: '所属数据源',
+        render: (text, record, index) => <span>{listItemData.sourceName}</span>,
+      },
+      {
+        title: '数据源类型',
+        render: (text, record, index) => <span>{listItemData.sourceType}</span>,
+      },
+      {
+        title: '表类型',
+        dataIndex: 'type',
+      },
+      {
+        title: '字段数',
+        dataIndex: 'selectedFieldNum',
+      },
+      {
+        title: '操作',
+        render: (text, record, index) => {
+          return (
+            <Fragment>
+              <a onClick={() => {
+                this.getFileDetailHandle(text, true);
+              }}>查看</a>
+            </Fragment>
+          );
+        },
+      },
+    ];
     const parentMethods = {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
@@ -660,7 +974,22 @@ export default class ResourceClassify extends PureComponent {
       handleModalVisible: this.testHandleModalVisible,
       selectedRows: this.state.selectedRows,
       testList: this.state.testList,
-      testHandleAdd:this.testHandleAdd,
+      testHandleAdd: this.testHandleAdd,
+    };
+    const parentMethodsResource = {
+      handleAdd: this.handleAddResource,
+      radioSwitcHandle: this.radioSwitcHandle,
+      operateLog: operateLog,
+      sqlList: sqlList,
+      field: field,
+      excSql: this.excSql,
+      searchHandle: this.searchHandle,
+      lifelist: lifelist,
+      httpItem: httpItem,
+      radioSwitch: radioSwitch,
+      tableAndField: tableAndField,
+      detailType: detailType,
+      handleModalVisible: this.handleModalVisible,
     };
     const options = [
       {
@@ -679,7 +1008,7 @@ export default class ResourceClassify extends PureComponent {
         value: '非关系型数据库',
         label: '非关系型数据库',
         children: [{
-          value: 'mongodbB', label: 'mongodbB',
+          value: 'mongo', label: 'mongo',
         }, {
           value: 'hbase', label: 'hbase',
         }],
@@ -730,7 +1059,29 @@ export default class ResourceClassify extends PureComponent {
             handleTree={this.handleTree}
             title={'数据库'}
           />
-          <Card bordered={false} className={styles.flexTable}>
+          {isFileDetail ? <Card bordered={false} className={styles.flexTable}>
+            <div className={styles.tableList}>
+              <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
+                <Col md={6} sm={24}>
+                  <FormItem>
+                    <Button onClick={() => {
+                      this.getFileListHandleModalVisible(false);
+                    }}>
+                      返回
+                    </Button>
+                  </FormItem>
+                </Col>
+              </Row>
+              <StandardTable
+                selectedRows={[]}
+                loading={loading}
+                data={dataListPage}
+                columns={detailColumns}
+                onSelectRow={this.handleSelectRows}
+                onChange={this.handleStandardTableChangeDetail}
+              />
+            </div>
+          </Card> : <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
               <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
                 <Col md={6} sm={24}>
@@ -769,9 +1120,13 @@ export default class ResourceClassify extends PureComponent {
               />
             </div>
           </Card>
+
+          }
+
         </div>
         <TestForm {...testParentMethods} modalVisible={testModalVisible}/>
-        <CreateForm {...parentMethods} modalVisible={modalVisible}/>
+        {/*<CreateForm {...parentMethods} modalVisible={modalVisible}/>*/}
+        <ResourceDetail {...parentMethodsResource} modalVisible={modalVisible}/>
       </PageHeaderLayout>
     );
   }

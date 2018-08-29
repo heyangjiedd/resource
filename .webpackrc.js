@@ -8,6 +8,13 @@ export default {
       extraBabelPlugins: ['dva-hmr'],
     },
   },
+  proxy: {
+    "/": {
+      target: "http://120.77.155.17:8011/",
+      changeOrigin: true,
+      pathRewrite: { "^/" : "" }
+    }
+  },
   externals: {
     '@antv/data-set': 'DataSet',
     rollbar: 'rollbar',

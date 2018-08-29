@@ -214,7 +214,10 @@ export async function tableDataList(params) {
 export async function tableList(params) {
   return request(`/datasource/tableList?${stringify(params)}`);
 }
-
+// 查询数据库表详情和文件分页
+export async function tableListPage(params) {
+  return request(`/datasource/tablePageList?${stringify(params)}`);
+}
 // wsdl查询
 export async function wsdlData(params) {
   return request(`/datasource/wsdlData?${stringify(params)}`);
@@ -382,6 +385,10 @@ export async function queryFakeList(params) {
 
 export async function fakeAccountLogin(params) {
   // return request('/api/login/account', {
+  //   method: 'POST',
+  //   body: params,
+  // });
+  // return requestToken('http://172.18.32.13:8010/oauth/token', {
   //   method: 'POST',
   //   body: params,
   // });
