@@ -137,7 +137,6 @@ const proxy = {
   },
 };
 
-// const apiurl = 'http://172.18.32.13:8011/';
 // const apiurl = 'http://192.168.1.15:8011/';
 const apiurl = 'http://120.77.155.17:8011/';
 

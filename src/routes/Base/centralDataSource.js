@@ -271,7 +271,7 @@ const CreateForm = Form.create()(props => {
           </FormItem>
           <FormItem {...formItemLayout} label="SID">
             {form.getFieldDecorator('sid', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{message: 'Please input some description...' }],
               initialValue: createItemData.sid,
             })(<Input placeholder="请输入"/>)}
           </FormItem>

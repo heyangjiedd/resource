@@ -34,7 +34,7 @@ const getValue = obj =>
     .join(',');
 let itemDataStatus = 0;
 let listItemData = {};
-let treeSelect = {};
+let treeSelect = '';
 
 const CreateForm = Form.create()(props => {
   const { modalVisible, form, handleAdd, handleModalVisible } = props;
@@ -42,7 +42,10 @@ const CreateForm = Form.create()(props => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
       form.resetFields();
-      handleAdd(fieldsValue);
+      if (itemDataStatus === 2)
+        handleModalVisible();
+      else
+        handleAdd(fieldsValue);
     });
   };
   const formItemLayout = {
@@ -56,19 +59,20 @@ const CreateForm = Form.create()(props => {
       md: { span: 17 },
     },
   };
-  let title = itemDataStatus===1?"编辑分类":itemDataStatus===2?"查看分类":"新增分类";
+  let title = itemDataStatus === 1 ? '编辑分类' : itemDataStatus === 2 ? '查看分类' : '新增分类';
   return (
     <Modal
       title={title}
       visible={modalVisible}
       onOk={okHandle}
+      footer={itemDataStatus === 2}
       destroyOnClose={true}
       onCancel={() => handleModalVisible()}
     >
 
       <FormItem {...formItemLayout} label="父级分类名称">
         {form.getFieldDecorator('parentName', {
-          rules: [{  message: 'Please input some description...' }],
+          rules: [{ message: 'Please input some description...' }],
           initialValue: listItemData.parentName,
         })(<Input disabled placeholder="请输入"/>)}
       </FormItem>
@@ -183,7 +187,7 @@ export default class ResourceClassify extends PureComponent {
     } else {
       dispatch({
         type: 'classify/add',
-        payload: {...fields,parentId:treeSelect},
+        payload: { ...fields, parentId: treeSelect },
         callback: () => {
           dispatch({
             type: 'classify/fetch',
@@ -226,13 +230,13 @@ export default class ResourceClassify extends PureComponent {
       });
     }
   };
-  handleTree = (data,e) => {
+  handleTree = (data, e) => {
     treeSelect = data[0];
   };
 
   render() {
     const {
-      classify: { data ,treeData},
+      classify: { data, treeData },
       loading,
     } = this.props;
     const { selectedRows, modalVisible } = this.state;
@@ -243,7 +247,7 @@ export default class ResourceClassify extends PureComponent {
     const columns = [
       {
         title: '序号',
-        render: (text, record, index) => <span>{index+1}</span>
+        render: (text, record, index) => <span>{index + 1}</span>,
       },
       {
         title: '分类名称',

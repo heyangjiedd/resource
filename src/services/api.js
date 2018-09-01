@@ -2,6 +2,20 @@ import { stringify } from 'qs';
 import request from '../utils/request';
 import requestToken from '../utils/requestToken';
 
+//首页统计
+// 获取目录分类数量和目录个数
+export async function childNumAndCatalogNum(params) {
+  return request(`/dirclassify/childNumAndCatalogNum?${stringify(params)}`);
+}
+// 统计目录总数
+export async function statisticTotal() {
+  return request(`/statistic/total`);
+}
+// 已校核或未校核目录占比
+export async function statisticCheck(params) {
+  return request(`/statistic/check?${stringify(params)}`);
+}
+
 // 资源分类
 // 获取资源分类列表
 export async function resourceclassifyList(params) {
@@ -392,7 +406,7 @@ export async function fakeAccountLogin(params) {
   //   method: 'POST',
   //   body: params,
   // });
-  return requestToken('http://120.77.155.17:8010/oauth/token', {
+  return requestToken('/oauth/token', {
     method: 'POST',
     body: params,
   });

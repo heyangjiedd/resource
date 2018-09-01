@@ -9,7 +9,6 @@ import {
   Table,
   Radio,
   DatePicker,
-  Tooltip,
   Menu,
   Dropdown,
 } from 'antd';
@@ -28,6 +27,21 @@ import {
 import Trend from 'components/Trend';
 import NumberInfo from 'components/NumberInfo';
 import { getTimeDistance } from '../../utils/utils';
+import {
+  G2,
+  Chart,
+  Geom,
+  Axis,
+  Tooltip,
+  Coord,
+  Label,
+  Legend,
+  View,
+  Guide,
+  Shape,
+  Facet,
+  Util,
+} from 'bizcharts';
 
 import styles from './Analysis.less';
 
@@ -48,8 +62,9 @@ const Yuan = ({ children }) => (
   />
 );
 
-@connect(({ chart, loading }) => ({
+@connect(({ chart, charts, loading }) => ({
   chart,
+  charts,
   loading: loading.effects['chart/fetch'],
 }))
 export default class Analysis extends Component {
@@ -62,15 +77,31 @@ export default class Analysis extends Component {
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
-      type: 'chart/fetch',
+      type: 'charts/fetchCatlog1',
+      payload: { fid: '1' },
+    });
+    dispatch({
+      type: 'charts/fetchCatlog2',
+      payload: { fid: '2' },
+    });
+    dispatch({
+      type: 'charts/fetchCatlog3',
+      payload: { fid: '3' },
+    });
+    dispatch({
+      type: 'charts/catlogTotal',
+    });
+    dispatch({
+      type: 'charts/catlogcheck',
+      payload: { isCheck: 'check' },
     });
   }
 
   componentWillUnmount() {
     const { dispatch } = this.props;
-    dispatch({
-      type: 'chart/clear',
-    });
+    // dispatch({
+    //   type: 'chart/clear',
+    // });
   }
 
   handleChangeSalesType = e => {
@@ -122,129 +153,11 @@ export default class Analysis extends Component {
   }
 
   render() {
-    const { rangePickerValue, salesType, currentTabKey } = this.state;
-    const { chart, loading } = this.props;
+    const { salesType } = this.state;
+    const { charts, loading } = this.props;
     const {
-      visitData,
-      visitData2,
-      salesData,
-      searchData,
-      offlineData,
-      offlineChartData,
-      salesTypeData,
-      salesTypeDataOnline,
-      salesTypeDataOffline,
-    } = chart;
-
-    const salesPieData =
-      salesType === 'all'
-        ? salesTypeData
-        : salesType === 'online'
-          ? salesTypeDataOnline
-          : salesTypeDataOffline;
-
-    const menu = (
-      <Menu>
-        <Menu.Item>操作一</Menu.Item>
-        <Menu.Item>操作二</Menu.Item>
-      </Menu>
-    );
-
-    const iconGroup = (
-      <span className={styles.iconGroup}>
-        <Dropdown overlay={menu} placement="bottomRight">
-          <Icon type="ellipsis" />
-        </Dropdown>
-      </span>
-    );
-
-    const salesExtra = (
-      <div className={styles.salesExtraWrap}>
-        <div className={styles.salesExtra}>
-          <a className={this.isActive('today')} onClick={() => this.selectDate('today')}>
-            今日
-          </a>
-          <a className={this.isActive('week')} onClick={() => this.selectDate('week')}>
-            本周
-          </a>
-          <a className={this.isActive('month')} onClick={() => this.selectDate('month')}>
-            本月
-          </a>
-          <a className={this.isActive('year')} onClick={() => this.selectDate('year')}>
-            全年
-          </a>
-        </div>
-        <RangePicker
-          value={rangePickerValue}
-          onChange={this.handleRangePickerChange}
-          style={{ width: 256 }}
-        />
-      </div>
-    );
-
-    const columns = [
-      {
-        title: '排名',
-        dataIndex: 'index',
-        key: 'index',
-      },
-      {
-        title: '搜索关键词',
-        dataIndex: 'keyword',
-        key: 'keyword',
-        render: text => <a href="/">{text}</a>,
-      },
-      {
-        title: '用户数',
-        dataIndex: 'count',
-        key: 'count',
-        sorter: (a, b) => a.count - b.count,
-        className: styles.alignRight,
-      },
-      {
-        title: '周涨幅',
-        dataIndex: 'range',
-        key: 'range',
-        sorter: (a, b) => a.range - b.range,
-        render: (text, record) => (
-          <Trend flag={record.status === 1 ? 'down' : 'up'}>
-            <span style={{ marginRight: 4 }}>
-              {text}
-              %
-            </span>
-          </Trend>
-        ),
-        align: 'right',
-      },
-    ];
-
-    const activeKey = currentTabKey || (offlineData[0] && offlineData[0].name);
-
-    const CustomTab = ({ data, currentTabKey: currentKey }) => (
-      <Row gutter={8} style={{ width: 138, margin: '8px 0' }}>
-        <Col span={12}>
-          <NumberInfo
-            title={data.name}
-            subTitle="转化率"
-            gap={2}
-            total={`${data.cvr * 100}%`}
-            theme={currentKey !== data.name && 'light'}
-          />
-        </Col>
-        <Col span={12} style={{ paddingTop: 36 }}>
-          <Pie
-            animate={false}
-            color={currentKey !== data.name && '#BDE4FF'}
-            inner={0.55}
-            tooltip={false}
-            margin={[0, 0, 0, 0]}
-            percent={data.cvr * 100}
-            height={64}
-          />
-        </Col>
-      </Row>
-    );
-
+      total, check, catlog1, catlog2, catlog3,
+    } = charts;
     const topColResponsiveProps = {
       xs: 24,
       sm: 12,
@@ -253,258 +166,498 @@ export default class Analysis extends Component {
       xl: 6,
       style: { marginBottom: 24 },
     };
-
+    const { DataView } = DataSet;
+    const { Html } = Guide;
+    const data_catlog = [
+      {
+        item: '已校验目录',
+        count: check,
+      },
+      {
+        item: '未校验目录',
+        count: 1 - check,
+      },
+    ];
+    const dv_catlog = new DataView();
+    dv_catlog.source(data_catlog).transform({
+      type: 'percent',
+      field: 'count',
+      dimension: 'item',
+      as: 'percent',
+    });
+    const cols = {
+      percent: {
+        formatter: val => {
+          val = val * 100 + '%';
+          return val;
+        },
+      },
+    };
+    let ztsml = catlog2.reduce((total,item)=>{
+      return total + parseInt(item.catalogNum)
+    },0)
+    let ztsmg = catlog2.reduce((total,item)=>{
+      return total + parseInt(item.childNum)
+    },0)
+    let bmsml = catlog3.reduce((total,item)=>{
+      return total + parseInt(item.catalogNum)
+    },0)
+    let bmsmg = catlog3.reduce((total,item)=>{
+      return total + parseInt(item.childNum)
+    },0);
+    const data = [
+      {
+        name: "London",
+        "Jan.": 18.9,
+        "Feb.": 28.8,
+        "Mar.": 39.3,
+        "Apr.": 81.4,
+        May: 47,
+        "Jun.": 20.3,
+        "Jul.": 24,
+        "Aug.": 35.6
+      },
+      {
+        name: "Berlin",
+        "Jan.": 12.4,
+        "Feb.": 23.2,
+        "Mar.": 34.5,
+        "Apr.": 99.7,
+        May: 52.6,
+        "Jun.": 35.5,
+        "Jul.": 37.4,
+        "Aug.": 42.4
+      }
+    ];
+    const ds = new DataSet();
+    const dv = ds.createView().source(data);
+    dv.transform({
+      type: "fold",
+      fields: ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug."],
+      // 展开字段集
+      key: "月份",
+      // key字段
+      value: "月均降雨量" // value字段
+    });
+    const data_derivation = [
+      { item: '事例一', count: 40 },
+      { item: '事例二', count: 21 },
+      { item: '事例三', count: 17 },
+      { item: '事例四', count: 13 },
+      { item: '事例五', count: 9 }
+    ];
+    const dv_derivation = new DataView();
+    dv_derivation.source(data_derivation).transform({
+      type: 'percent',
+      field: 'count',
+      dimension: 'item',
+      as: 'percent'
+    });
+    const cols_derivation = {
+      percent: {
+        formatter: val => {
+          val = (val * 100) + '%';
+          return val;
+        }
+      }
+    }
     return (
       <Fragment>
-        <Row gutter={24}>
-          <Col {...topColResponsiveProps}>
-            <ChartCard
-              bordered={false}
-              title="总销售额"
-              loading={loading}
-              action={
-                <Tooltip title="指标说明">
-                  <Icon type="info-circle-o" />
-                </Tooltip>
-              }
-              total={() => <Yuan>126560</Yuan>}
-              footer={<Field label="日均销售额" value={`￥${numeral(12423).format('0,0')}`} />}
-              contentHeight={46}
-            >
-              <Trend flag="up" style={{ marginRight: 16 }}>
-                周同比
-                <span className={styles.trendText}>12%</span>
-              </Trend>
-              <Trend flag="down">
-                日环比
-                <span className={styles.trendText}>11%</span>
-              </Trend>
-            </ChartCard>
-          </Col>
-          <Col {...topColResponsiveProps}>
-            <ChartCard
-              bordered={false}
-              title="访问量"
-              loading={loading}
-              action={
-                <Tooltip title="指标说明">
-                  <Icon type="info-circle-o" />
-                </Tooltip>
-              }
-              total={numeral(8846).format('0,0')}
-              footer={<Field label="日访问量" value={numeral(1234).format('0,0')} />}
-              contentHeight={46}
-            >
-              <MiniArea color="#975FE4" data={visitData} />
-            </ChartCard>
-          </Col>
-          <Col {...topColResponsiveProps}>
-            <ChartCard
-              bordered={false}
-              title="支付笔数"
-              loading={loading}
-              action={
-                <Tooltip title="指标说明">
-                  <Icon type="info-circle-o" />
-                </Tooltip>
-              }
-              total={numeral(6560).format('0,0')}
-              footer={<Field label="转化率" value="60%" />}
-              contentHeight={46}
-            >
-              <MiniBar data={visitData} />
-            </ChartCard>
-          </Col>
-          <Col {...topColResponsiveProps}>
-            <ChartCard
-              bordered={false}
-              title="运营活动效果"
-              loading={loading}
-              action={
-                <Tooltip title="指标说明">
-                  <Icon type="info-circle-o" />
-                </Tooltip>
-              }
-              total="78%"
-              footer={
-                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
-                  <Trend flag="up" style={{ marginRight: 16 }}>
-                    周同比
-                    <span className={styles.trendText}>12%</span>
-                  </Trend>
-                  <Trend flag="down">
-                    日环比
-                    <span className={styles.trendText}>11%</span>
-                  </Trend>
+        <Row gutter={24}  key={0}>
+          <Card
+            loading={loading}
+            bordered={false}
+            title="政务信息资源目录总量"
+            bodyStyle={{ padding: 0 }}
+          >
+            <Col xl={8} lg={8} md={8} sm={24} xs={24}
+                 className={styles.catlog}>
+              <Chart
+                height={180}
+                data={dv_catlog}
+                scale={cols}
+                padding={[50, 0, 10, 0]}
+                forceFit={true}
+              >
+                <Coord type={'theta'} radius={1} innerRadius={0.6}/>
+                <Axis name="percent"/>
+                <Guide>
+                  <Html
+                    position={['50%', '-50%']}
+                    html={'<div style=\'color:#8c8c8c;font-size:1.16em;text-align: center;width: 10em;\'><span style=\'color:#262626;font-size:1.5em\'>' + total + '</span>个</div>'}
+                    alignX="middle"
+                    alignY="top"
+                  />
+                </Guide>
+                <Legend
+                  marker={'square'}
+                  position="top"
+                  offsetY={0}
+                  offsetX={0}
+                />
+                <Tooltip
+                  showTitle={false}
+                  itemTpl="<li><span style=&quot;background-color:{color};&quot; class=&quot;g2-tooltip-marker&quot;></span>{name}: {value}</li>"
+                />
+                <Geom
+                  type="intervalStack"
+                  position="percent"
+                  color="item"
+                >
+                </Geom>
+              </Chart>
+            </Col>
+            <Col xl={8} lg={8} md={8} sm={24} xs={24}>
+              <Chart height={180}
+                     width={340}
+                     className={styles.catlog}
+                     padding={[40, 10, 40, 10]}
+                     data={catlog3}>
+                <Tooltip
+                  crosshairs={{
+                    type: 'catalogNum',
+                  }}
+                />
+                <Guide>
+                  <Html
+                    position={['10%', '-50%']}
+                    html={'<div style=\'background:#8FADCC;text-align: center;border-radius:25%;width: 5em;\'><span style=\'color:#fff ;font-size:12px\'>基础目录</span></div>'}
+                    alignX="middle"
+                    alignY="top"
+                  />
+                </Guide>
+                <Axis name="name" tickLine={null}
+                      line={null}
+                      textStyle={{
+                        fontSize: '12',
+                        textAlign: 'center',
+                        fill: '#999',
+                        fontWeight: 'bold',
+                        rotate: 90,
+                      }}/>
+                <Geom type='interval' position="name*catalogNum">
+                  <Label content="catalogNum"/>
+                </Geom>
+              </Chart>
+            </Col>
+            <Col xl={4} lg={4} md={4} sm={12} xs={12} className={styles.catlog}>
+              <div style={{height:180,padding:'0 10px'}}>
+                <div className={styles.catlogTitle}><span style={{color:'#fff',fontSize:12}}>主题目录</span></div>
+                <div style={{height:80,textAlign:'center',borderBottom:'1px solid #e8e8e8'}}>
+                  <div style={{fontSize:'1.16em'}}><span style={{fontSize:'1.5em',marginRight:5}}>{ztsml}</span>类</div>
+                  <div>主题数目</div>
                 </div>
-              }
-              contentHeight={46}
-            >
-              <MiniProgress percent={78} strokeWidth={8} target={80} color="#13C2C2" />
-            </ChartCard>
-          </Col>
+                <div style={{height:80,textAlign:'center',borderBottom:'1px solid #e8e8e8'}}>
+                  <div style={{fontSize:'1.16em'}}><span style={{fontSize:'1.5em',marginRight:5}}>{ztsmg}</span>个</div>
+                  <div>目录数目</div>
+                </div>
+              </div>
+            </Col>
+            <Col xl={4} lg={4} md={4} sm={12} xs={12} className={styles.catlog}>
+              <div style={{height:180,padding:'0 10px'}}>
+                <div className={styles.catlogTitle}><span style={{color:'#fff',fontSize:12}}>部门目录</span></div>
+                <div style={{height:80,textAlign:'center',borderBottom:'1px solid #e8e8e8'}}>
+                  <div style={{fontSize:'1.16em'}}><span style={{fontSize:'1.5em',marginRight:5}}>{bmsml}</span>部门</div>
+                  <div>部门数目</div>
+                </div>
+                <div style={{height:80,textAlign:'center',borderBottom:'1px solid #e8e8e8'}}>
+                  <div style={{fontSize:'1.16em'}}><span style={{fontSize:'1.5em',marginRight:5}}>{bmsmg}</span>个</div>
+                  <div>目录数目</div>
+                </div>
+              </div>
+            </Col>
+          </Card>
         </Row>
-
-        <Card loading={loading} bordered={false} bodyStyle={{ padding: 0 }}>
-          <div className={styles.salesCard}>
-            <Tabs tabBarExtraContent={salesExtra} size="large" tabBarStyle={{ marginBottom: 24 }}>
-              <TabPane tab="销售额" key="sales">
-                <Row>
-                  <Col xl={16} lg={12} md={12} sm={24} xs={24}>
-                    <div className={styles.salesBar}>
-                      <Bar height={295} title="销售额趋势" data={salesData} />
-                    </div>
-                  </Col>
-                  <Col xl={8} lg={12} md={12} sm={24} xs={24}>
-                    <div className={styles.salesRank}>
-                      <h4 className={styles.rankingTitle}>门店销售额排名</h4>
-                      <ul className={styles.rankingList}>
-                        {rankingListData.map((item, i) => (
-                          <li key={item.title}>
-                            <span className={i < 3 ? styles.active : ''}>{i + 1}</span>
-                            <span>{item.title}</span>
-                            <span>{numeral(item.total).format('0,0')}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </Col>
-                </Row>
-              </TabPane>
-              <TabPane tab="访问量" key="views">
-                <Row>
-                  <Col xl={16} lg={12} md={12} sm={24} xs={24}>
-                    <div className={styles.salesBar}>
-                      <Bar height={292} title="访问量趋势" data={salesData} />
-                    </div>
-                  </Col>
-                  <Col xl={8} lg={12} md={12} sm={24} xs={24}>
-                    <div className={styles.salesRank}>
-                      <h4 className={styles.rankingTitle}>门店访问量排名</h4>
-                      <ul className={styles.rankingList}>
-                        {rankingListData.map((item, i) => (
-                          <li key={item.title}>
-                            <span className={i < 3 ? styles.active : ''}>{i + 1}</span>
-                            <span>{item.title}</span>
-                            <span>{numeral(item.total).format('0,0')}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </Col>
-                </Row>
-              </TabPane>
-            </Tabs>
-          </div>
-        </Card>
-
-        {/*<Row gutter={24}>*/}
-          {/*<Col xl={12} lg={24} md={24} sm={24} xs={24}>*/}
-            {/*<Card*/}
-              {/*loading={loading}*/}
-              {/*bordered={false}*/}
-              {/*title="线上热门搜索"*/}
-              {/*extra={iconGroup}*/}
-              {/*style={{ marginTop: 24 }}*/}
-            {/*>*/}
-              {/*<Row gutter={68}>*/}
-                {/*<Col sm={12} xs={24} style={{ marginBottom: 24 }}>*/}
-                  {/*<NumberInfo*/}
-                    {/*subTitle={*/}
-                      {/*<span>*/}
-                        {/*搜索用户数*/}
-                        {/*<Tooltip title="指标文案">*/}
-                          {/*<Icon style={{ marginLeft: 8 }} type="info-circle-o" />*/}
-                        {/*</Tooltip>*/}
-                      {/*</span>*/}
-                    {/*}*/}
-                    {/*gap={8}*/}
-                    {/*total={numeral(12321).format('0,0')}*/}
-                    {/*status="up"*/}
-                    {/*subTotal={17.1}*/}
-                  {/*/>*/}
-                  {/*<MiniArea line height={45} data={visitData2} />*/}
-                {/*</Col>*/}
-                {/*<Col sm={12} xs={24} style={{ marginBottom: 24 }}>*/}
-                  {/*<NumberInfo*/}
-                    {/*subTitle="人均搜索次数"*/}
-                    {/*total={2.7}*/}
-                    {/*status="down"*/}
-                    {/*subTotal={26.2}*/}
-                    {/*gap={8}*/}
-                  {/*/>*/}
-                  {/*<MiniArea line height={45} data={visitData2} />*/}
-                {/*</Col>*/}
-              {/*</Row>*/}
-              {/*<Table*/}
-                {/*rowKey={record => record.index}*/}
-                {/*size="small"*/}
-                {/*columns={columns}*/}
-                {/*dataSource={searchData}*/}
-                {/*pagination={{*/}
-                  {/*style: { marginBottom: 0 },*/}
-                  {/*pageSize: 5,*/}
-                {/*}}*/}
-              {/*/>*/}
-            {/*</Card>*/}
-          {/*</Col>*/}
-          {/*<Col xl={12} lg={24} md={24} sm={24} xs={24}>*/}
-            {/*<Card*/}
-              {/*loading={loading}*/}
-              {/*className={styles.salesCard}*/}
-              {/*bordered={false}*/}
-              {/*title="销售额类别占比"*/}
-              {/*bodyStyle={{ padding: 24 }}*/}
-              {/*extra={*/}
-                {/*<div className={styles.salesCardExtra}>*/}
-                  {/*{iconGroup}*/}
-                  {/*<div className={styles.salesTypeRadio}>*/}
-                    {/*<Radio.Group value={salesType} onChange={this.handleChangeSalesType}>*/}
-                      {/*<Radio.Button value="all">全部渠道</Radio.Button>*/}
-                      {/*<Radio.Button value="online">线上</Radio.Button>*/}
-                      {/*<Radio.Button value="offline">门店</Radio.Button>*/}
-                    {/*</Radio.Group>*/}
-                  {/*</div>*/}
-                {/*</div>*/}
-              {/*}*/}
-              {/*style={{ marginTop: 24, minHeight: 509 }}*/}
-            {/*>*/}
-              {/*<h4 style={{ marginTop: 8, marginBottom: 32 }}>销售额</h4>*/}
-              {/*<Pie*/}
-                {/*hasLegend*/}
-                {/*subTitle="销售额"*/}
-                {/*total={() => <Yuan>{salesPieData.reduce((pre, now) => now.y + pre, 0)}</Yuan>}*/}
-                {/*data={salesPieData}*/}
-                {/*valueFormat={value => <Yuan>{value}</Yuan>}*/}
-                {/*height={248}*/}
-                {/*lineWidth={4}*/}
-              {/*/>*/}
-            {/*</Card>*/}
-          {/*</Col>*/}
-        {/*</Row>*/}
-
-        {/*<Card*/}
-          {/*loading={loading}*/}
-          {/*className={styles.offlineCard}*/}
-          {/*bordered={false}*/}
-          {/*bodyStyle={{ padding: '0 0 32px 0' }}*/}
-          {/*style={{ marginTop: 32 }}*/}
-        {/*>*/}
-          {/*<Tabs activeKey={activeKey} onChange={this.handleTabChange}>*/}
-            {/*{offlineData.map(shop => (*/}
-              {/*<TabPane tab={<CustomTab data={shop} currentTabKey={activeKey} />} key={shop.name}>*/}
-                {/*<div style={{ padding: '0 24px' }}>*/}
-                  {/*<TimelineChart*/}
-                    {/*height={400}*/}
-                    {/*data={offlineChartData}*/}
-                    {/*titleMap={{ y1: '客流量', y2: '支付笔数' }}*/}
-                  {/*/>*/}
-                {/*</div>*/}
-              {/*</TabPane>*/}
-            {/*))}*/}
-          {/*</Tabs>*/}
-        {/*</Card>*/}
-      </Fragment>
-    );
+        <Row gutter={24} key={1}>
+          <Card
+            loading={loading}
+            bordered={false}
+            title="政务信息资源总量"
+            bodyStyle={{ padding: 0 }}
+          >
+            <Col xl={8} lg={8} md={8} sm={24} xs={24}
+                 className={styles.catlog}>
+              <div>
+                <div className={styles.catlogTitle} style={{left:8}}><span style={{color:'#fff',fontSize:12}}>数据库</span></div>
+                <div style={{display:'flex'}}><div style={{fontSize:'1.16em',flex:'1 1 auto',textAlign:'center',borderRight:'1px solid #e8e8e8'}}><span style={{fontSize:'1.5em',marginRight:5}}>{bmsml}</span>万条</div>
+                <div style={{fontSize:'1.16em',flex:'1 1 auto',textAlign:'center'}}><span style={{fontSize:'1.5em',marginRight:5}}>{bmsml}</span>GB</div></div>
+              </div>
+              <Chart height={180} width={340} data={dv}
+                     padding={[40, 10, 40, 10]} >
+                <Axis name="月份" />
+                <Axis name="月均降雨量" />
+                <Tooltip
+                  crosshairs={{
+                    type: "y"
+                  }}
+                />
+                <Legend
+                  marker={'square'}
+                  position="top"
+                  offsetY={0}
+                  offsetX={0}
+                />
+                <Geom
+                  type="interval"
+                  position="月份*月均降雨量"
+                  color={"name"}
+                  adjust={[
+                    {
+                      type: "dodge",
+                      marginRatio: 1 / 32
+                    }
+                  ]}
+                />
+              </Chart>
+            </Col>
+            <Col xl={8} lg={8} md={8} sm={24} xs={24}
+                 className={styles.catlog}>
+              <div>
+                <div className={styles.catlogTitle} style={{left:8}}><span style={{color:'#fff',fontSize:12}}>文件</span></div>
+                <div style={{display:'flex'}}><div style={{fontSize:'1.16em',flex:'1 1 auto',textAlign:'center',borderRight:'1px solid #e8e8e8'}}><span style={{fontSize:'1.5em',marginRight:5}}>{bmsml}</span>个</div>
+                  <div style={{fontSize:'1.16em',flex:'1 1 auto',textAlign:'center'}}><span style={{fontSize:'1.5em',marginRight:5}}>{bmsml}</span>GB</div></div>
+              </div>
+              <Chart height={180} width={340} data={dv}
+                     padding={[40, 10, 40, 10]} >
+                <Axis name="月份" />
+                <Axis name="月均降雨量" />
+                <Tooltip
+                  crosshairs={{
+                    type: "y"
+                  }}
+                />
+                <Legend
+                  marker={'square'}
+                  position="top"
+                  offsetY={0}
+                  offsetX={0}
+                />
+                <Geom
+                  type="interval"
+                  position="月份*月均降雨量"
+                  color={"name"}
+                  adjust={[
+                    {
+                      type: "dodge",
+                      marginRatio: 1 / 32
+                    }
+                  ]}
+                />
+              </Chart>
+            </Col>
+            <Col xl={8} lg={8} md={8} sm={24} xs={24}
+                 className={styles.catlog}>
+              <div>
+                <div className={styles.catlogTitle} style={{left:8}}><span style={{color:'#fff',fontSize:12}}>服务</span></div>
+                <div style={{fontSize:'1.16em',textAlign:'center',borderRight:'1px solid #e8e8e8'}}><span style={{fontSize:'1.5em',marginRight:5}}>{bmsml}</span>个</div>
+              </div>
+              <Chart height={180} width={340} data={dv}
+                     padding={[40, 10, 40, 10]} >
+                <Axis name="月份" />
+                <Axis name="月均降雨量" />
+                <Tooltip
+                  crosshairs={{
+                    type: "y"
+                  }}
+                />
+                <Legend
+                  marker={'square'}
+                  position="top"
+                  offsetY={0}
+                  offsetX={0}
+                />
+                <Geom
+                  type="line"
+                  position="月份*月均降雨量"
+                  color={"name"}
+                  adjust={[
+                    {
+                      type: "dodge",
+                      marginRatio: 1 / 32
+                    }
+                  ]}
+                />
+              </Chart>
+            </Col>
+          </Card>
+        </Row>
+        <Row gutter={24} key={2}>
+          <Card
+            loading={loading}
+            bordered={false}
+            title="政务信息资源衍生库分类统计"
+            bodyStyle={{ padding: 0 }}
+          >
+            <Col xl={8} lg={8} md={8} sm={24} xs={24}
+                 className={styles.catlog}>
+            <Chart height={180} data={dv_derivation} scale={cols_derivation} padding={[ 40, 0, 20, 0 ]} forceFit>
+              <Coord type='theta' radius={0.75} />
+              <Axis name="percent" />
+              <Guide>
+                <Html
+                  position={['50%', '-50%']}
+                  html={'<div style=\'color:#8c8c8c;font-size:1.16em;text-align: center;width: 10em;\'><span style=\'color:#262626;font-size:1.5em\'>' + total + '</span>个</div>'}
+                  alignX="middle"
+                  alignY="top"
+                />
+              </Guide>
+              <Tooltip
+                showTitle={false}
+                itemTpl='<li><span style="background-color:{color};" class="g2-tooltip-marker"></span>{name}: {value}</li>'
+              />
+              <Geom
+                type="intervalStack"
+                position="percent"
+                color='item'
+                tooltip={['item*percent',(item, percent) => {
+                  percent = percent * 100 + '%';
+                  return {
+                    name: item,
+                    value: percent
+                  };
+                }]}
+                style={{lineWidth: 1,stroke: '#fff'}}
+              >
+                <Label content='percent' formatter={(val, item) => {
+                  return item.point.item + ': ' + val;}} />
+              </Geom>
+            </Chart>
+              <div style={{height:57,textAlign:'center',lineHeight:'57px',cursor:'pointer',color:'#1890ff'}}>查看全部衍生库>></div>
+            </Col>
+            <Col xl={4} lg={4} md={4} sm={12} xs={12}
+                 className={styles.catlog}>
+              <div>
+                <div className={styles.catlogTitle} style={{left:8}}><span style={{color:'#fff',fontSize:12}}>数据库</span></div>
+                <span style={{marginLeft:5,color:'#1890ff'}}>数量</span>
+                <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>数据库<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>万条</div>
+                <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>文件<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>个</div>
+                <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>服务<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>个</div>
+              </div>
+              <span style={{marginLeft:5,color:'#1890ff'}}>容量(GB)</span>
+              <Chart height={120}
+                     width={170}
+                     padding={[30, 5, 40, 5]}
+                     data={[{name:20,label:'数据库'},{name:3,label:'文件'}]}>
+                <Tooltip
+                  crosshairs={{
+                    type: 'name',
+                  }}
+                />
+                <Axis name="label" tickLine={null}
+                      line={null}
+                      textStyle={{
+                        fontSize: '12',
+                        textAlign: 'center',
+                        fill: '#999',
+                        fontWeight: 'bold',
+                        rotate: 90,
+                      }}/>
+                <Geom type='interval' position="label*name">
+                  <Label content="name"/>
+                </Geom>
+              </Chart>
+            </Col>
+            <Col xl={4} lg={4} md={4} sm={12} xs={12}
+                 className={styles.catlog}>
+              <div>
+                <div className={styles.catlogTitle} style={{left:8}}><span style={{color:'#fff',fontSize:12}}>主题库</span></div>
+                <span style={{marginLeft:5,color:'#1890ff'}}>数量</span>
+                <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>数据库<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>万条</div>
+                <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>文件<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>个</div>
+                <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>服务<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>个</div>
+              </div>
+              <span style={{marginLeft:5,color:'#1890ff'}}>容量(GB)</span>
+              <Chart height={120}
+                     width={170}
+                     padding={[30, 5, 40, 5]}
+                     data={[{name:20,label:'数据库'},{name:3,label:'文件'}]}>
+                <Tooltip
+                  crosshairs={{
+                    type: 'name',
+                  }}
+                />
+                <Axis name="label" tickLine={null}
+                      line={null}
+                      textStyle={{
+                        fontSize: '12',
+                        textAlign: 'center',
+                        fill: '#999',
+                        fontWeight: 'bold',
+                        rotate: 90,
+                      }}/>
+                <Geom type='interval' position="label*name">
+                  <Label content="name"/>
+                </Geom>
+              </Chart>
+            </Col>
+            <Col xl={4} lg={4} md={4} sm={12} xs={12}
+                        className={styles.catlog}>
+            <div>
+              <div className={styles.catlogTitle} style={{left:8}}><span style={{color:'#fff',fontSize:12}}>部门库</span></div>
+              <span style={{marginLeft:5,color:'#1890ff'}}>数量</span>
+              <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>数据库<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>万条</div>
+              <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>文件<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>个</div>
+              <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>服务<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>个</div>
+            </div>
+            <span style={{marginLeft:5,color:'#1890ff'}}>容量(GB)</span>
+            <Chart height={120}
+                   width={170}
+                   padding={[30, 5, 40, 5]}
+                   data={[{name:20,label:'数据库'},{name:3,label:'文件'}]}>
+              <Tooltip
+                crosshairs={{
+                  type: 'name',
+                }}
+              />
+              <Axis name="label" tickLine={null}
+                    line={null}
+                    textStyle={{
+                      fontSize: '12',
+                      textAlign: 'center',
+                      fill: '#999',
+                      fontWeight: 'bold',
+                      rotate: 90,
+                    }}/>
+              <Geom type='interval' position="label*name">
+                <Label content="name"/>
+              </Geom>
+            </Chart>
+          </Col>
+            <Col xl={4} lg={4} md={4} sm={12} xs={12}
+                      className={styles.catlog}>
+            <div>
+              <div className={styles.catlogTitle} style={{left:8}}><span style={{color:'#fff',fontSize:12}}>其他衍生库</span></div>
+              <span style={{marginLeft:5,color:'#1890ff'}}>数量</span>
+              <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>数据库<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>万条</div>
+              <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>文件<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>个</div>
+              <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>服务<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>个</div>
+            </div>
+            <span style={{marginLeft:5,color:'#1890ff'}}>容量(GB)</span>
+            <Chart height={120}
+                   width={170}
+                   padding={[30, 5, 40, 5]}
+                   data={[{name:20,label:'数据库'},{name:3,label:'文件'}]}>
+              <Tooltip
+                crosshairs={{
+                  type: 'name',
+                }}
+              />
+              <Axis name="label" tickLine={null}
+                    line={null}
+                    textStyle={{
+                      fontSize: '12',
+                      textAlign: 'center',
+                      fill: '#999',
+                      fontWeight: 'bold',
+                      rotate: 90,
+                    }}/>
+              <Geom type='interval' position="label*name">
+                <Label content="name"/>
+              </Geom>
+            </Chart>
+          </Col>
+          </Card>
+        </Row>
+      </Fragment>);
   }
 }
