@@ -77,6 +77,9 @@ export const getRouterData = app => {
     '/main': {
       component: dynamicWrapper(app,['charts'], () => import('../routes/Dashboard/Analysis')),
     },
+    '/derivationDetail': {
+      component: dynamicWrapper(app,['charts'], () => import('../routes/Dashboard/derivationDetail')),
+    },
     '/base/resourceClassify': {
       component: dynamicWrapper(app,['classify'], () => import('../routes/Base/resourceClassify')),
     },

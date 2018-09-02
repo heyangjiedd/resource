@@ -2,9 +2,14 @@ import { isUrl } from '../utils/utils';
 
 const menuData = [
   {
-    name: '系统首页',
+    name: '系统概览',
     icon: 'home',
     path: 'main',
+  },
+  {
+    name: '系统概览   /   衍生库详情',
+    path: 'derivationDetail',
+    hideInMenu: true,
   },
   {
     name: '基础配置',

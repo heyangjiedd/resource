@@ -47,7 +47,7 @@ let createItemData = {};
 let itemDataStatus = status;
 
 const CreateForm = Form.create()(props => {
-  const { modalVisible, form, handleAdd, handleModalVisible, handleItem, item } = props;
+  const { modalVisible, form, handleAdd, handleModalVisible, handleItem, item ,orgList} = props;
   const okHandle = () => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
@@ -227,10 +227,9 @@ const CreateForm = Form.create()(props => {
             initialValue: createItemData.orgId,
           })(
             <Select placeholder="选择所属组织机构" style={{ width: '100%' }}>
-              <Option value="0">公安局</Option>
-              <Option value="1">刑侦科</Option>
-              <Option value="2">户籍科</Option>
-              <Option value="3">办公室</Option>
+              {orgList.map(r=>{
+                return <Option value={r.deptCode}>{r.deptShortName}</Option>
+              })}
             </Select>,
           )}
         </FormItem>
@@ -594,6 +593,9 @@ export default class ResourceClassify extends PureComponent {
     });
     dispatch({
       type: 'classify/tree',
+    });
+    dispatch({
+      type: 'centersource/fetchOrgList',
     });
   }
 
@@ -980,7 +982,7 @@ export default class ResourceClassify extends PureComponent {
 
   render() {
     const {
-      centersource: { data },
+      centersource: { data,orgList },
       classify: { treeData },
       loading,
     } = this.props;
@@ -1040,6 +1042,7 @@ export default class ResourceClassify extends PureComponent {
     const parentMethods = {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
+      orgList:orgList,
     };
     const testParentMethods = {
       handleAdd: this.testHandleAdd,

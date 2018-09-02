@@ -1,6 +1,6 @@
 import {
   resourcelist, resourcelink, addresource, updateresource, removeresource, getresource,
-  resourceapiData, resourcefileLista, mongoDataList, tableDataList, tableList, tableListPage,
+  resourceapiData, resourcefileLista, mongoDataList, tableDataList, tableList, tableListPage,orgList
 } from '../services/api';
 
 export default {
@@ -16,9 +16,17 @@ export default {
     dataListPage: [],
     lifelist: [],
     httpItem: {},
+    orgList:[],
   },
 
   effects: {
+    * fetchOrgList({ payload }, { call, put }) {
+      const response = yield call(orgList);
+      yield put({
+        type: 'org',
+        payload: response,
+      });
+    },
     //取数据源列表
     * fetch({ payload }, { call, put }) {
       const response = yield call(resourcelist, payload);
@@ -96,6 +104,12 @@ export default {
   },
 
   reducers: {
+    org(state, action) {
+      return {
+        ...state,
+        orgList: action.payload,
+      };
+    },
     save(state, action) {
       return {
         ...state,

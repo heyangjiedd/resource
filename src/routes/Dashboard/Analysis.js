@@ -6,6 +6,7 @@ import {
   Icon,
   Card,
   Tabs,
+  Form,
   Table,
   Radio,
   DatePicker,
@@ -24,8 +25,10 @@ import {
   Pie,
   TimelineChart,
 } from 'components/Charts';
+import { Link } from 'dva/router';
 import Trend from 'components/Trend';
 import NumberInfo from 'components/NumberInfo';
+import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 import { getTimeDistance } from '../../utils/utils';
 import {
   G2,
@@ -36,6 +39,7 @@ import {
   Coord,
   Label,
   Legend,
+  Button,
   View,
   Guide,
   Shape,
@@ -47,6 +51,7 @@ import styles from './Analysis.less';
 
 const { TabPane } = Tabs;
 const { RangePicker } = DatePicker;
+const FormItem = Form.Item;
 
 const rankingListData = [];
 for (let i = 0; i < 7; i += 1) {
@@ -72,10 +77,12 @@ export default class Analysis extends Component {
     salesType: 'all',
     currentTabKey: '',
     rangePickerValue: getTimeDistance('year'),
+    isFileDetail: false,
   };
 
   componentDidMount() {
     const { dispatch } = this.props;
+    //1
     dispatch({
       type: 'charts/fetchCatlog1',
       payload: { fid: '1' },
@@ -94,6 +101,26 @@ export default class Analysis extends Component {
     dispatch({
       type: 'charts/catlogcheck',
       payload: { isCheck: 'check' },
+    });
+    // 2
+    dispatch({
+      type: 'charts/dataSourceCount',
+    });
+    dispatch({
+      type: 'charts/halfYearCount1',
+      payload: { sourceType : 'db' },
+    });
+    dispatch({
+      type: 'charts/halfYearCount2',
+      payload: { sourceType : 'file' },
+    });
+    dispatch({
+      type: 'charts/halfYearCount3',
+      payload: { sourceType : 'api' },
+    });
+    //3
+    dispatch({
+      type: 'charts/deriveClassifyCount',
     });
   }
 
@@ -115,7 +142,11 @@ export default class Analysis extends Component {
       currentTabKey: key,
     });
   };
-
+  getListHandleModalVisible = (flag) => {
+    this.setState({
+      isFileDetail: !!flag,
+    });
+  };
   handleRangePickerChange = rangePickerValue => {
     this.setState({
       rangePickerValue,
@@ -152,20 +183,26 @@ export default class Analysis extends Component {
     }
   }
 
+  getCount = (type,index)=>{
+    const { charts } = this.props;
+    const { dataCount } = charts;
+    if(dataCount.length == 0)
+      return 0;
+    return dataCount.filter(r=>{
+      return r.sourceType == type;
+    })[0][index];
+  }
+  getGB = (index)=>{
+    if(!index)
+      return 0.0
+    return index.substr(0,index.length - 2);
+  }
   render() {
-    const { salesType } = this.state;
+    const { salesType, isFileDetail } = this.state;
     const { charts, loading } = this.props;
     const {
-      total, check, catlog1, catlog2, catlog3,
+      total, check, catlog1, catlog2, catlog3,dataCount,halfYear1,halfYear2,halfYear3,deriveCount
     } = charts;
-    const topColResponsiveProps = {
-      xs: 24,
-      sm: 12,
-      md: 12,
-      lg: 12,
-      xl: 6,
-      style: { marginBottom: 24 },
-    };
     const { DataView } = DataSet;
     const { Html } = Guide;
     const data_catlog = [
@@ -193,77 +230,92 @@ export default class Analysis extends Component {
         },
       },
     };
-    let ztsml = catlog2.reduce((total,item)=>{
-      return total + parseInt(item.catalogNum)
-    },0)
-    let ztsmg = catlog2.reduce((total,item)=>{
-      return total + parseInt(item.childNum)
-    },0)
-    let bmsml = catlog3.reduce((total,item)=>{
-      return total + parseInt(item.catalogNum)
-    },0)
-    let bmsmg = catlog3.reduce((total,item)=>{
-      return total + parseInt(item.childNum)
-    },0);
-    const data = [
-      {
-        name: "London",
-        "Jan.": 18.9,
-        "Feb.": 28.8,
-        "Mar.": 39.3,
-        "Apr.": 81.4,
-        May: 47,
-        "Jun.": 20.3,
-        "Jul.": 24,
-        "Aug.": 35.6
-      },
-      {
-        name: "Berlin",
-        "Jan.": 12.4,
-        "Feb.": 23.2,
-        "Mar.": 34.5,
-        "Apr.": 99.7,
-        May: 52.6,
-        "Jun.": 35.5,
-        "Jul.": 37.4,
-        "Aug.": 42.4
-      }
-    ];
+    let ztsml = catlog2.reduce((total, item) => {
+      return total + parseInt(item.catalogNum);
+    }, 0);
+    let ztsmg = catlog2.reduce((total, item) => {
+      return total + parseInt(item.childNum);
+    }, 0);
+    let bmsml = catlog3.reduce((total, item) => {
+      return total + parseInt(item.catalogNum);
+    }, 0);
+    let bmsmg = catlog3.reduce((total, item) => {
+      return total + parseInt(item.childNum);
+    }, 0);
     const ds = new DataSet();
-    const dv = ds.createView().source(data);
-    dv.transform({
-      type: "fold",
-      fields: ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug."],
-      // 展开字段集
-      key: "月份",
-      // key字段
-      value: "月均降雨量" // value字段
+
+    const dv_db = [];
+    let dv_db_itemsl = {name:'数量'};
+    let dv_db_itemrl = {name:'容量'};
+    let dv_db_item = [];
+    halfYear1.forEach(r=>{
+      dv_db_itemsl[r.month+'月'] = r.totalCount
+      dv_db_itemrl[r.month+'月'] = parseInt(this.getGB(r.totalSize));
+      dv_db_item.push(r.month+'月');
     });
+    if(halfYear1.length > 0){
+      dv_db.push(dv_db_itemsl);
+      dv_db.push(dv_db_itemrl);
+    }
+    const dv_file = [];
+    let dv_file_itemsl = {name:'数量'};
+    let dv_file_itemrl = {name:'容量'};
+    let dv_file_item = [];
+    halfYear2.forEach(r=>{
+      dv_file_itemsl[r.month+'月'] = r.totalCount
+      dv_file_itemrl[r.month+'月'] = parseInt(this.getGB(r.totalSize));
+      dv_file_item.push(r.month+'月');
+    });
+    if(halfYear2.length > 0){
+      dv_file.push(dv_file_itemsl);
+      dv_file.push(dv_file_itemrl);
+    }
+    const dv = ds.createView().source(dv_db);
+    dv.transform({
+      type: 'fold',
+      fields: dv_db_item,
+      // 展开字段集
+      key: '月份',
+      // key字段
+      value: '月均', // value字段
+    });
+    const dv__file = ds.createView().source(dv_file);
+    dv__file.transform({
+      type: 'fold',
+      fields: dv_file_item,
+      // 展开字段集
+      key: '月份',
+      // key字段
+      value: '月均', // value字段
+    });
+    halfYear3.forEach(r=>{
+      r.month = r.month+'月'
+    });
+
     const data_derivation = [
-      { item: '事例一', count: 40 },
-      { item: '事例二', count: 21 },
-      { item: '事例三', count: 17 },
-      { item: '事例四', count: 13 },
-      { item: '事例五', count: 9 }
+      { item: '数据库', count: 40 },
+      { item: '主题库', count: 21 },
+      { item: '部门库', count: 17 },
+      { item: '其他衍生库', count: 13 },
     ];
     const dv_derivation = new DataView();
     dv_derivation.source(data_derivation).transform({
       type: 'percent',
       field: 'count',
       dimension: 'item',
-      as: 'percent'
+      as: 'percent',
     });
     const cols_derivation = {
       percent: {
         formatter: val => {
-          val = (val * 100) + '%';
+          val = parseInt(val * 100) + '%';
           return val;
-        }
-      }
-    }
+        },
+      },
+    };
     return (
-      <Fragment>
-        <Row gutter={24}  key={0}>
+      <PageHeaderLayout><Fragment>
+        <Row gutter={24} key={0}>
           <Card
             loading={loading}
             bordered={false}
@@ -312,7 +364,7 @@ export default class Analysis extends Component {
                      width={340}
                      className={styles.catlog}
                      padding={[40, 10, 40, 10]}
-                     data={catlog3}>
+                     data={catlog1}>
                 <Tooltip
                   crosshairs={{
                     type: 'catalogNum',
@@ -341,27 +393,31 @@ export default class Analysis extends Component {
               </Chart>
             </Col>
             <Col xl={4} lg={4} md={4} sm={12} xs={12} className={styles.catlog}>
-              <div style={{height:180,padding:'0 10px'}}>
-                <div className={styles.catlogTitle}><span style={{color:'#fff',fontSize:12}}>主题目录</span></div>
-                <div style={{height:80,textAlign:'center',borderBottom:'1px solid #e8e8e8'}}>
-                  <div style={{fontSize:'1.16em'}}><span style={{fontSize:'1.5em',marginRight:5}}>{ztsml}</span>类</div>
+              <div style={{ height: 180, padding: '0 10px' }}>
+                <div className={styles.catlogTitle}><span style={{ color: '#fff', fontSize: 12 }}>主题目录</span></div>
+                <div style={{ height: 80, textAlign: 'center', borderBottom: '1px solid #e8e8e8' }}>
+                  <div style={{ fontSize: '1.16em' }}><span style={{ fontSize: '1.5em', marginRight: 5 }}>{ztsml}</span>类
+                  </div>
                   <div>主题数目</div>
                 </div>
-                <div style={{height:80,textAlign:'center',borderBottom:'1px solid #e8e8e8'}}>
-                  <div style={{fontSize:'1.16em'}}><span style={{fontSize:'1.5em',marginRight:5}}>{ztsmg}</span>个</div>
+                <div style={{ height: 80, textAlign: 'center', borderBottom: '1px solid #e8e8e8' }}>
+                  <div style={{ fontSize: '1.16em' }}><span style={{ fontSize: '1.5em', marginRight: 5 }}>{ztsmg}</span>个
+                  </div>
                   <div>目录数目</div>
                 </div>
               </div>
             </Col>
             <Col xl={4} lg={4} md={4} sm={12} xs={12} className={styles.catlog}>
-              <div style={{height:180,padding:'0 10px'}}>
-                <div className={styles.catlogTitle}><span style={{color:'#fff',fontSize:12}}>部门目录</span></div>
-                <div style={{height:80,textAlign:'center',borderBottom:'1px solid #e8e8e8'}}>
-                  <div style={{fontSize:'1.16em'}}><span style={{fontSize:'1.5em',marginRight:5}}>{bmsml}</span>部门</div>
+              <div style={{ height: 180, padding: '0 10px' }}>
+                <div className={styles.catlogTitle}><span style={{ color: '#fff', fontSize: 12 }}>部门目录</span></div>
+                <div style={{ height: 80, textAlign: 'center', borderBottom: '1px solid #e8e8e8' }}>
+                  <div style={{ fontSize: '1.16em' }}><span style={{ fontSize: '1.5em', marginRight: 5 }}>{bmsml}</span>部门
+                  </div>
                   <div>部门数目</div>
                 </div>
-                <div style={{height:80,textAlign:'center',borderBottom:'1px solid #e8e8e8'}}>
-                  <div style={{fontSize:'1.16em'}}><span style={{fontSize:'1.5em',marginRight:5}}>{bmsmg}</span>个</div>
+                <div style={{ height: 80, textAlign: 'center', borderBottom: '1px solid #e8e8e8' }}>
+                  <div style={{ fontSize: '1.16em' }}><span style={{ fontSize: '1.5em', marginRight: 5 }}>{bmsmg}</span>个
+                  </div>
                   <div>目录数目</div>
                 </div>
               </div>
@@ -378,17 +434,28 @@ export default class Analysis extends Component {
             <Col xl={8} lg={8} md={8} sm={24} xs={24}
                  className={styles.catlog}>
               <div>
-                <div className={styles.catlogTitle} style={{left:8}}><span style={{color:'#fff',fontSize:12}}>数据库</span></div>
-                <div style={{display:'flex'}}><div style={{fontSize:'1.16em',flex:'1 1 auto',textAlign:'center',borderRight:'1px solid #e8e8e8'}}><span style={{fontSize:'1.5em',marginRight:5}}>{bmsml}</span>万条</div>
-                <div style={{fontSize:'1.16em',flex:'1 1 auto',textAlign:'center'}}><span style={{fontSize:'1.5em',marginRight:5}}>{bmsml}</span>GB</div></div>
+                <div className={styles.catlogTitle} style={{ left: 8 }}><span
+                  style={{ color: '#fff', fontSize: 12 }}>数据库</span></div>
+                <div style={{ display: 'flex' }}>
+                  <div style={{
+                    fontSize: '1.16em',
+                    flex: '1 1 auto',
+                    textAlign: 'center',
+                    borderRight: '1px solid #e8e8e8',
+                  }}><span style={{ fontSize: '1.5em', marginRight: 5 }}>{this.getCount('db','totalCount')}</span>万条
+                  </div>
+                  <div style={{ fontSize: '1.16em', flex: '1 1 auto', textAlign: 'center' }}><span
+                    style={{ fontSize: '1.5em', marginRight: 5 }}>{this.getGB(this.getCount('db','totalSize'))}</span>GB
+                  </div>
+                </div>
               </div>
               <Chart height={180} width={340} data={dv}
-                     padding={[40, 10, 40, 10]} >
-                <Axis name="月份" />
-                <Axis name="月均降雨量" />
+                     padding={[40, 10, 40, 10]}>
+                <Axis name="月份"/>
+                <Axis name="月均"/>
                 <Tooltip
                   crosshairs={{
-                    type: "y"
+                    type: 'y',
                   }}
                 />
                 <Legend
@@ -399,13 +466,13 @@ export default class Analysis extends Component {
                 />
                 <Geom
                   type="interval"
-                  position="月份*月均降雨量"
-                  color={"name"}
+                  position="月份*月均"
+                  color={'name'}
                   adjust={[
                     {
-                      type: "dodge",
-                      marginRatio: 1 / 32
-                    }
+                      type: 'dodge',
+                      marginRatio: 1 / 32,
+                    },
                   ]}
                 />
               </Chart>
@@ -413,17 +480,28 @@ export default class Analysis extends Component {
             <Col xl={8} lg={8} md={8} sm={24} xs={24}
                  className={styles.catlog}>
               <div>
-                <div className={styles.catlogTitle} style={{left:8}}><span style={{color:'#fff',fontSize:12}}>文件</span></div>
-                <div style={{display:'flex'}}><div style={{fontSize:'1.16em',flex:'1 1 auto',textAlign:'center',borderRight:'1px solid #e8e8e8'}}><span style={{fontSize:'1.5em',marginRight:5}}>{bmsml}</span>个</div>
-                  <div style={{fontSize:'1.16em',flex:'1 1 auto',textAlign:'center'}}><span style={{fontSize:'1.5em',marginRight:5}}>{bmsml}</span>GB</div></div>
+                <div className={styles.catlogTitle} style={{ left: 8 }}><span
+                  style={{ color: '#fff', fontSize: 12 }}>文件</span></div>
+                <div style={{ display: 'flex' }}>
+                  <div style={{
+                    fontSize: '1.16em',
+                    flex: '1 1 auto',
+                    textAlign: 'center',
+                    borderRight: '1px solid #e8e8e8',
+                  }}><span style={{ fontSize: '1.5em', marginRight: 5 }}>{this.getCount('file','totalCount')}</span>个
+                  </div>
+                  <div style={{ fontSize: '1.16em', flex: '1 1 auto', textAlign: 'center' }}><span
+                    style={{ fontSize: '1.5em', marginRight: 5 }}>{this.getGB(this.getCount('file','totalSize'))}</span>GB
+                  </div>
+                </div>
               </div>
-              <Chart height={180} width={340} data={dv}
-                     padding={[40, 10, 40, 10]} >
-                <Axis name="月份" />
-                <Axis name="月均降雨量" />
+              <Chart height={180} width={340} data={dv__file}
+                     padding={[40, 10, 40, 10]}>
+                <Axis name="月份"/>
+                <Axis name="月均"/>
                 <Tooltip
                   crosshairs={{
-                    type: "y"
+                    type: 'y',
                   }}
                 />
                 <Legend
@@ -434,13 +512,13 @@ export default class Analysis extends Component {
                 />
                 <Geom
                   type="interval"
-                  position="月份*月均降雨量"
-                  color={"name"}
+                  position="月份*月均"
+                  color={'name'}
                   adjust={[
                     {
-                      type: "dodge",
-                      marginRatio: 1 / 32
-                    }
+                      type: 'dodge',
+                      marginRatio: 1 / 32,
+                    },
                   ]}
                 />
               </Chart>
@@ -448,16 +526,19 @@ export default class Analysis extends Component {
             <Col xl={8} lg={8} md={8} sm={24} xs={24}
                  className={styles.catlog}>
               <div>
-                <div className={styles.catlogTitle} style={{left:8}}><span style={{color:'#fff',fontSize:12}}>服务</span></div>
-                <div style={{fontSize:'1.16em',textAlign:'center',borderRight:'1px solid #e8e8e8'}}><span style={{fontSize:'1.5em',marginRight:5}}>{bmsml}</span>个</div>
+                <div className={styles.catlogTitle} style={{ left: 8 }}><span
+                  style={{ color: '#fff', fontSize: 12 }}>服务</span></div>
+                <div style={{ fontSize: '1.16em', textAlign: 'center', borderRight: '1px solid #e8e8e8' }}><span
+                  style={{ fontSize: '1.5em', marginRight: 5 }}>{this.getCount('api','totalCount')}</span>个
+                </div>
               </div>
-              <Chart height={180} width={340} data={dv}
-                     padding={[40, 10, 40, 10]} >
-                <Axis name="月份" />
-                <Axis name="月均降雨量" />
+              <Chart height={180} width={340} data={halfYear3}
+                     padding={[40, 10, 40, 10]}>
+                <Axis name="month"/>
+                <Axis name="totalCount"/>
                 <Tooltip
                   crosshairs={{
-                    type: "y"
+                    type: 'y',
                   }}
                 />
                 <Legend
@@ -467,15 +548,14 @@ export default class Analysis extends Component {
                   offsetX={0}
                 />
                 <Geom
-                  type="line"
-                  position="月份*月均降雨量"
-                  color={"name"}
-                  adjust={[
-                    {
-                      type: "dodge",
-                      marginRatio: 1 / 32
-                    }
-                  ]}
+                  type="point"
+                  position="month*totalCount"
+                  size={4}
+                  shape={"circle"}
+                  style={{
+                    stroke: "#fff",
+                    lineWidth: 1
+                  }}
                 />
               </Chart>
             </Col>
@@ -490,174 +570,145 @@ export default class Analysis extends Component {
           >
             <Col xl={8} lg={8} md={8} sm={24} xs={24}
                  className={styles.catlog}>
-            <Chart height={180} data={dv_derivation} scale={cols_derivation} padding={[ 40, 0, 20, 0 ]} forceFit>
-              <Coord type='theta' radius={0.75} />
-              <Axis name="percent" />
-              <Guide>
-                <Html
-                  position={['50%', '-50%']}
-                  html={'<div style=\'color:#8c8c8c;font-size:1.16em;text-align: center;width: 10em;\'><span style=\'color:#262626;font-size:1.5em\'>' + total + '</span>个</div>'}
-                  alignX="middle"
-                  alignY="top"
+              <Chart height={180} data={dv_derivation} scale={cols_derivation} padding={[40, 0, 20, 0]} forceFit>
+                <Coord type='theta' radius={0.75}/>
+                <Axis name="percent"/>
+                <Guide>
+                  <Html
+                    position={['50%', '-50%']}
+                    html={'<div style=\'color:#8c8c8c;font-size:1.16em;text-align: center;width: 10em;\'><span style=\'color:#262626;font-size:1.5em\'>' + deriveCount + '</span>个</div>'}
+                    alignX="middle"
+                    alignY="top"
+                  />
+                </Guide>
+                <Tooltip
+                  showTitle={false}
+                  itemTpl='<li><span style="background-color:{color};" class="g2-tooltip-marker"></span>{name}: {value}</li>'
                 />
-              </Guide>
-              <Tooltip
-                showTitle={false}
-                itemTpl='<li><span style="background-color:{color};" class="g2-tooltip-marker"></span>{name}: {value}</li>'
-              />
-              <Geom
-                type="intervalStack"
-                position="percent"
-                color='item'
-                tooltip={['item*percent',(item, percent) => {
-                  percent = percent * 100 + '%';
-                  return {
-                    name: item,
-                    value: percent
-                  };
-                }]}
-                style={{lineWidth: 1,stroke: '#fff'}}
-              >
-                <Label content='percent' formatter={(val, item) => {
-                  return item.point.item + ': ' + val;}} />
-              </Geom>
-            </Chart>
-              <div style={{height:57,textAlign:'center',lineHeight:'57px',cursor:'pointer',color:'#1890ff'}}>查看全部衍生库>></div>
+                <Geom
+                  type="intervalStack"
+                  position="percent"
+                  color='item'
+                  tooltip={['item*percent', (item, percent) => {
+                    percent = percent * 100 + '%';
+                    return {
+                      name: item,
+                      value: percent,
+                    };
+                  }]}
+                  style={{ lineWidth: 1, stroke: '#fff' }}
+                >
+                  <Label content='percent' formatter={(val, item) => {
+                    return item.point.item + ': ' + val;
+                  }}/>
+                </Geom>
+              </Chart>
+
+              <div style={{
+                height: 30,
+                textAlign: 'center',
+                lineHeight: '30px',
+                cursor: 'pointer',
+                color: '#1890ff',
+              }}><Link to="/derivationDetail"  key="logo">
+                查看全部衍生库>>
+              </Link>
+              </div>
             </Col>
             <Col xl={4} lg={4} md={4} sm={12} xs={12}
                  className={styles.catlog}>
-              <div>
-                <div className={styles.catlogTitle} style={{left:8}}><span style={{color:'#fff',fontSize:12}}>数据库</span></div>
-                <span style={{marginLeft:5,color:'#1890ff'}}>数量</span>
-                <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>数据库<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>万条</div>
-                <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>文件<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>个</div>
-                <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>服务<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>个</div>
+              <div style={{ height:210}}>
+                <div className={styles.catlogTitle} style={{ left: 8 ,marginBottom:10}}><span
+                  style={{ color: '#fff', fontSize: 12 }}>数据库</span></div>
+                <span style={{ marginLeft: 5, color: '#1890ff'}}>数量</span>
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' ,marginTop:10}}>数据库<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>万条
+                </div>
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' }}>文件<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>个
+                </div>
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' }}>服务<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>个
+                </div>
               </div>
-              <span style={{marginLeft:5,color:'#1890ff'}}>容量(GB)</span>
-              <Chart height={120}
-                     width={170}
-                     padding={[30, 5, 40, 5]}
-                     data={[{name:20,label:'数据库'},{name:3,label:'文件'}]}>
-                <Tooltip
-                  crosshairs={{
-                    type: 'name',
-                  }}
-                />
-                <Axis name="label" tickLine={null}
-                      line={null}
-                      textStyle={{
-                        fontSize: '12',
-                        textAlign: 'center',
-                        fill: '#999',
-                        fontWeight: 'bold',
-                        rotate: 90,
-                      }}/>
-                <Geom type='interval' position="label*name">
-                  <Label content="name"/>
-                </Geom>
-              </Chart>
             </Col>
             <Col xl={4} lg={4} md={4} sm={12} xs={12}
                  className={styles.catlog}>
-              <div>
-                <div className={styles.catlogTitle} style={{left:8}}><span style={{color:'#fff',fontSize:12}}>主题库</span></div>
-                <span style={{marginLeft:5,color:'#1890ff'}}>数量</span>
-                <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>数据库<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>万条</div>
-                <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>文件<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>个</div>
-                <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>服务<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>个</div>
+              <div  style={{ height:210}}>
+                <div className={styles.catlogTitle} style={{ left: 8  ,marginBottom:10}}><span
+                  style={{ color: '#fff', fontSize: 12 }}>主题库</span></div>
+                <span style={{ marginLeft: 5, color: '#1890ff'}}>数量</span>
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' ,marginTop:10}}>数据库<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>万条
+                </div>
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' }}>文件<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>个
+                </div>
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' }}>服务<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>个
+                </div>
               </div>
-              <span style={{marginLeft:5,color:'#1890ff'}}>容量(GB)</span>
-              <Chart height={120}
-                     width={170}
-                     padding={[30, 5, 40, 5]}
-                     data={[{name:20,label:'数据库'},{name:3,label:'文件'}]}>
-                <Tooltip
-                  crosshairs={{
-                    type: 'name',
-                  }}
-                />
-                <Axis name="label" tickLine={null}
-                      line={null}
-                      textStyle={{
-                        fontSize: '12',
-                        textAlign: 'center',
-                        fill: '#999',
-                        fontWeight: 'bold',
-                        rotate: 90,
-                      }}/>
-                <Geom type='interval' position="label*name">
-                  <Label content="name"/>
-                </Geom>
-              </Chart>
             </Col>
             <Col xl={4} lg={4} md={4} sm={12} xs={12}
-                        className={styles.catlog}>
-            <div>
-              <div className={styles.catlogTitle} style={{left:8}}><span style={{color:'#fff',fontSize:12}}>部门库</span></div>
-              <span style={{marginLeft:5,color:'#1890ff'}}>数量</span>
-              <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>数据库<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>万条</div>
-              <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>文件<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>个</div>
-              <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>服务<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>个</div>
-            </div>
-            <span style={{marginLeft:5,color:'#1890ff'}}>容量(GB)</span>
-            <Chart height={120}
-                   width={170}
-                   padding={[30, 5, 40, 5]}
-                   data={[{name:20,label:'数据库'},{name:3,label:'文件'}]}>
-              <Tooltip
-                crosshairs={{
-                  type: 'name',
-                }}
-              />
-              <Axis name="label" tickLine={null}
-                    line={null}
-                    textStyle={{
-                      fontSize: '12',
-                      textAlign: 'center',
-                      fill: '#999',
-                      fontWeight: 'bold',
-                      rotate: 90,
-                    }}/>
-              <Geom type='interval' position="label*name">
-                <Label content="name"/>
-              </Geom>
-            </Chart>
-          </Col>
+                 className={styles.catlog}>
+              <div  style={{ height:210}}>
+                <div className={styles.catlogTitle} style={{ left: 8  ,marginBottom:10}}><span
+                  style={{ color: '#fff', fontSize: 12 }}>部门库</span></div>
+                <span style={{ marginLeft: 5, color: '#1890ff'}}>数量</span>
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' ,marginTop:10}}>数据库<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>万条
+                </div>
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' }}>文件<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>个
+                </div>
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' }}>服务<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>个
+                </div>
+              </div>
+            </Col>
             <Col xl={4} lg={4} md={4} sm={12} xs={12}
-                      className={styles.catlog}>
-            <div>
-              <div className={styles.catlogTitle} style={{left:8}}><span style={{color:'#fff',fontSize:12}}>其他衍生库</span></div>
-              <span style={{marginLeft:5,color:'#1890ff'}}>数量</span>
-              <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>数据库<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>万条</div>
-              <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>文件<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>个</div>
-              <div style={{fontSize:'0.8em',flex:'1 1 auto',textAlign:'center'}}>服务<span style={{fontSize:'0.9em',marginLeft:5,marginRight:5}}>{bmsml}</span>个</div>
-            </div>
-            <span style={{marginLeft:5,color:'#1890ff'}}>容量(GB)</span>
-            <Chart height={120}
-                   width={170}
-                   padding={[30, 5, 40, 5]}
-                   data={[{name:20,label:'数据库'},{name:3,label:'文件'}]}>
-              <Tooltip
-                crosshairs={{
-                  type: 'name',
-                }}
-              />
-              <Axis name="label" tickLine={null}
-                    line={null}
-                    textStyle={{
-                      fontSize: '12',
-                      textAlign: 'center',
-                      fill: '#999',
-                      fontWeight: 'bold',
-                      rotate: 90,
-                    }}/>
-              <Geom type='interval' position="label*name">
-                <Label content="name"/>
-              </Geom>
-            </Chart>
-          </Col>
+                 className={styles.catlog}>
+              <div  style={{ height:210}}>
+                <div className={styles.catlogTitle} style={{ left: 8  ,marginBottom:10}}><span
+                  style={{ color: '#fff', fontSize: 12 }}>其他衍生库</span></div>
+                <span style={{ marginLeft: 5, color: '#1890ff'}}>数量</span>
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' ,marginTop:10}}>数据库<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>万条
+                </div>
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' }}>文件<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>个
+                </div>
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' }}>服务<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>个
+                </div>
+              </div>
+              {/*<span style={{ marginLeft: 5, color: '#1890ff' }}>容量(GB)</span>*/}
+              {/*<Chart height={120}*/}
+                     {/*width={170}*/}
+                     {/*padding={[30, 5, 40, 5]}*/}
+                     {/*data={[{ name: 20, label: '数据库' }, { name: 3, label: '文件' }]}>*/}
+                {/*<Tooltip*/}
+                  {/*crosshairs={{*/}
+                    {/*type: 'name',*/}
+                  {/*}}*/}
+                {/*/>*/}
+                {/*<Axis name="label" tickLine={null}*/}
+                      {/*line={null}*/}
+                      {/*textStyle={{*/}
+                        {/*fontSize: '12',*/}
+                        {/*textAlign: 'center',*/}
+                        {/*fill: '#999',*/}
+                        {/*fontWeight: 'bold',*/}
+                        {/*rotate: 90,*/}
+                      {/*}}/>*/}
+                {/*<Geom type='interval' position="label*name">*/}
+                  {/*<Label content="name"/>*/}
+                {/*</Geom>*/}
+              {/*</Chart>*/}
+            </Col>
           </Card>
         </Row>
-      </Fragment>);
+      </Fragment></PageHeaderLayout>
+    );
   }
 }

@@ -16,6 +16,25 @@ export async function statisticCheck(params) {
   return request(`/statistic/check?${stringify(params)}`);
 }
 
+// 查询各分类资源信息总量
+export async function dataSourceCount() {
+  return request(`/statistic/latestDataSourceCount`);
+}
+// 查询各分类最近半年资源信息总量
+export async function halfYearCount(params) {
+  return request(`/statistic/halfYearDataSourceCount?${stringify(params)}`);
+}
+// 统计衍生库分类
+export async function deriveClassifyCount() {
+  return request(`/statistic/deriveClassifyCount`);
+}
+
+
+// 组织机构列表
+export async function orgList() {
+  return request(`/dictionary/orgList`);
+}
+
 // 资源分类
 // 获取资源分类列表
 export async function resourceclassifyList(params) {
