@@ -258,6 +258,11 @@ export async function wsdlData(params) {
 
 //衍生资源分类
 
+// 根据父id获取下级分类
+export async function deriveresourceclassifybyid(params) {
+  let url = params?`?${stringify(params)}`:'';
+  return request(`/deriveresourceclassify/child`+url);
+}
 // 获取衍生资源分类列表
 export async function deriverclassifyList(params) {
   let url = params?`?${stringify(params)}`:'';

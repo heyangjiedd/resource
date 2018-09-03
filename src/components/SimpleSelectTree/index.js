@@ -59,6 +59,7 @@ class SimpleTree extends PureComponent {
     return result;
   };
   onChange = (value) => {
+    this.props.transMsg(value);
     this.setState({ value });
   };
 
@@ -70,12 +71,12 @@ class SimpleTree extends PureComponent {
       const title = <span>{item.name}</span>;
       if (item.children) {
         return (
-          <TreeNode key={item.id} title={item.name} value={item.name}>
+          <TreeNode key={item.id} title={item.name} value={item.id}>
             {loop(item.children)}
           </TreeNode>
         );
       }
-      return <TreeNode key={item.id} title={item.name} value={item.name}/>;
+      return <TreeNode key={item.id} title={item.name} value={item.id}/>;
     });
 
     return (

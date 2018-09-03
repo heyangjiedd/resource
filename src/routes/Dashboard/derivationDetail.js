@@ -111,8 +111,9 @@ const CreateForm = Form.create()(props => {
   );
 });
 
-@connect(({ classify, loading }) => ({
+@connect(({ classify,dervieClassify, loading }) => ({
   classify,
+  dervieClassify,
   loading: loading.models.classify,
 }))
 @Form.create()
@@ -122,12 +123,13 @@ export default class DerivationDetail extends PureComponent {
     expandForm: false,
     selectedRows: [],
     formValues: {},
+    index:0,
   };
 
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
-      type: 'classify/fetch',
+      type: 'dervieClassify/derivechildybyid',
     });
   }
 
@@ -168,14 +170,17 @@ export default class DerivationDetail extends PureComponent {
     this.handleModalVisible(true);
   };
   handleModeChange = item =>{
-
+    this.setState({
+      index:item
+    })
   }
   render() {
     const {
       classify: { data, treeData },
+      dervieClassify:{child},
       loading,
     } = this.props;
-    const { selectedRows, modalVisible } = this.state;
+    const { selectedRows, modalVisible,index } = this.state;
     const parentMethods = {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
@@ -236,21 +241,13 @@ export default class DerivationDetail extends PureComponent {
                 <Tabs
                   defaultActiveKey="1"
                   tabPosition='top'
+                  onChange={this.handleModeChange}
                 >
-                  <TabPane tab="基础库" key="1">暂无</TabPane>
-                  <TabPane tab="主题库" key="2">暂无</TabPane>
-                  <TabPane tab="部门库" key="3">暂无</TabPane>
-                  <TabPane tab="共享库" key="4">暂无</TabPane>
-                  <TabPane tab="开放库" key="5">暂无</TabPane>
-                  <TabPane tab="衍生库1" key="6">暂无</TabPane>
-                  <TabPane tab="衍生库2" key="7">暂无</TabPane>
-                  <TabPane tab="衍生库3" key="8">暂无</TabPane>
-                  <TabPane tab="衍生库4" key="9">暂无</TabPane>
-                  <TabPane tab="衍生库5" key="10">暂无</TabPane>
-                  <TabPane tab="衍生库3" key="11">暂无</TabPane>
-                  <TabPane tab="衍生库4" key="12">暂无</TabPane>
-                  <TabPane tab="衍生库5" key="13">暂无</TabPane>
+                  {child.map(r=>{
+                    return <TabPane tab={r.name} key={r.id}></TabPane>
+                  })}
                 </Tabs>
+                <span>{index}</span>
               </div>
             </div>
           </Card>

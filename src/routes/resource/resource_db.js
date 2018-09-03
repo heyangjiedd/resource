@@ -406,7 +406,7 @@ export default class ResourceClassify extends PureComponent {
 
   fetchHandle(params) {
     const { dispatch } = this.props;
-    params = { ...params, file: 'mysql,oracle,sqlserver,db2', unrelationDb: 'mongo,hbase' };
+    params = { relationDb: 'mysql,oracle,sqlserver,db2', unrelationDb: 'mongo,hbase', ...params };
     dispatch({
       type: 'centersource/fetch',
       payload: params,
@@ -519,17 +519,31 @@ export default class ResourceClassify extends PureComponent {
 
       const values = {
         ...fieldsValue,
-        updatedAt: fieldsValue.updatedAt && fieldsValue.updatedAt.valueOf(),
       };
-
       this.setState({
         formValues: values,
       });
+      if (fieldsValue.sourceType && fieldsValue.sourceType[0] == 'all') {
+
+      } else if (fieldsValue.sourceType && fieldsValue.sourceType[0] == '关系型数据库') {
+        if (fieldsValue.sourceType[1] == 'all') {
+          values.relationDb = 'mysql,oracle,sqlserver,db2';
+          values.unrelationDb = undefined;
+        } else {
+          values.relationDb = fieldsValue.sourceType[1];
+          values.unrelationDb = undefined;
+        }
+      } else if (fieldsValue.sourceType && fieldsValue.sourceType[0] == '非关系型数据库') {
+        if (fieldsValue.sourceType[1] == 'all') {
+          values.relationDb = undefined;
+          values.unrelationDb = 'mongo,hbase';
+        } else {
+          values.relationDb = undefined;
+          values.unrelationDb = fieldsValue.sourceType[1];
+        }
+      }
+      values.sourceType = undefined;
       this.fetchHandle(values);
-      // dispatch({
-      //   type: 'centersource/fetch',
-      //   payload: values,
-      // });
     });
   };
 
@@ -570,175 +584,6 @@ export default class ResourceClassify extends PureComponent {
       testModalVisible: !!flag,
     });
   };
-
-  renderSimpleForm() {
-    const { form } = this.props;
-    const { getFieldDecorator } = form;
-    return (
-      <Form onSubmit={this.handleSearch} layout="inline">
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <Col md={6} sm={24}>
-            <FormItem>
-              {getFieldDecorator('status')(
-                <Select placeholder="数据库类型" style={{ width: '100%' }}>
-                  <Option value="0">关系型数据库</Option>
-                  <Option value="1">非关系型数据库</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={3} sm={24}>
-            <FormItem>
-              {getFieldDecorator('status')(
-                <Select placeholder="连通状态" style={{ width: '100%' }}>
-                  <Option value="0">已连通</Option>
-                  <Option value="1">未连通</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={3} sm={24}>
-            <FormItem>
-              {getFieldDecorator('status')(
-                <Select placeholder="同步状态" style={{ width: '100%' }}>
-                  <Option value="0">已同步</Option>
-                  <Option value="1">未同步</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={6} sm={24}>
-            <FormItem>
-              {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
-            </FormItem>
-          </Col>
-          <Col md={6} sm={24}>
-            <span className={styles.submitButtons}>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-              <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
-                展开 <Icon type="down"/>
-              </a>
-            </span>
-          </Col>
-        </Row>
-      </Form>
-    );
-  }
-
-  renderAdvancedForm() {
-    const { form } = this.props;
-    const { getFieldDecorator } = form;
-    return (
-      <Form onSubmit={this.handleSearch} layout="inline">
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <Col md={6} sm={24}>
-            <FormItem>
-              {getFieldDecorator('status')(
-                <Select placeholder="数据库类型" style={{ width: '100%' }}>
-                  <Option value="0">关系型数据库</Option>
-                  <Option value="1">非关系型数据库</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={3} sm={24}>
-            <FormItem>
-              {getFieldDecorator('status')(
-                <Select placeholder="连通状态" style={{ width: '100%' }}>
-                  <Option value="0">已连通</Option>
-                  <Option value="1">未连通</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={3} sm={24}>
-            <FormItem>
-              {getFieldDecorator('status')(
-                <Select placeholder="同步状态" style={{ width: '100%' }}>
-                  <Option value="0">已同步</Option>
-                  <Option value="1">未同步</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={6} sm={24}>
-            <FormItem>
-              {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
-            </FormItem>
-          </Col>
-          <Col md={6} sm={24}>
-            <span className={styles.submitButtons}>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-               <Button style={{ marginLeft: 8 }} onClick={this.handleFormReset}>
-              重置
-              </Button>
-              <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
-              收起 <Icon type="up"/>
-            </a>
-            </span>
-          </Col>
-        </Row>
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <StandardFormRow title="关系型数据库" block style={{ paddingBottom: 5 }}>
-            <FormItem style={{ marginBottom: 0 }}>
-              {getFieldDecorator('category')(
-                <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="mysql">mysql</TagSelect.Option>
-                  <TagSelect.Option value="oracle">oracle</TagSelect.Option>
-                  <TagSelect.Option value="sqlserver">sqlserver</TagSelect.Option>
-                  <TagSelect.Option value="db2">db2</TagSelect.Option>
-                </TagSelect>,
-              )}
-            </FormItem>
-          </StandardFormRow>
-        </Row>
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <StandardFormRow title="非关系型数据库" block style={{ paddingBottom: 5 }}>
-            <FormItem style={{ marginBottom: 0 }}>
-              {getFieldDecorator('category')(
-                <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="mongo">mongo</TagSelect.Option>
-                  <TagSelect.Option value="hbase">hbase</TagSelect.Option>
-                </TagSelect>,
-              )}
-            </FormItem>
-          </StandardFormRow>
-        </Row>
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <StandardFormRow title="API" block style={{ paddingBottom: 5 }}>
-            <FormItem style={{ marginBottom: 0 }}>
-              {getFieldDecorator('category')(
-                <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="http">http</TagSelect.Option>
-                  <TagSelect.Option value="https">https</TagSelect.Option>
-                  <TagSelect.Option value="wsdl">wsdl</TagSelect.Option>
-                  <TagSelect.Option value="rest">rest</TagSelect.Option>
-                </TagSelect>,
-              )}
-            </FormItem>
-          </StandardFormRow>
-        </Row>
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <StandardFormRow title="普通文件系统" block style={{ paddingBottom: 5 }}>
-            <FormItem style={{ marginBottom: 0 }}>
-              {getFieldDecorator('category')(
-                <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="ftp">ftp</TagSelect.Option>
-                  <TagSelect.Option value="sftp">sftp</TagSelect.Option>
-                  <TagSelect.Option value="本地磁盘">本地磁盘</TagSelect.Option>
-                  <TagSelect.Option value="共享文件件">共享文件件</TagSelect.Option>
-                </TagSelect>,
-              )}
-            </FormItem>
-          </StandardFormRow>
-        </Row>
-      </Form>
-    );
-  }
 
   renderForm() {
     const { expandForm } = this.state;
@@ -991,52 +836,34 @@ export default class ResourceClassify extends PureComponent {
       detailType: detailType,
       handleModalVisible: this.handleModalVisible,
     };
-    const options = [
-      {
-        value: '关系型数据库',
-        label: '关系型数据库',
-        children: [{
-          value: 'mysql', label: 'mysql',
-        }, {
-          value: 'oracle', label: 'oracle',
-        }, {
-          value: 'sqlserver', label: 'sqlserver',
-        }, {
-          value: 'db2', label: 'db2',
-        }],
+    const options = [{
+      value: 'all',
+      label: '全选',
+    }, {
+      value: '关系型数据库',
+      label: '关系型数据库',
+      children: [{
+        value: 'all', label: '全选',
       }, {
-        value: '非关系型数据库',
-        label: '非关系型数据库',
-        children: [{
-          value: 'mongo', label: 'mongo',
-        }, {
-          value: 'hbase', label: 'hbase',
-        }],
+        value: 'mysql', label: 'mysql',
       }, {
-        value: 'API',
-        label: 'API',
-        children: [{
-          value: 'http', label: 'http',
-        }, {
-          value: 'https', label: 'https',
-        }, {
-          value: 'wsdl', label: 'wsdl',
-        }, {
-          value: 'rest', label: 'rest',
-        }],
+        value: 'oracle', label: 'oracle',
       }, {
-        value: '普通文件',
-        label: '普通文件',
-        children: [{
-          value: 'ftp', label: 'ftp',
-        }, {
-          value: 'sftp', label: 'sftp',
-        }, {
-          value: '本地磁盘', label: '本地磁盘',
-        }, {
-          value: '共享文件夹', label: '共享文件夹',
-        }],
-      }];
+        value: 'sqlserver', label: 'sqlserver',
+      }, {
+        value: 'db2', label: 'db2',
+      }],
+    }, {
+      value: '非关系型数据库',
+      label: '非关系型数据库',
+      children: [{
+        value: 'all', label: '全选',
+      }, {
+        value: 'mongo', label: 'mongo',
+      }, {
+        value: 'hbase', label: 'hbase',
+      }],
+    }];
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },
@@ -1047,8 +874,6 @@ export default class ResourceClassify extends PureComponent {
         sm: { span: 16 },
         md: { span: 16 },
       },
-    };
-    const onChange = (value) => {
     };
     const { getFieldDecorator } = form;
     return (
@@ -1083,33 +908,35 @@ export default class ResourceClassify extends PureComponent {
             </div>
           </Card> : <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
-              <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
-                <Col md={6} sm={24}>
-                  <FormItem>
-                    <Button icon="desktop" type="primary" onClick={() => this.testHandleAdd(true)}>
-                      测试连通性
-                    </Button>
-                  </FormItem>
-                </Col>
-                <Col md={8} sm={24}>
-                  <FormItem {...formItemLayout} label="数据源类型">
-                    <Cascader style={{ width: 100 + '%' }} options={options} onChange={onChange}
-                              placeholder="请选择数据源/数据库"/>
-                  </FormItem>
-                </Col>
-                <Col md={8} sm={24}>
-                  <FormItem>
-                    {getFieldDecorator('no')(<Input placeholder="请输入数据源名称"/>)}
-                  </FormItem>
-                </Col>
-                <Col md={2} sm={24}>
-                  <FormItem>
-                    <Button type="primary" htmlType="submit">
-                      查询
-                    </Button>
-                  </FormItem>
-                </Col>
-              </Row>
+              <Form onSubmit={this.handleSearch}>
+                <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
+                  <Col md={6} sm={24}>
+                    <FormItem>
+                      <Button icon="desktop" type="primary" onClick={() => this.testHandleAdd(true)}>
+                        测试连通性
+                      </Button>
+                    </FormItem>
+                  </Col>
+                  <Col md={8} sm={24}>
+                    <FormItem {...formItemLayout} label="数据源类型">
+                      {getFieldDecorator('sourceType')(<Cascader style={{ width: 100 + '%' }} options={options}
+                                                                 placeholder="请选择数据源/数据库"/>)}
+                    </FormItem>
+                  </Col>
+                  <Col md={8} sm={24}>
+                    <FormItem>
+                      {getFieldDecorator('sourceName')(<Input placeholder="请输入数据源名称"/>)}
+                    </FormItem>
+                  </Col>
+                  <Col md={2} sm={24}>
+                    <FormItem>
+                      <Button type="primary" htmlType="submit">
+                        查询
+                      </Button>
+                    </FormItem>
+                  </Col>
+                </Row>
+              </Form>
               <StandardTable
                 selectedRows={selectedRows}
                 loading={loading}

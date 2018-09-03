@@ -52,6 +52,7 @@ let itemDataStatus = 0;
 let listItemData = {};//列表选择
 let modalListData = {};//弹窗第一页选择
 let choiseListItemData = {};//弹窗中弹窗选择
+let searchValue = {resourceId:'',sourceType:''} //关联查询
 
 const CatlogDetail = Form.create()(props => {
   const { modalVisible, form, handleModalVisible, loading, data, columns } = props;
@@ -514,7 +515,6 @@ const CreateForm = Form.create()(props => {
   let addFeilsSelectedRows = [];
   let addTableRows = [];
   let setTableRows = [];
-  let search = {};//搜索内容
   let fgxxsjkHandleSelectRows = [];
   let fileTableSelectedRows = [];
   const okHandle = () => {
@@ -598,7 +598,7 @@ const CreateForm = Form.create()(props => {
     </Col>
   </Row>);
   const onChange = (index) => {
-    search.sourceType = index[0] + '/' + index[1];
+    searchValue.searchValue = index[1];
   };
 
   const handleFeildSelectRows = (data) => {
@@ -616,7 +616,7 @@ const CreateForm = Form.create()(props => {
   const handleSubmit = () => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
-      handleItemSearch({ ...search, ...fieldsValue });
+      handleItemSearch({ ...searchValue, ...fieldsValue });
     });
   };
   const formItemLayout = {
@@ -643,7 +643,7 @@ const CreateForm = Form.create()(props => {
           <Col md={12} sm={24}>
             <FormItem {...formItemLayout} label="资源分类">
               <SimpleSelectTree transMsg={(index) => {
-                search.resourceId = index;
+                searchValue.resourceId = index;
               }}></SimpleSelectTree>
             </FormItem>
           </Col>

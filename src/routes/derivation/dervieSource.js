@@ -57,9 +57,10 @@ let treeSelect = {};
 let selectValue = [];
 let modalListData = {};//弹窗第一页选择
 let choiseListItemData = {};//弹窗中弹窗选择
+let searchValue = {resourceId:'',sourceType:''} //新增查询
 
 const ChoiceList = Form.create()(props => {
-  const { modalVisible, handleAdd, handleModalVisible, loading, data, columns, handleChoiceFeild, choiceFeild } = props;
+  const { modalVisible, handleAdd, handleModalVisible, loadinhandleItemSearchg, data, columns, handleChoiceFeild, choiceFeild } = props;
   const okHandle = () => {
     handleChoiceFeild(selectedRows);
     handleModalVisible();
@@ -118,7 +119,7 @@ const CreateForm = Form.create()(props => {
   const {
     modalVisible, form, handleAdd, handleModalVisible, data, handleItem, item, catalogItem, dataList, handleItemSearch,
     searchHandle, getListBuyId, choiseFeild, choiseList, type, handleType, choiceFeild, choiceFeildCount, catalogItemChange,
-    selectHttpItem, httpItem, lifelist,
+    selectHttpItem, httpItem, lifelist
   } = props;
   const { getFieldDecorator } = form;
   const options = [
@@ -250,21 +251,24 @@ const CreateForm = Form.create()(props => {
       dataIndex: 'len',
     },
   ];
-  const fgxxsjkcolumns = [{
+  const fgxxsjkcolumns = [
+    {
     title: '文件名称',
     dataIndex: 'name',
   }, {
     title: '文件类型',
     dataIndex: 'type',
   }];
-  const filecolumns = [{
+  const filecolumns = [
+    {
     title: '序号',
     dataIndex: 'id',
   }, {
     title: '集合',
     dataIndex: 'name',
   }];
-  const columnscatalogfeild = [{
+  const columnscatalogfeild = [
+    {
     title: '信息源',
     dataIndex: 'name',
   }, {
@@ -308,7 +312,6 @@ const CreateForm = Form.create()(props => {
   let addFeilsSelectedRows = [];
   let addTableRows = [];
   let setTableRows = [];
-  let search = {};//搜索内容
   let fgxxsjkHandleSelectRows = [];
   let fileTableSelectedRows = [];
   const okHandle = () => {
@@ -392,7 +395,7 @@ const CreateForm = Form.create()(props => {
     </Col>
   </Row>);
   const onChange = (index) => {
-    search.sourceType = index[0] + '/' + index[1];
+    searchValue.sourceType = index[1];
   };
 
   const handleFeildSelectRows = (data) => {
@@ -414,7 +417,7 @@ const CreateForm = Form.create()(props => {
   const handleSubmit = () => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
-      handleItemSearch({ ...search, ...fieldsValue });
+      handleItemSearch({...searchValue,...fieldsValue});
     });
   };
   const formItemLayout = {
@@ -441,7 +444,7 @@ const CreateForm = Form.create()(props => {
           <Col md={12} sm={24}>
             <FormItem {...formItemLayout} label="资源分类">
               <SimpleSelectTree transMsg={(index) => {
-                search.resourceId = index;
+                searchValue.resourceId = index;
               }}></SimpleSelectTree>
             </FormItem>
           </Col>
@@ -460,7 +463,7 @@ const CreateForm = Form.create()(props => {
           </Col>
           <Col md={4} sm={24}>
             <span className={styles.submitButtons}>
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" onClick={handleSubmit}>
                 查询
               </Button>
             </span>
@@ -962,6 +965,17 @@ export default class ResourceClassify extends PureComponent {
     });
   }
 
+  handleSubmit = () => {
+    const { form, dispatch } = this.props;
+    form.validateFields((err, fieldsValue) => {
+      if (err) return;
+      dispatch({
+        type: 'dervieClassify/fetch',
+        payload: fieldsValue,
+      });
+    });
+  };
+
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
     const { dispatch } = this.props;
     const { formValues } = this.state;
@@ -1136,6 +1150,7 @@ export default class ResourceClassify extends PureComponent {
     this.handleModalVisibleResource(true);
   };
   handleItemSearch = (index) => {
+    const { dispatch } = this.props;
     dispatch({
       type: 'centersource/fetch',
       payload: index,
@@ -1535,6 +1550,7 @@ export default class ResourceClassify extends PureComponent {
           <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
               <div className={styles.tableListOperator}>
+                <Form onSubmit={this.handleSubmit}>
                 <Row>
                   <Col md={12} sm={12}>
                     <Button icon="plus" type="primary" onClick={() => this.addHandle(true)}>
@@ -1546,7 +1562,7 @@ export default class ResourceClassify extends PureComponent {
                   </Col>
                   <Col md={8} sm={8}>
                     <FormItem>
-                      {getFieldDecorator('name')(<Input placeholder="请输入数据源名称"/>)}
+                      {getFieldDecorator('source')(<Input placeholder="请输入数据源名称"/>)}
                     </FormItem>
                   </Col>
                   <Col md={4} sm={4}>
@@ -1557,6 +1573,7 @@ export default class ResourceClassify extends PureComponent {
                     </FormItem>
                   </Col>
                 </Row>
+                </Form>
               </div>
               <StandardTable
                 selectedRows={selectedRows}
