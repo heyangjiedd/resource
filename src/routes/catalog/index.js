@@ -1278,11 +1278,10 @@ export default class ResourceClassify extends PureComponent {
       this.setState({
         formValues: values,
       });
-
-      // dispatch({
-      //   type: 'catalog/fetch',
-      //   payload: values,
-      // });
+      dispatch({
+        type: 'catalog/fetch',
+        payload: values,
+      });
     });
   };
 
@@ -1823,14 +1822,15 @@ export default class ResourceClassify extends PureComponent {
           />
           <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
+              <Form onSubmit={this.handleSearch}>
               {/*<div className={styles.tableListForm}>{this.renderForm()}</div>*/}
               <Row>
-                <Col md={8} sm={24}>
+                <Col md={10} sm={24}>
                   <FormItem>
                     {getFieldDecorator('name')(<Input placeholder="请输入数据源名称"/>)}
                   </FormItem>
                 </Col>
-                <Col md={6} sm={24}>
+                <Col md={4} sm={24}>
                   <FormItem>
                     <Button type="primary" htmlType="submit">
                       查询
@@ -1838,6 +1838,7 @@ export default class ResourceClassify extends PureComponent {
                   </FormItem>
                 </Col>
               </Row>
+              </Form>
               <StandardTableNoCheck
                 selectedRows={selectedRows}
                 loading={loading}
