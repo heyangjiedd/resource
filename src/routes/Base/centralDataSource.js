@@ -235,9 +235,8 @@ const CreateForm = Form.create()(props => {
         </FormItem>
         <FormItem {...formItemLayout} label="资源分类">
           {form.getFieldDecorator('resourceId', {
-            rules: [{ message: 'Please input some description...' }],
             initialValue: createItemData.resourceId,
-          })(<Input disable placeholder="请输入"/>)}
+          })(<Input disabled={true} placeholder="请输入"/>)}
         </FormItem>
         <FormItem {...formItemLayout} label="数据源描述">
           {form.getFieldDecorator('content', {

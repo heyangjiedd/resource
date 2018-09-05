@@ -32,7 +32,7 @@ const getValue = obj =>
   Object.keys(obj)
     .map(key => obj[key])
     .join(',');
-let itemDataStatus = 0;
+let itemDataStatus = 1;
 let listItemData = {};
 let treeSelect = '';
 
@@ -66,21 +66,34 @@ const CreateForm = Form.create()(props => {
     return value;
   };
   let title = itemDataStatus===1?"编辑分类":itemDataStatus===2?"查看分类":"新增分类";
+  const footer = (<Row>
+    <Col md={24} sm={24}>
+      <Button onClick={() => {
+        handleModalVisible();
+      }}>
+        取消
+      </Button>
+      <Button type="primary" onClick={okHandle}>
+        确定
+      </Button>
+    </Col>
+  </Row>);
   return (
     <Modal
       title={title}
       visible={modalVisible}
+      footer={itemDataStatus === 2?null:footer}
       onOk={okHandle}
       destroyOnClose={true}
       onCancel={() => handleModalVisible()}
     >
 
-      <FormItem {...formItemLayout} label="父级分类名称">
+      {itemDataStatus==3||itemDataStatus==4?'':<FormItem {...formItemLayout} label="父级分类名称">
         {form.getFieldDecorator('parentName', {
           rules: [{  message: 'Please input some description...' }],
           initialValue: listItemData.parentName,
         })(<Input disabled placeholder="请输入"/>)}
-      </FormItem>
+      </FormItem>}
       <FormItem {...formItemLayout} label="分类名称">
         {form.getFieldDecorator('name', {
           rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.name,
@@ -127,12 +140,7 @@ export default class ResourceClassify extends PureComponent {
 
   componentDidMount() {
     const { dispatch } = this.props;
-    dispatch({
-      type: 'dervieClassify/fetch',
-    });
-    dispatch({
-      type: 'dervieClassify/tree',
-    });
+    this.fetchAll();
   }
 
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
@@ -234,7 +242,15 @@ export default class ResourceClassify extends PureComponent {
       // });
     });
   };
-
+  fetchAll =()=>{
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'dervieClassify/fetch',
+    });
+    dispatch({
+      type: 'dervieClassify/tree',
+    });
+  }
   handleModalVisible = flag => {
     this.setState({
       modalVisible: !!flag,
@@ -246,26 +262,30 @@ export default class ResourceClassify extends PureComponent {
     this.handleModalVisible(true);
   };
   handleAdd = fields => {
-    const { dispatch } = this.props;
+    const { dispatch , dervieClassify: { treeData }} = this.props;
     if (itemDataStatus === 1) {
       dispatch({
         type: 'dervieClassify/update',
         payload: { ...listItemData, ...fields },
         callback: () => {
-          dispatch({
-            type: 'dervieClassify/fetch',
-          });
+          this.fetchAll();
         },
       });
       message.success('修改成功');
     } else {
+      let select = treeData.filter(r => {
+        return treeSelect == r.id;
+      });
+      if (itemDataStatus == 3) {
+        treeSelect = select[0].parentId;
+      } else {
+        treeSelect = select[0].id;
+      }
       dispatch({
         type: 'dervieClassify/add',
         payload: {...fields,parentId:treeSelect},
         callback: () => {
-          dispatch({
-            type: 'dervieClassify/fetch',
-          });
+          this.fetchAll();
         },
       });
       message.success('添加成功');
@@ -289,9 +309,7 @@ export default class ResourceClassify extends PureComponent {
             payload: {
               id: item.id,
             }, callback: () => {
-              dispatch({
-                type: 'dervieClassify/fetch',
-              });
+              this.fetchAll();
             },
           });
           message.success('删除成功');
@@ -380,10 +398,15 @@ export default class ResourceClassify extends PureComponent {
             <div className={styles.tableList}>
               {/*<div className={styles.tableListForm}>{this.renderForm()}</div>*/}
               <div className={styles.tableListOperator}>
-                <Button icon="plus" type="primary" onClick={() => {this.handleModal({},0);}}>
+                <Button icon="plus" type="primary" onClick={() => {this.handleModal({},3);}}>
                   添加同级
                 </Button>
-                <Button icon="plus" type="primary" onClick={() => {this.handleModal({},0);}}>
+                <Button icon="plus" type="primary" onClick={() => {
+                  if (!treeSelect) {
+                    message.error('请先选择资源分类');
+                    return;
+                  }
+                  this.handleModal({},4);}}>
                   添加下级
                 </Button>
                 <Button icon="delete" onClick={() => this.handleDelete()}>

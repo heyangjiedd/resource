@@ -119,12 +119,12 @@ class SimpleTree extends PureComponent {
       const title = <span>{item.name}</span>;
       if (item.children) {
         return (
-          <TreeNode key={item.id} title={title}>
+          <TreeNode key={item.id} title={title}  value={item.id}>
             {loop(item.children)}
           </TreeNode>
         );
       }
-      return <TreeNode key={item.id} title={title}/>;
+      return <TreeNode key={item.id} title={title}  value={item.id}/>;
     });
     return (
       <div className={styles.tree_back_ground} style={ss}>

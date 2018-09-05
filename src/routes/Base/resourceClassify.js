@@ -32,7 +32,7 @@ const getValue = obj =>
   Object.keys(obj)
     .map(key => obj[key])
     .join(',');
-let itemDataStatus = 0;
+let itemDataStatus = 1;
 let listItemData = {};
 let treeSelect = '';
 
@@ -60,22 +60,34 @@ const CreateForm = Form.create()(props => {
     },
   };
   let title = itemDataStatus === 1 ? '编辑分类' : itemDataStatus === 2 ? '查看分类' : '新增分类';
+  const footer = (<Row>
+    <Col md={24} sm={24}>
+      <Button onClick={() => {
+        handleModalVisible();
+      }}>
+        取消
+      </Button>
+      <Button type="primary" onClick={okHandle}>
+        确定
+      </Button>
+    </Col>
+  </Row>);
   return (
     <Modal
       title={title}
       visible={modalVisible}
       onOk={okHandle}
-      footer={itemDataStatus === 2}
+      footer={itemDataStatus === 2 ? null : footer}
       destroyOnClose={true}
       onCancel={() => handleModalVisible()}
     >
 
-      <FormItem {...formItemLayout} label="父级分类名称">
+      {itemDataStatus==3||itemDataStatus==4?'':<FormItem {...formItemLayout} label="父级分类名称">
         {form.getFieldDecorator('parentName', {
           rules: [{ message: 'Please input some description...' }],
           initialValue: listItemData.parentName,
         })(<Input disabled placeholder="请输入"/>)}
-      </FormItem>
+      </FormItem>}
       <FormItem {...formItemLayout} label="分类名称">
         {form.getFieldDecorator('name', {
           rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.name,
@@ -122,12 +134,7 @@ export default class ResourceClassify extends PureComponent {
 
   componentDidMount() {
     const { dispatch } = this.props;
-    dispatch({
-      type: 'classify/tree',
-    });
-    dispatch({
-      type: 'classify/fetch',
-    });
+    this.fetchAll()
   }
 
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
@@ -171,27 +178,41 @@ export default class ResourceClassify extends PureComponent {
     itemDataStatus = status;
     this.handleModalVisible(true);
   };
+  fetchAll = () => {
+    const { dispatch} = this.props;
+    dispatch({
+      type: 'classify/tree',
+    });
+    dispatch({
+      type: 'classify/fetch',
+    });
+
+  };
   handleAdd = fields => {
-    const { dispatch } = this.props;
+    const { dispatch, classify: { treeData } } = this.props;
     if (itemDataStatus === 1) {
       dispatch({
         type: 'classify/update',
         payload: { ...listItemData, ...fields },
         callback: () => {
-          dispatch({
-            type: 'classify/fetch',
-          });
+         this.fetchAll()
         },
       });
       message.success('修改成功');
     } else {
+      let select = treeData.filter(r => {
+        return treeSelect == r.id;
+      });
+      if (itemDataStatus == 3) {
+        treeSelect = select[0].parentId;
+      } else {
+        treeSelect = select[0].id;
+      }
       dispatch({
         type: 'classify/add',
         payload: { ...fields, parentId: treeSelect },
         callback: () => {
-          dispatch({
-            type: 'classify/fetch',
-          });
+          this.fetchAll()
         },
       });
       message.success('添加成功');
@@ -210,9 +231,7 @@ export default class ResourceClassify extends PureComponent {
             payload: {
               id: item.id,
             }, callback: () => {
-              dispatch({
-                type: 'classify/fetch',
-              });
+              this.fetchAll()
             },
           });
           message.success('删除成功');
@@ -305,12 +324,16 @@ export default class ResourceClassify extends PureComponent {
               {/*<div className={styles.tableListForm}>{this.renderForm()}</div>*/}
               <div className={styles.tableListOperator}>
                 <Button icon="plus" type="primary" onClick={() => {
-                  this.handleModal({}, 0);
+                  this.handleModal({}, 3);
                 }}>
                   添加同级
                 </Button>
                 <Button icon="plus" type="primary" onClick={() => {
-                  this.handleModal({}, 0);
+                  if (!treeSelect) {
+                    message.error('请先选择资源分类');
+                    return;
+                  }
+                  this.handleModal({}, 4);
                 }}>
                   添加下级
                 </Button>
