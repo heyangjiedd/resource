@@ -366,9 +366,9 @@ const CreateForm = Form.create()(props => {
     }, {
       value: 'sftp', label: 'sftp',
     }, {
-      value: '本地磁盘', label: '本地磁盘',
+      value: 'local', label: '本地磁盘',
     }, {
-      value: '共享文件夹', label: '共享文件夹',
+      value: 'share', label: '共享文件夹',
     }],
   }];
   const columns = [
@@ -487,7 +487,7 @@ const CreateForm = Form.create()(props => {
     title: '字段名',
     dataIndex: 'feild_name',
     render: (text, record, index) => {
-      return <Select placeholder={'请选择'} style={{ width: 120 }} onSelect={(select, current) => {
+      return <Select placeholder={'请选择'} style={{ width: 120 }} getPopupContainer={triggerNode => triggerNode.parentNode} onSelect={(select, current) => {
         save(text, record, index, select, current);
       }}>
         {choiceFeild.map(item => {
@@ -570,8 +570,8 @@ const CreateForm = Form.create()(props => {
         } else if (choiceSelectedRows[0].sourceType === 'http' || choiceSelectedRows[0].sourceType === 'https' || choiceSelectedRows[0].sourceType === 'wsdl'
           || choiceSelectedRows[0].sourceType === 'rest') {
           getListBuyId(choiceSelectedRows[0], 5);
-        } else if (choiceSelectedRows[0].sourceType === 'ftp' || choiceSelectedRows[0].sourceType === 'sftp' || choiceSelectedRows[0].sourceType === '本地磁盘'
-          || choiceSelectedRows[0].sourceType === '共享文件夹') {
+        } else if (choiceSelectedRows[0].sourceType === 'ftp' || choiceSelectedRows[0].sourceType === 'sftp' || choiceSelectedRows[0].sourceType === 'local'
+          || choiceSelectedRows[0].sourceType === 'share') {
           getListBuyId(choiceSelectedRows[0], 4);
         }
       }}>
@@ -720,16 +720,16 @@ const CreateForm = Form.create()(props => {
             <span>请选择字段：</span>
           </Col>
         </Row>
-        <Row>
-          <Col md={12} sm={24}>
-            <FormItem {...formItemLayout} label="请选择表/视图">
-              <RadioGroup onChange={this.onChange}>
-                <Radio value='table'>表</Radio>
-                <Radio value='view'>视图</Radio>
-              </RadioGroup>
-            </FormItem>
-          </Col>
-        </Row>
+        {/*<Row>*/}
+          {/*<Col md={12} sm={24}>*/}
+            {/*<FormItem {...formItemLayout} label="请选择表/视图">*/}
+              {/*<RadioGroup onChange={this.onChange}>*/}
+                {/*<Radio value='table'>表</Radio>*/}
+                {/*<Radio value='view'>视图</Radio>*/}
+              {/*</RadioGroup>*/}
+            {/*</FormItem>*/}
+          {/*</Col>*/}
+        {/*</Row>*/}
         <Row>
           <StandardTableNothing
             data={dataList}
@@ -749,7 +749,7 @@ const CreateForm = Form.create()(props => {
         <Row>
           <Col>
             <span>
-              已选择<span>{choiceFeildCount}</span>张表，共<span>{choiceFeild.length}</span>个字段，需设置至少<span>{choiceFeildCount - 1}</span>个表间关系
+              已选择<span>{choiceFeildCount}</span>张表，共<span>{choiceFeild.length}</span>个字段，需设置至少<span>{(choiceFeildCount||1) - 1}</span>个表间关系
             </span>
           </Col>
         </Row>
@@ -862,25 +862,16 @@ const ResourceDetail = Form.create()(props => {
   const onChange = (value) => {
     radioSwitcHandle(value.target.value);
   };
-  const gxxsjkdatacolumns = [
-    {
-      title: '姓名',
-      dataIndex: 'sourceName',
-    },
-    {
-      title: '性别',
-      dataIndex: 'sourceType',
-    },
-    {
-      title: '年龄',
-      dataIndex: 'content',
-    }, {
-      title: '身份证号码',
-      dataIndex: 'content',
-    }, {
-      title: '地址',
-      dataIndex: 'content',
-    }];
+  const gxxsjkdatacolumns = [];
+  if(sqlList.length > 0){
+    for (let feild in sqlList[0]){
+      gxxsjkdatacolumns.push({
+        title:feild,
+        dataIndex:feild,
+        width: 100,
+      })
+    }
+  }
   const gxxsjkfieldcolumns = [
     {
       title: '字段名',
@@ -1038,6 +1029,7 @@ const ResourceDetail = Form.create()(props => {
           <DescriptionList size="large" title="数据详情" style={{ marginBottom: 32 }}>
           </DescriptionList>
           <StandardTableNothing
+            scroll={{x:true}}
             loading={loading}
             data={sqlList}
             columns={gxxsjkdatacolumns}
@@ -1291,13 +1283,21 @@ export default class ResourceClassify extends PureComponent {
     });
   };
   handleModalVisibleResource = flag => {
-    this.setState({
-      modalVisibleResource: !!flag,
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'centersource/fetchViewSetNull',
+      callback: () => {
+        this.setState({
+          modalVisibleResource: !!flag,
+        });
+      }
     });
   };
   handleModalVisible = flag => {
     this.setState({
       modalVisible: !!flag,
+      choiceFeild: [],
+      choiceFeildCount: 0,
     });
   };
   handleModalCatlog = (item, status) => {
@@ -1346,8 +1346,8 @@ export default class ResourceClassify extends PureComponent {
       this.setState({
         detailType: 3,
       });
-    } else if (listItemData.sourceType === 'ftp' || listItemData.sourceType === 'sftp' || listItemData.sourceType === '本地磁盘'
-      || listItemData.sourceType === '共享文件夹') {
+    } else if (listItemData.sourceType === 'ftp' || listItemData.sourceType === 'sftp' || listItemData.sourceType === 'local'
+      || listItemData.sourceType === 'share') {
       dispatch({
         type: 'centersource/fetchFile',
         payload: {
@@ -1672,7 +1672,7 @@ export default class ResourceClassify extends PureComponent {
   catalogItemChange = (index) => {
     const { dispatch, catalog: { catalogItem } } = this.props;
     let list = catalogItem.map(item => {
-      if (item.id = index.id) ;
+      if (item.id == index.id)
       item = index;
       return item;
     });
@@ -1794,11 +1794,11 @@ export default class ResourceClassify extends PureComponent {
         render: (text, record, index) => {
           return (
             <Fragment>
-              <a onClick={() => {
-                // listItemData = text;
-                // this.handleModalCatlog()
-              }}>目录详情</a>
-              <Divider type="vertical"/>
+              {/*<a onClick={() => {*/}
+                {/*// listItemData = text;*/}
+                {/*// this.handleModalCatlog()*/}
+              {/*}}>目录详情</a>*/}
+              {/*<Divider type="vertical"/>*/}
               <a onClick={() => {
                 this.handleModalResource(text, true);
               }}>配置详情</a>

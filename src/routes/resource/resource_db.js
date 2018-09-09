@@ -60,106 +60,6 @@ let createItemData = {};
 let itemData = {};
 let treeSelect = {};
 
-const CreateForm = Form.create()(props => {
-  const { modalVisible, form, handleAdd, handleModalVisible } = props;
-  const okHandle = () => {
-    form.validateFields((err, fieldsValue) => {
-      if (err) return;
-      form.resetFields();
-      handleAdd(fieldsValue);
-    });
-  };
-  const formItemLayout = {
-    labelCol: {
-      xs: { span: 24 },
-      sm: { span: 8 },
-    },
-    wrapperCol: {
-      xs: { span: 24 },
-      sm: { span: 16 },
-      md: { span: 16 },
-    },
-  };
-  return (
-    <Modal
-      title="修改配置"
-      visible={modalVisible}
-      onOk={okHandle}
-      onCancel={() => handleModalVisible()}
-    >
-      <FormItem {...formItemLayout} label="数据源类型">
-        {form.getFieldDecorator('desc', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据库类型">
-        {form.getFieldDecorator('desc1', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据源名称">
-        {form.getFieldDecorator('desc2', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="所属组织机构">
-        {form.getFieldDecorator('desc3', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="资源分类">
-        {form.getFieldDecorator('desc4', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(
-          <Select placeholder="请选择" style={{ width: '100%' }}>
-            <Option value="0">关闭</Option>
-            <Option value="1">运行中</Option>
-          </Select>)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="IP地址">
-        {form.getFieldDecorator('desc5', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="端口">
-        {form.getFieldDecorator('desc6', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据库名称/SID">
-        {form.getFieldDecorator('desc7', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="用户名">
-        {form.getFieldDecorator('desc8', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="密码">
-        {form.getFieldDecorator('desc9', {
-          rules: [{ required: true, message: 'Please input some description...' }],
-        })(<Input placeholder="请输入"/>)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="数据源描述">
-        {form.getFieldDecorator('flms', {
-          rules: [
-            {
-              required: true,
-              message: '请输入数据源描述',
-            },
-          ], initialValue: listItemData.owner,
-        })(
-          <TextArea
-            style={{ minHeight: 32 }}
-            placeholder="请输入你的数据源描述"
-            rows={4}
-          />,
-        )}
-      </FormItem>
-    </Modal>
-  );
-});
 const TestForm = Form.create()(props => {
   const { modalVisible, form, selectedRows, testHandleAdd, testList, testSuccess, testFail, handleModalVisible } = props;
   let percent = parseInt((testList.length / selectedRows.length) * 100);
@@ -398,9 +298,16 @@ export default class ResourceClassify extends PureComponent {
 
   componentDidMount() {
     const { dispatch } = this.props;
-    this.fetchHandle();
     dispatch({
-      type: 'classify/tree',
+      type: 'centersource/fetchOrgList',
+      callback: () => {
+        dispatch({
+          type: 'classify/tree',
+          callback: () => {
+            this.fetchHandle();
+          },
+        });
+      },
     });
   }
 
@@ -614,7 +521,7 @@ export default class ResourceClassify extends PureComponent {
           this.setState({
             testList: this.state.testList,
           });
-          if (res) {
+          if (res===true) {
             this.setState({
               testSuccess: this.state.testSuccess++,
             });
@@ -715,7 +622,7 @@ export default class ResourceClassify extends PureComponent {
 
   render() {
     const {
-      centersource: { sqlList, data, dataListPage, dataList, lifelist: { list: lifelist }, httpItem },
+      centersource: { sqlList, data, dataListPage, orgList,dataList, lifelist: { list: lifelist }, httpItem },
       loading,
       classify: { treeData },
       catalog: { catalogItem, field, tableAndField, operateLog },
@@ -735,12 +642,21 @@ export default class ResourceClassify extends PureComponent {
       {
         title: '所属组织机构',
         dataIndex: 'orgId',
+        render(val) {
+          let org = orgList.filter(r => {
+            return val == r.deptCode;
+          });
+          return <span>{org[0] && org[0].deptShortName}</span>;
+        },
       },
       {
         title: '所属资源分类',
-        dataIndex: 'status',
+        dataIndex: 'resourceId',
         render(val) {
-          return <Badge status={statusMap[val]} text={status[val]}/>;
+          let classfy = treeData.filter(r => {
+            return val == r.id;
+          });
+          return <span>{classfy[0] && classfy[0].name}</span>;
         },
       },
       {

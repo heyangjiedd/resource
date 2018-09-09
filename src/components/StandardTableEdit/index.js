@@ -86,10 +86,10 @@ class EditableCell extends React.Component {
                   <FormItem style={{ margin: 0 }}>
                     {form.getFieldDecorator(dataIndex, {
                     initialValue: list[0].id,
-                    })(<Select placeholder={'请选择'} onSelect={this.save}>
+                    })(<Select style={{width:'100%'}} placeholder={'请选择'} onSelect={this.save}>
                       {list.map(item=>{
                         return (
-                          <Option title={item.name} value={item.id}>{item.name}</Option>
+                          <Option title={item.name} key={item.id} value={item.id}>{item.name}</Option>
                         )
                       })}
                     </Select>)}
@@ -177,24 +177,28 @@ class EditableTable extends React.Component {
     this.columns = [{
       title: '表名',
       dataIndex: 'name1',
+      width:'25%',
       render:val=><span>{selectItemTable&&selectItemTable.filter(item=>{ return item.id ===val})&&
       selectItemTable.filter(item=>{ return item.id ===val}).length>0&&selectItemTable.filter(item=>{ return item.id ===val})[0].name}</span>,
       editable: true,
     }, {
       title: '字段',
       dataIndex: 'feils1',
+      width:'25%',
       render:val=><span>{selectItemFeild&&selectItemFeild.filter(item=>{ return item.id ===val})&&
       selectItemFeild.filter(item=>{ return item.id ===val}).length>0&&selectItemFeild.filter(item=>{ return item.id ===val})[0].name}</span>,
       editable: true,
     },{
       title: '表名',
       dataIndex: 'name2',
+      width:'25%',
       render:val=><span>{selectItemTable&&selectItemTable.filter(item=>{ return item.id ===val})&&
       selectItemTable.filter(item=>{ return item.id ===val}).length>0&&selectItemTable.filter(item=>{ return item.id ===val})[0].name}</span>,
       editable: true,
     }, {
       title: '字段',
       dataIndex: 'feils2',
+      width:'25%',
       render:val=><span>{selectItemFeild&&selectItemFeild.filter(item=>{ return item.id ===val})&&
       selectItemFeild.filter(item=>{ return item.id ===val}).length>0&&selectItemFeild.filter(item=>{ return item.id ===val})[0].name}</span>,
       editable: true,

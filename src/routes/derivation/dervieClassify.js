@@ -349,10 +349,6 @@ export default class ResourceClassify extends PureComponent {
         dataIndex: 'name',
       },
       {
-        title: '下级分类',
-        dataIndex: 'childNum',
-      },
-      {
         title: '分类结构',
         render: (text, record, index) => {
           return (

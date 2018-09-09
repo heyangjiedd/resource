@@ -223,7 +223,7 @@ const ResourceDetail = Form.create()(props => {
       <div>
         <DescriptionList size="large" col={2} title="基本信息详情" style={{ marginBottom: 32 }}>
           <Description term="服务名称">{httpItem.sourceName}</Description>
-          <Description term="所属数据源">{httpItem.sourceName}</Description>
+          <Description term="所属数据源">{httpItem.sourceType}</Description>
           <Description term="接口类型">{httpItem.interfaceType}</Description>
           <Description term="数据格式">{httpItem.content}</Description>
           <Description term="服务类型">{httpItem.interfaceName}</Description>
@@ -467,16 +467,11 @@ export default class ResourceClassify extends PureComponent {
       },
       {
         title: '服务类型',
-        dataIndex: 'createTime',
-        sorter: true,
-        render: val => <span>{val ? moment(val).format('YYYY-MM-DD HH:mm:ss') : '-'}</span>,
+        dataIndex: 'interfaceType',
       },
       {
         title: '服务描述',
-        dataIndex: 'linkStatus',
-        render(val) {
-          return <Badge status={val ? 'success' : 'error'} text={val || '未连通'}/>;
-        },
+        dataIndex: 'content',
       },
       {
         title: '操作',

@@ -55,7 +55,17 @@ class EditableCell extends React.Component {
         return;
       }
       this.toggleEdit();
-      handleSave({ ...record, ...values });
+      handleSave({ ...record, ...values,valueType:value });
+    });
+  };
+  savecondition = (value, option) => {
+    const { record, handleSave } = this.props;
+    this.form.validateFields((error, values) => {
+      if (error) {
+        return;
+      }
+      this.toggleEdit();
+      handleSave({ ...record, ...values,condition:value });
     });
   };
   saveCopy = (value, option) => {
@@ -65,7 +75,7 @@ class EditableCell extends React.Component {
         return;
       }
       this.toggleEdit();
-      handleSave({ ...record, ...values, tableId: value, field: option.props.children });
+      handleSave({ ...record, ...values, tableId: option.props.tableId, field: option.props.title });
     });
   };
   saveInput = () => {
@@ -107,7 +117,7 @@ class EditableCell extends React.Component {
                   {form.getFieldDecorator(dataIndex, {
                     initialValue: '',
                   })(
-                    <Input
+                    <Input style={{width:'100%'}}
                       ref={node => (this.input = node)}
                       onPressEnter={this.saveInput}
                     />,
@@ -115,22 +125,33 @@ class EditableCell extends React.Component {
                 </FormItem>
               )) : title == '字段' ? (<FormItem style={{ margin: 0 }}>
                   {form.getFieldDecorator(dataIndex, {
-                    initialValue: list.length > 0 ? [0].name : '',
-                  })(<Select placeholder={'请选择'} onSelect={this.saveCopy}>
+                    initialValue: list.length > 0 ? list[0].name : '',
+                  })(<Select placeholder={'请选择'} style={{width:120}} onSelect={this.saveCopy}>
                     {list.map(item => {
                       return (
-                        <Option title={item.name} value={item.tableId}>{item.name}</Option>
+                        <Option title={item.name} key={item.id} tableId={item.tableId} value={item.name}>{item.name}</Option>
                       );
                     })}
                   </Select>)}
                 </FormItem>
-              ) : (<FormItem style={{ margin: 0 }}>
+              ) : title == '条件' ?(<FormItem style={{ margin: 0 }}>
                   {form.getFieldDecorator(dataIndex, {
-                    initialValue: list[0].name,
-                  })(<Select placeholder={'请选择'} onSelect={this.save}>
+                    initialValue: list[0].id,
+                  })(<Select style={{width:'100%'}} placeholder={'请选择'} onSelect={this.savecondition}>
                     {list.map(item => {
                       return (
-                        <Option title={item.name} value={item.id}>{item.name}</Option>
+                        <Option title={item.name} key={item.id} value={item.id}>{item.name}</Option>
+                      );
+                    })}
+                  </Select>)}
+                </FormItem>
+              ):(<FormItem style={{ margin: 0 }}>
+                  {form.getFieldDecorator(dataIndex, {
+                    initialValue: list[0].id,
+                  })(<Select style={{width:'100%'}} placeholder={'请选择'} onSelect={this.save}>
+                    {list.map(item => {
+                      return (
+                        <Option title={item.name} key={item.id} value={item.id}>{item.name}</Option>
                       );
                     })}
                   </Select>)}
@@ -176,7 +197,7 @@ class EditableTable extends React.Component {
       dataSource: [...dataSource, newData],
       count: count + 1,
     });
-  };
+  }
   handleSave = (row) => {
     const newData = [...this.state.dataSource];
     const index = newData.findIndex(item => row.key === item.key);
@@ -206,25 +227,25 @@ class EditableTable extends React.Component {
         title: '字段',
         dataIndex: 'field',
         editable: true,
-        width: 1,
+        width: '20%',
       }, {
         title: '条件',
         dataIndex: 'condition',
         editable: true,
-        width: 1,
+        width: '20%',
       }, {
         title: '值类型',
         dataIndex: 'valueType',
         editable: true,
-        width: 1,
+        width: '20%',
       }, {
         title: '值',
         dataIndex: 'value',
         editable: true,
-        width: 1,
+        width: '20%',
       }, {
         title: '操作',
-        width: 1,
+        width:'20%',
         render: (text, record, index) => {
           return (
             <Fragment>

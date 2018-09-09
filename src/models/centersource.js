@@ -17,15 +17,17 @@ export default {
     lifelist: [],
     httpItem: {},
     orgList:[],
+    sqlList:[],
   },
 
   effects: {
-    * fetchOrgList({ payload }, { call, put }) {
+    * fetchOrgList({ payload, callback }, { call, put }) {
       const response = yield call(orgList);
       yield put({
         type: 'org',
         payload: response,
       });
+      if (callback) callback(response);
     },
     //取数据源列表
     * fetch({ payload }, { call, put }) {
@@ -80,6 +82,13 @@ export default {
       });
       if (callback) callback();
     },
+    * fetchViewSetNull({ payload, callback }, { call, put }) {
+      yield put({
+        type: 'sqlList',
+        payload:{data:{}},
+      });
+      if (callback) callback();
+    },
     * fetchTable({ payload }, { call, put }) {
       const response = yield call(tableList, payload);
       yield put({
@@ -125,7 +134,7 @@ export default {
     sqlList(state, action) {
       return {
         ...state,
-        sqlList: action.payload,
+        sqlList: action.payload.data.data||[],
       };
     },
     list(state, action) {

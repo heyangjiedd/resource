@@ -112,13 +112,18 @@ export default class GlobalHeader extends PureComponent {
             {/*}}*/}
           {/*/>*/}
           <Tooltip title="">
-            <a
-              target="_blank"
-              href="#"
+            <span
               rel="noopener noreferrer"
               className={styles.action}
             >
-              <Icon type="environment-o" /><span className={styles.location}>成都市</span>
+              <Icon type="environment-o" /><span className={styles.location}>内江市</span>
+            </span>
+            <a
+              href="#user/login"
+              rel="noopener noreferrer"
+              className={styles.action}
+            >
+              <Icon type="mail-reply" /><span className={styles.location}>退出</span>
             </a>
           </Tooltip>
           {/*<NoticeIcon*/}

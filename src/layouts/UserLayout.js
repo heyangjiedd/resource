@@ -4,7 +4,7 @@ import DocumentTitle from 'react-document-title';
 import { Icon } from 'antd';
 import GlobalFooter from '../components/GlobalFooter';
 import styles from './UserLayout.less';
-import logo from '../assets/logo.svg';
+import logo from '../assets/logo.png';
 import { getRoutes, getPageQuery, getQueryPath } from '../utils/utils';
 
 const links = [
@@ -27,7 +27,7 @@ const links = [
 
 const copyright = (
   <Fragment>
-    Copyright <Icon type="copyright" /> 2018 体验技术部出品
+    Copyright <Icon type="copyright" /> 2018 智政数据. All rights reserved.
   </Fragment>
 );
 
@@ -43,9 +43,9 @@ class UserLayout extends React.PureComponent {
   getPageTitle() {
     const { routerData, location } = this.props;
     const { pathname } = location;
-    let title = '政务信息资源中心';
+    let title = '内江市政务信息资源管理系统';
     if (routerData[pathname] && routerData[pathname].name) {
-      title = `${routerData[pathname].name} - 政务信息资源中心`;
+      title = `${routerData[pathname].name} - 内江市政务信息资源管理系统`;
     }
     return title;
   }
@@ -60,7 +60,7 @@ class UserLayout extends React.PureComponent {
               <div className={styles.header}>
                 <Link to="/">
                   {/*<img alt="logo" className={styles.logo} src={logo} />*/}
-                  <span className={styles.title}>政务信息资源中心</span>
+                  <span className={styles.title}>内江市政务信息资源管理系统</span>
                 </Link>
               </div>
               {/*<div className={styles.desc}>Ant Design 是西湖区最具影响力的 Web 设计规范</div>*/}
@@ -77,7 +77,7 @@ class UserLayout extends React.PureComponent {
               <Redirect from="/user" to={getLoginPathWithRedirectPath()} />
             </Switch>
           </div>
-          <GlobalFooter links={links} copyright={copyright} />
+          <GlobalFooter  copyright={copyright} />
         </div>
       </DocumentTitle>
     );

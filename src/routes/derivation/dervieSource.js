@@ -163,9 +163,9 @@ const CreateForm = Form.create()(props => {
       }, {
         value: 'sftp', label: 'sftp',
       }, {
-        value: '本地磁盘', label: '本地磁盘',
+        value: 'local', label: '本地磁盘',
       }, {
-        value: '共享文件夹', label: '共享文件夹',
+        value: 'share', label: '共享文件夹',
       }],
     }];
   const columns = [
@@ -367,8 +367,8 @@ const CreateForm = Form.create()(props => {
         } else if (choiceSelectedRows[0].sourceType === 'http' || choiceSelectedRows[0].sourceType === 'https' || choiceSelectedRows[0].sourceType === 'wsdl'
           || choiceSelectedRows[0].sourceType === 'rest') {
           getListBuyId(choiceSelectedRows[0], 5);
-        } else if (choiceSelectedRows[0].sourceType === 'ftp' || choiceSelectedRows[0].sourceType === 'sftp' || choiceSelectedRows[0].sourceType === '本地磁盘'
-          || choiceSelectedRows[0].sourceType === '共享文件夹') {
+        } else if (choiceSelectedRows[0].sourceType === 'ftp' || choiceSelectedRows[0].sourceType === 'sftp' || choiceSelectedRows[0].sourceType === 'local'
+          || choiceSelectedRows[0].sourceType === 'share') {
           getListBuyId(choiceSelectedRows[0], 4);
         }
       }}>
@@ -1130,8 +1130,8 @@ export default class ResourceClassify extends PureComponent {
       this.setState({
         detailType: 3,
       });
-    } else if (listItemData.sourceType === 'ftp' || listItemData.sourceType === 'sftp' || listItemData.sourceType === '本地磁盘'
-      || listItemData.sourceType === '共享文件夹') {
+    } else if (listItemData.sourceType === 'ftp' || listItemData.sourceType === 'sftp' || listItemData.sourceType === 'local'
+      || listItemData.sourceType === 'share') {
       dispatch({
         type: 'centersource/fetchFile',
         payload: {
@@ -1296,11 +1296,12 @@ export default class ResourceClassify extends PureComponent {
     this.handleItem(index);
     const { dispatch } = this.props;
     modalListData = data;
+    debugger
     if (index == 2 || index == 3) {
-      dispatch({
-        type: 'catalog/querycatalogItem',
-        payload: { catalogId: listItemData.id },
-      });
+      // dispatch({
+      //   type: 'catalog/querycatalogItem',
+      //   payload: { catalogId: listItemData.id },
+      // });
       dispatch({
         type: 'centersource/fetchTable',
         payload: { id: data.id },
@@ -1378,14 +1379,6 @@ export default class ResourceClassify extends PureComponent {
     this.handleModalVisible(true);
     this.searchHandle(data);
   };
-  getListBuyId = (data, index) => {
-    this.handleItem(index);
-    const { dispatch} = this.props;
-    dispatch({
-      type: 'centersource/fetch',
-      payload: data,
-    });
-  };
   handleChoiceFeild = (list) => {
     const { choiceFeild, choiceFeildCount } = this.state;
     this.setState({
@@ -1439,7 +1432,6 @@ export default class ResourceClassify extends PureComponent {
       "catalogId": listItemData.id,
       "params":param
     };
-    debugger
     dispatch({
       type: 'centersource/fetchView',
       payload: params,

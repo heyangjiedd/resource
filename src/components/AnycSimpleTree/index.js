@@ -84,7 +84,6 @@ class SimpleTree extends PureComponent {
     const { dispatch } = this.props;
     dispatch({
       type: 'catalog/tree',
-      payload: {region:'000000',type:'7'},
       callback: (list) => {
         this.setState({
           treeData:list,
