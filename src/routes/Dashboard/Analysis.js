@@ -108,19 +108,22 @@ export default class Analysis extends Component {
     });
     dispatch({
       type: 'charts/halfYearCount1',
-      payload: { sourceType : 'db' },
+      payload: { sourceType: 'db' },
     });
     dispatch({
       type: 'charts/halfYearCount2',
-      payload: { sourceType : 'file' },
+      payload: { sourceType: 'file' },
     });
     dispatch({
       type: 'charts/halfYearCount3',
-      payload: { sourceType : 'api' },
+      payload: { sourceType: 'api' },
     });
     //3
     dispatch({
       type: 'charts/deriveClassifyCount',
+    });
+    dispatch({
+      type: 'charts/deriveClassify',
     });
   }
 
@@ -183,25 +186,27 @@ export default class Analysis extends Component {
     }
   }
 
-  getCount = (type,index)=>{
+  getCount = (type, index) => {
     const { charts } = this.props;
     const { dataCount } = charts;
-    if(dataCount.length == 0)
+    if (dataCount.length > 0)
+      return dataCount.filter(r => {
+        return r.sourceType == type;
+      })[0][index];
+    else
       return 0;
-    return dataCount.filter(r=>{
-      return r.sourceType == type;
-    })[0][index];
-  }
-  getGB = (index)=>{
-    if(!index)
-      return 0.0
-    return index.substr(0,index.length - 2);
-  }
+  };
+  getGB = (index) => {
+    if (!index)
+      return 0.0;
+    return index.substr(0, index.length - 2);
+  };
+
   render() {
     const { salesType, isFileDetail } = this.state;
     const { charts, loading } = this.props;
     const {
-      total, check, catlog1, catlog2, catlog3,dataCount,halfYear1,halfYear2,halfYear3,deriveCount
+      total, check, catlog1, catlog2, catlog3, dataCount, halfYear1, halfYear2, halfYear3, deriveCount,deriveClassify,
     } = charts;
     const { DataView } = DataSet;
     const { Html } = Guide;
@@ -245,28 +250,28 @@ export default class Analysis extends Component {
     const ds = new DataSet();
 
     const dv_db = [];
-    let dv_db_itemsl = {name:'数量'};
-    let dv_db_itemrl = {name:'容量'};
+    let dv_db_itemsl = { name: '数量' };
+    let dv_db_itemrl = { name: '容量' };
     let dv_db_item = [];
-    halfYear1.forEach(r=>{
-      dv_db_itemsl[r.month+'月'] = r.totalCount
-      dv_db_itemrl[r.month+'月'] = parseInt(this.getGB(r.totalSize));
-      dv_db_item.push(r.month+'月');
+    halfYear1.forEach(r => {
+      dv_db_itemsl[r.month + '月'] = r.totalCount;
+      dv_db_itemrl[r.month + '月'] = parseInt(this.getGB(r.totalSize));
+      dv_db_item.push(r.month + '月');
     });
-    if(halfYear1.length > 0){
+    if (halfYear1.length > 0) {
       dv_db.push(dv_db_itemsl);
       dv_db.push(dv_db_itemrl);
     }
     const dv_file = [];
-    let dv_file_itemsl = {name:'数量'};
-    let dv_file_itemrl = {name:'容量'};
+    let dv_file_itemsl = { name: '数量' };
+    let dv_file_itemrl = { name: '容量' };
     let dv_file_item = [];
-    halfYear2.forEach(r=>{
-      dv_file_itemsl[r.month+'月'] = r.totalCount
-      dv_file_itemrl[r.month+'月'] = parseInt(this.getGB(r.totalSize));
-      dv_file_item.push(r.month+'月');
+    halfYear2.forEach(r => {
+      dv_file_itemsl[r.month + '月'] = r.totalCount;
+      dv_file_itemrl[r.month + '月'] = parseInt(this.getGB(r.totalSize));
+      dv_file_item.push(r.month + '月');
     });
-    if(halfYear2.length > 0){
+    if (halfYear2.length > 0) {
       dv_file.push(dv_file_itemsl);
       dv_file.push(dv_file_itemrl);
     }
@@ -288,16 +293,12 @@ export default class Analysis extends Component {
       // key字段
       value: '月均', // value字段
     });
-    halfYear3.forEach(r=>{
-      r.month = r.month+'月'
+    halfYear3.forEach(r => {
+      r.month = r.month + '月';
     });
-
-    const data_derivation = [
-      { item: '数据库', count: 40 },
-      { item: '主题库', count: 21 },
-      { item: '部门库', count: 17 },
-      { item: '其他衍生库', count: 13 },
-    ];
+    const data_derivation = Object.keys(deriveCount).map(item=>{
+        return {item:item,count:deriveCount[item]}
+      });
     const dv_derivation = new DataView();
     dv_derivation.source(data_derivation).transform({
       type: 'percent',
@@ -442,10 +443,10 @@ export default class Analysis extends Component {
                     flex: '1 1 auto',
                     textAlign: 'center',
                     borderRight: '1px solid #e8e8e8',
-                  }}><span style={{ fontSize: '1.5em', marginRight: 5 }}>{this.getCount('db','totalCount')}</span>万条
+                  }}><span style={{ fontSize: '1.5em', marginRight: 5 }}>{this.getCount('db', 'totalCount')}</span>万条
                   </div>
                   <div style={{ fontSize: '1.16em', flex: '1 1 auto', textAlign: 'center' }}><span
-                    style={{ fontSize: '1.5em', marginRight: 5 }}>{this.getGB(this.getCount('db','totalSize'))}</span>GB
+                    style={{ fontSize: '1.5em', marginRight: 5 }}>{this.getGB(this.getCount('db', 'totalSize'))}</span>GB
                   </div>
                 </div>
               </div>
@@ -488,10 +489,13 @@ export default class Analysis extends Component {
                     flex: '1 1 auto',
                     textAlign: 'center',
                     borderRight: '1px solid #e8e8e8',
-                  }}><span style={{ fontSize: '1.5em', marginRight: 5 }}>{this.getCount('file','totalCount')}</span>个
+                  }}><span style={{ fontSize: '1.5em', marginRight: 5 }}>{this.getCount('file', 'totalCount')}</span>个
                   </div>
                   <div style={{ fontSize: '1.16em', flex: '1 1 auto', textAlign: 'center' }}><span
-                    style={{ fontSize: '1.5em', marginRight: 5 }}>{this.getGB(this.getCount('file','totalSize'))}</span>GB
+                    style={{
+                      fontSize: '1.5em',
+                      marginRight: 5,
+                    }}>{this.getGB(this.getCount('file', 'totalSize'))}</span>GB
                   </div>
                 </div>
               </div>
@@ -529,7 +533,7 @@ export default class Analysis extends Component {
                 <div className={styles.catlogTitle} style={{ left: 8 }}><span
                   style={{ color: '#fff', fontSize: 12 }}>服务</span></div>
                 <div style={{ fontSize: '1.16em', textAlign: 'center', borderRight: '1px solid #e8e8e8' }}><span
-                  style={{ fontSize: '1.5em', marginRight: 5 }}>{this.getCount('api','totalCount')}</span>个
+                  style={{ fontSize: '1.5em', marginRight: 5 }}>{this.getCount('api', 'totalCount')}</span>个
                 </div>
               </div>
               <Chart height={180} width={340} data={halfYear3}
@@ -551,10 +555,10 @@ export default class Analysis extends Component {
                   type="point"
                   position="month*totalCount"
                   size={4}
-                  shape={"circle"}
+                  shape={'circle'}
                   style={{
-                    stroke: "#fff",
-                    lineWidth: 1
+                    stroke: '#fff',
+                    lineWidth: 1,
                   }}
                 />
               </Chart>
@@ -576,7 +580,7 @@ export default class Analysis extends Component {
                 <Guide>
                   <Html
                     position={['50%', '-50%']}
-                    html={'<div style=\'color:#8c8c8c;font-size:1.16em;text-align: center;width: 10em;\'><span style=\'color:#262626;font-size:1.5em\'>' + deriveCount + '</span>个</div>'}
+                    html={'<div style=\'color:#8c8c8c;font-size:1.16em;text-align: center;width: 10em;\'><span style=\'color:#262626;font-size:1.5em\'>' + Object.keys(deriveCount).reduce((d,item)=>{return deriveCount[item]+d},0) + '</span>个</div>'}
                     alignX="middle"
                     alignY="top"
                   />
@@ -610,101 +614,126 @@ export default class Analysis extends Component {
                 lineHeight: '30px',
                 cursor: 'pointer',
                 color: '#1890ff',
-              }}><Link to="/derivationDetail"  key="logo">
+              }}><Link to="/derivationDetail" key="logo">
                 查看全部衍生库>>
               </Link>
               </div>
             </Col>
             <Col xl={4} lg={4} md={4} sm={12} xs={12}
                  className={styles.catlog}>
-              <div style={{ height:210}}>
-                <div className={styles.catlogTitle} style={{ left: 8 ,marginBottom:10}}><span
-                  style={{ color: '#fff', fontSize: 12 }}>数据库</span></div>
-                <span style={{ marginLeft: 5, color: '#1890ff'}}>数量</span>
-                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' ,marginTop:10}}>数据库<span
-                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>万条
+              <div style={{ height: 210 }}>
+                <div className={styles.catlogTitle} style={{ left: 8, marginBottom: 10 }}><span
+                  style={{ color: '#fff', fontSize: 12 }}>基础库</span></div>
+                <span style={{ marginLeft: 5, color: '#1890ff' }}>数量</span>
+                <div style={{
+                  fontSize: '1em',
+                  flex: '1 1 auto',
+                  textAlign: 'center',
+                  lineHeight: '2em',
+                  marginTop: 10,
+                }}>数据库<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{deriveClassify[0]&&deriveClassify[0]['基础库'].reduce((total,item)=>{
+                    return total + parseInt(item.totalCount||0)
+                },0)}</span>万条
                 </div>
-                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' }}>文件<span
-                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>个
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center', lineHeight: '2em' }}>文件<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{deriveClassify[0]&&deriveClassify[0]['基础库'].reduce((total,item)=>{
+                  return total + parseInt(item.totalCount||0)
+                },0)}</span>个
                 </div>
-                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' }}>服务<span
-                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>个
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center', lineHeight: '2em' }}>服务<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{deriveClassify[0]&&deriveClassify[0]['基础库'].reduce((total,item)=>{
+                  return total + parseInt(item.totalCount||0)
+                },0)}</span>个
                 </div>
               </div>
             </Col>
             <Col xl={4} lg={4} md={4} sm={12} xs={12}
                  className={styles.catlog}>
-              <div  style={{ height:210}}>
-                <div className={styles.catlogTitle} style={{ left: 8  ,marginBottom:10}}><span
+              <div style={{ height: 210 }}>
+                <div className={styles.catlogTitle} style={{ left: 8, marginBottom: 10 }}><span
                   style={{ color: '#fff', fontSize: 12 }}>主题库</span></div>
-                <span style={{ marginLeft: 5, color: '#1890ff'}}>数量</span>
-                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' ,marginTop:10}}>数据库<span
-                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>万条
+                <span style={{ marginLeft: 5, color: '#1890ff' }}>数量</span>
+                <div style={{
+                  fontSize: '1em',
+                  flex: '1 1 auto',
+                  textAlign: 'center',
+                  lineHeight: '2em',
+                  marginTop: 10,
+                }}>数据库<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{deriveClassify[1]&&deriveClassify[1]['主题库'].reduce((total,item)=>{
+                  return total + parseInt(item.totalCount||0)
+                },0)}</span>万条
                 </div>
-                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' }}>文件<span
-                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>个
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center', lineHeight: '2em' }}>文件<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{deriveClassify[1]&&deriveClassify[1]['主题库'].reduce((total,item)=>{
+                  return total + parseInt(item.totalCount||0)
+                },0)}</span>个
                 </div>
-                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' }}>服务<span
-                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>个
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center', lineHeight: '2em' }}>服务<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{deriveClassify[1]&&deriveClassify[1]['主题库'].reduce((total,item)=>{
+                  return total + parseInt(item.totalCount||0)
+                },0)}</span>个
                 </div>
               </div>
             </Col>
             <Col xl={4} lg={4} md={4} sm={12} xs={12}
                  className={styles.catlog}>
-              <div  style={{ height:210}}>
-                <div className={styles.catlogTitle} style={{ left: 8  ,marginBottom:10}}><span
+              <div style={{ height: 210 }}>
+                <div className={styles.catlogTitle} style={{ left: 8, marginBottom: 10 }}><span
                   style={{ color: '#fff', fontSize: 12 }}>部门库</span></div>
-                <span style={{ marginLeft: 5, color: '#1890ff'}}>数量</span>
-                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' ,marginTop:10}}>数据库<span
-                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>万条
+                <span style={{ marginLeft: 5, color: '#1890ff' }}>数量</span>
+                <div style={{
+                  fontSize: '1em',
+                  flex: '1 1 auto',
+                  textAlign: 'center',
+                  lineHeight: '2em',
+                  marginTop: 10,
+                }}>数据库<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{deriveClassify[2]&&deriveClassify[2]['部门库'].reduce((total,item)=>{
+                  return total + parseInt(item.totalCount||0)
+                },0)}</span>万条
                 </div>
-                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' }}>文件<span
-                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>个
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center', lineHeight: '2em' }}>文件<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{deriveClassify[2]&&deriveClassify[2]['部门库'].reduce((total,item)=>{
+                  return total + parseInt(item.totalCount||0)
+                },0)}</span>个
                 </div>
-                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' }}>服务<span
-                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>个
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center', lineHeight: '2em' }}>服务<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{deriveClassify[2]&&deriveClassify[2]['部门库'].reduce((total,item)=>{
+                  return total + parseInt(item.totalCount||0)
+                },0)}</span>个
                 </div>
               </div>
             </Col>
             <Col xl={4} lg={4} md={4} sm={12} xs={12}
                  className={styles.catlog}>
-              <div  style={{ height:210}}>
-                <div className={styles.catlogTitle} style={{ left: 8  ,marginBottom:10}}><span
+              <div style={{ height: 210 }}>
+                <div className={styles.catlogTitle} style={{ left: 8, marginBottom: 10 }}><span
                   style={{ color: '#fff', fontSize: 12 }}>其他衍生库</span></div>
-                <span style={{ marginLeft: 5, color: '#1890ff'}}>数量</span>
-                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' ,marginTop:10}}>数据库<span
-                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>万条
+                <span style={{ marginLeft: 5, color: '#1890ff' }}>数量</span>
+                <div style={{
+                  fontSize: '1em',
+                  flex: '1 1 auto',
+                  textAlign: 'center',
+                  lineHeight: '2em',
+                  marginTop: 10,
+                }}>数据库<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{deriveClassify[3]&&deriveClassify[3]['其它衍生库'].reduce((total,item)=>{
+                  return total + parseInt(item.totalCount||0)
+                },0)}</span>万条
                 </div>
-                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' }}>文件<span
-                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>个
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center', lineHeight: '2em' }}>文件<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{deriveClassify[3]&&deriveClassify[3]['其它衍生库'].reduce((total,item)=>{
+                  return total + parseInt(item.totalCount||0)
+                },0)}</span>个
                 </div>
-                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center',lineHeight:'2em' }}>服务<span
-                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{bmsml}</span>个
+                <div style={{ fontSize: '1em', flex: '1 1 auto', textAlign: 'center', lineHeight: '2em' }}>服务<span
+                  style={{ fontSize: '1.2em', marginLeft: 5, marginRight: 5 }}>{deriveClassify[3]&&deriveClassify[3]['其它衍生库'].reduce((total,item)=>{
+                  return total + parseInt(item.totalCount||0)
+                },0)}</span>个
                 </div>
               </div>
-              {/*<span style={{ marginLeft: 5, color: '#1890ff' }}>容量(GB)</span>*/}
-              {/*<Chart height={120}*/}
-                     {/*width={170}*/}
-                     {/*padding={[30, 5, 40, 5]}*/}
-                     {/*data={[{ name: 20, label: '数据库' }, { name: 3, label: '文件' }]}>*/}
-                {/*<Tooltip*/}
-                  {/*crosshairs={{*/}
-                    {/*type: 'name',*/}
-                  {/*}}*/}
-                {/*/>*/}
-                {/*<Axis name="label" tickLine={null}*/}
-                      {/*line={null}*/}
-                      {/*textStyle={{*/}
-                        {/*fontSize: '12',*/}
-                        {/*textAlign: 'center',*/}
-                        {/*fill: '#999',*/}
-                        {/*fontWeight: 'bold',*/}
-                        {/*rotate: 90,*/}
-                      {/*}}/>*/}
-                {/*<Geom type='interval' position="label*name">*/}
-                  {/*<Label content="name"/>*/}
-                {/*</Geom>*/}
-              {/*</Chart>*/}
             </Col>
           </Card>
         </Row>

@@ -22,9 +22,9 @@ class SimpleTree extends PureComponent {
     };
   }
   componentDidMount() {
-    const { dispatch } = this.props;
+    const { dispatch,url } = this.props;
     dispatch({
-      type: 'classify/tree',
+      type:url,
       callback: (list) => {
         this.setState({
           treeData:list,

@@ -196,19 +196,19 @@ const ResourceDetail = Form.create()(props => {
     },
     {
       title: '服务调用用户',
-      dataIndex: 'content',
+      dataIndex: 'userName',
     }, {
       title: '最近一次接口调用开始时间',
-      dataIndex: 'content',
+      dataIndex: 'startTime',
     }, {
       title: '最近一次接口调用结束时间',
-      dataIndex: 'content',
+      dataIndex: 'endTime',
     }, {
       title: '累积调用次数',
-      dataIndex: 'content',
+      dataIndex: 'num',
     }, {
       title: '调用方式',
-      dataIndex: 'content',
+      dataIndex: 'type',
     },
   ];
   return (

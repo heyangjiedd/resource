@@ -34,6 +34,7 @@ import SimpleTableEdit from 'components/SimpleTableEdit';
 import StandardTableRadioNopage from 'components/StandardTableRadioNopage';
 import AnycSimpleTree from 'components/AnycSimpleTree';
 import SimpleSelectTree from 'components/SimpleSelectTree';
+import StandardTableNothingNoCloums from 'components/StandardTableNothingNoCloums';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
 import styles from './index.less';
@@ -52,7 +53,7 @@ let itemDataStatus = 0;
 let listItemData = {};//列表选择
 let modalListData = {};//弹窗第一页选择
 let choiseListItemData = {};//弹窗中弹窗选择
-let searchValue = {resourceId:'',sourceType:''} //关联查询
+let searchValue = {resourceId:'',relationDb:'',unrelationDb:'',api:'',files:""} //关联查询
 
 const CatlogDetail = Form.create()(props => {
   const { modalVisible, form, handleModalVisible, loading, data, columns } = props;
@@ -332,7 +333,7 @@ const CreateForm = Form.create()(props => {
     children: [{
       value: 'mysql', label: 'mysql',
     }, {
-      value: 'Oracle', label: 'oracle',
+      value: 'oracle', label: 'oracle',
     }, {
       value: 'sqlserver', label: 'sqlserver',
     }, {
@@ -454,7 +455,7 @@ const CreateForm = Form.create()(props => {
       dataIndex: 'len',
     },
   ];
-  const fgxxsjkcolumns = [
+  const filecolumns = [
     {
     title: '文件名称',
     dataIndex: 'name',
@@ -462,7 +463,7 @@ const CreateForm = Form.create()(props => {
     title: '文件类型',
     dataIndex: 'type',
   }];
-  const filecolumns = [
+  const fgxxsjkcolumns = [
     {
     title: '序号',
     dataIndex: 'id',
@@ -553,7 +554,7 @@ const CreateForm = Form.create()(props => {
     catalogItemChange(record);
   };
   const cancel = () => {
-    handleItem(1);
+    handleItem(1,true);
     handleModalVisible(false);
   };
   const firstFooter = (<Row>
@@ -598,7 +599,22 @@ const CreateForm = Form.create()(props => {
     </Col>
   </Row>);
   const onChange = (index) => {
-    searchValue.searchValue = index[1];
+    searchValue.relationDb = '';
+    searchValue.unrelationDb = '';
+    searchValue.api = '';
+    searchValue.files = '';
+    if (index[1] === 'mysql' || index[1] === 'oracle' || index[1] === 'sqlserver'
+      || index[1] === 'db2') {
+      searchValue.relationDb = index[1];
+    } else if (index[1] === 'mongo' ||  index[1] === 'hbase') {
+      searchValue.unrelationDb = index[1];
+    } else if (index[1] === 'http' || index[1] === 'https' || index[1] === 'wsdl'
+      || index[1] === 'rest') {
+      searchValue.api = index[1];
+    } else if (index[1] === 'ftp' || index[1] === 'sftp' || index[1] === 'local'
+      || index[1] === 'share') {
+      searchValue.file = index[1];
+    }
   };
 
   const handleFeildSelectRows = (data) => {
@@ -642,7 +658,7 @@ const CreateForm = Form.create()(props => {
         <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
           <Col md={12} sm={24}>
             <FormItem {...formItemLayout} label="资源分类">
-              <SimpleSelectTree transMsg={(index) => {
+              <SimpleSelectTree url={'classify/tree'} transMsg={(index) => {
                 searchValue.resourceId = index;
               }}></SimpleSelectTree>
             </FormItem>
@@ -698,9 +714,9 @@ const CreateForm = Form.create()(props => {
         {/*</Row>*/}
         <Row>
           <Col>
-            <FormItem>
+            <span>
               信息资源所含信息项一览：
-            </FormItem>
+            </span>
           </Col>
         </Row>
         <Row>
@@ -780,7 +796,6 @@ const CreateForm = Form.create()(props => {
         <Row>
           <StandardTableNothing
             data={catalogItem}
-            scroll={{ y: 180 }}
             columns={columnscatalogfeild}
           />
           {/*<SimpleTableEdit*/}
@@ -833,7 +848,7 @@ const CreateForm = Form.create()(props => {
 const ResourceDetail = Form.create()(props => {
   const {
     modalVisible, form, handleModalVisible, loading, data, columns, detailType, tableAndField,
-    radioSwitch, radioSwitcHandle, operateLog, lifelist, httpItem,searchHandle,sqlList,excSql
+    radioSwitch, radioSwitcHandle, operateLog, lifelist, httpItem,searchHandle,sqlList,excSql,catalogTable
   } = props;
   const okHandle = () => {
     form.validateFields((err, fieldsValue) => {
@@ -954,14 +969,23 @@ const ResourceDetail = Form.create()(props => {
     }];
   const fgxxsjkdatacolumns = [
     {
-      title: 'Key',
-      dataIndex: 'key',
+      title: '集合名称',
+      dataIndex: 'name',
     }, {
-      title: 'Value',
-      dataIndex: 'value',
+      title: '所属数据源',
+      dataIndex: 'description',
+    },
+  ];
+  const lifelistcolumns = [
+    {
+      title: '文件名称',
+      dataIndex: 'name',
     }, {
-      title: 'Type',
+      title: '文件类型',
       dataIndex: 'type',
+    }, {
+      title: '文件描述',
+      dataIndex: 'description',
     },
   ];
   let indexList = [];
@@ -1028,7 +1052,7 @@ const ResourceDetail = Form.create()(props => {
           </div>}
           <DescriptionList size="large" title="数据详情" style={{ marginBottom: 32 }}>
           </DescriptionList>
-          <StandardTableNothing
+          <StandardTableNothingNoCloums
             scroll={{x:true}}
             loading={loading}
             data={sqlList}
@@ -1054,13 +1078,13 @@ const ResourceDetail = Form.create()(props => {
         </TabPane>
       </Tabs></div> : detailType == 2 ?
         <div>
-          <DescriptionList size="large" col={2} title="" style={{ marginBottom: 32 }}>
-            <Description term="集合名称">{httpItem.sourceName}</Description>
-            <Description term="所属数据源">{httpItem.sourceName}</Description>
-          </DescriptionList>
+          {/*<DescriptionList size="large" col={2} title="" style={{ marginBottom: 32 }}>*/}
+            {/*<Description term="集合名称">{catalogTable[0]&&catalogTable[0].name||''}</Description>*/}
+            {/*<Description term="所属数据源">{catalogTable[0]&&catalogTable[0].description||''}</Description>*/}
+          {/*</DescriptionList>*/}
           <StandardTableNothing
             loading={loading}
-            data={sqlList}
+            data={catalogTable}
             columns={fgxxsjkdatacolumns}
           />
         </div> : detailType == 3 ?
@@ -1084,29 +1108,33 @@ const ResourceDetail = Form.create()(props => {
           </div> :
           <div>
             <DescriptionList size="large" title="文件信息" style={{ marginBottom: 32 }}>
-              <List
-                rowKey="id"
-                grid={{ gutter: 24, lg: 3, md: 2, sm: 1, xs: 1 }}
-                dataSource={lifelist}
-                renderItem={item =>
-                  <List.Item key={item.id}>
-                    <Card hoverable className={styles.card}>
-                      <Card.Meta
-                        description={
-                          <DescriptionList size="large"  col={1} title="" style={{ marginBottom: 12 }}>
-                            {/*<div>文件名称:<span>{item.sourceName}</span></div>*/}
-                            {/*<div>文件类型:<span>{item.sourceName}</span></div>*/}
-                            {/*<div>文件类型:<span>{item.interfaceType}</span></div>*/}
-                            <Description term="文件名称">{item.sourceName}</Description>
-                            <Description term="文件类型">{item.sourceName}</Description>
-                            <Description term="文件描述">{item.interfaceType}</Description>
-                          </DescriptionList>
-                        }
-                      />
-                    </Card>
-                  </List.Item>
-                }
+              <StandardTableNothing
+                selectedRows={[]}
+                onSelectRow={[]}
+                loading={loading}
+                data={lifelist}
+                columns={lifelistcolumns}
               />
+              {/*<List*/}
+                {/*rowKey="id"*/}
+                {/*grid={{ gutter: 24, lg: 3, md: 2, sm: 1, xs: 1 }}*/}
+                {/*dataSource={lifelist}*/}
+                {/*renderItem={item =>*/}
+                  {/*<List.Item key={item.id}>*/}
+                    {/*<Card hoverable className={styles.card}>*/}
+                      {/*<Card.Meta*/}
+                        {/*description={*/}
+                          {/*<DescriptionList size="large"  col={1} title="" style={{ marginBottom: 12 }}>*/}
+                            {/*<Description term="文件名称">{item.name}</Description>*/}
+                            {/*<Description term="文件类型">{item.type}</Description>*/}
+                            {/*<Description term="文件描述">{item.description}</Description>*/}
+                          {/*</DescriptionList>*/}
+                        {/*}*/}
+                      {/*/>*/}
+                    {/*</Card>*/}
+                  {/*</List.Item>*/}
+                {/*}*/}
+              {/*/>*/}
             </DescriptionList>
             <DescriptionList size="large" title="数据调用记录" style={{ marginBottom: 32 }}>
               <StandardTableNoCheck
@@ -1294,10 +1322,12 @@ export default class ResourceClassify extends PureComponent {
     });
   };
   handleModalVisible = flag => {
+    searchValue = {resourceId:'',relationDb:'',unrelationDb:'',api:'',files:""}
     this.setState({
       modalVisible: !!flag,
       choiceFeild: [],
       choiceFeildCount: 0,
+      item: 1,
     });
   };
   handleModalCatlog = (item, status) => {
@@ -1321,13 +1351,9 @@ export default class ResourceClassify extends PureComponent {
       this.setState({
         detailType: 1,
       });
-    } else if (listItemData.sourceType === 'mongo' || listItemData.sourceType === 'mongo' || listItemData.sourceType === 'hbase') {
+    } else if (listItemData.sourceType === 'mongo' || listItemData.sourceType === 'hbase') {
       dispatch({
-        type: 'catalog/catalogTableAndTableField',
-        payload: { catalogId: listItemData.id },
-      });
-      dispatch({
-        type: 'centersource/fetchView',
+        type: 'catalog/catalogTable',
         payload: { catalogId: listItemData.id },
       });
       this.setState({
@@ -1473,7 +1499,7 @@ export default class ResourceClassify extends PureComponent {
       });
     } else if (this.state.item == 5) {
       let params = {};
-      params[listItemData.id] = modalListData.id;
+      params[listItemData.id] = [modalListData.id];
       dispatch({
         type: 'catalog/catalogApi',
         payload: params,
@@ -1720,7 +1746,7 @@ export default class ResourceClassify extends PureComponent {
   }
   render() {
     const {
-      catalog: { data, catalogItem, field, tableAndField, operateLog },
+      catalog: { data, catalogItem, field, tableAndField, operateLog,catTable },
       loading,
       centersource: {sqlList, data: formData, dataList, lifelist: { list: lifelist }, httpItem },
       form,
@@ -1769,6 +1795,7 @@ export default class ResourceClassify extends PureComponent {
       searchHandle:this.searchHandle,
       radioSwitch: radioSwitch,
       tableAndField: tableAndField,
+      catalogTable:catTable,
       detailType: detailType,
       handleModalVisible: this.handleModalVisibleResource,
     };

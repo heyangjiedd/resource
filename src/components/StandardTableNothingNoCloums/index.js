@@ -26,13 +26,13 @@ class StandardTable extends PureComponent {
 
   componentWillReceiveProps(nextProps) {
     // clean state
-    if (nextProps.selectedRows.length === 0) {
-      const needTotalList = initTotalList(nextProps.columns);
-      this.setState({
-        selectedRowKeys: [],
-        needTotalList,
-      });
-    }
+    // if (nextProps.selectedRows.length === 0) {
+    //   const needTotalList = initTotalList(nextProps.columns);
+    //   this.setState({
+    //     selectedRowKeys: [],
+    //     needTotalList,
+    //   });
+    // }
   }
 
   handleRowSelectChange = (selectedRowKeys, selectedRows) => {
@@ -67,16 +67,16 @@ class StandardTable extends PureComponent {
   render() {
     const { selectedRowKeys, needTotalList } = this.state;
     const {
-      data: list,
+      data:list ,
       loading,
       columns,
       rowKey,
       scroll,
     } = this.props;
+
     const paginationProps = {
       showSizeChanger: true,
       showQuickJumper: true,
-      // ...pagination,
     };
 
     const rowSelection = {
@@ -86,17 +86,16 @@ class StandardTable extends PureComponent {
         disabled: record.disabled,
       }),
     };
+
     return (
       <div className={styles.standardTable}>
         <Table
           loading={loading}
           rowKey={rowKey || 'key'}
-          rowSelection={rowSelection}
           dataSource={list}
           columns={columns}
           scroll={scroll}
           pagination={false}
-          onChange={this.handleTableChange}
         />
       </div>
     );

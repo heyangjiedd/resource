@@ -36,12 +36,13 @@ export default {
         payload: response,
       });
     },
-    * tree({ payload }, { call, put }) {
+    * tree({ payload,callback }, { call, put }) {
       const response = yield call(getAllderiverlassify, payload);
       yield put({
         type: 'treeData',
         payload: response,
       });
+      if (callback) callback(response);
     },
     * get({ payload }, { call, put }) {
       const response = yield call(getderiverlassify, payload);

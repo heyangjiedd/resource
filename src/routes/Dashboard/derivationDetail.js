@@ -24,6 +24,7 @@ import {
 import { Link } from 'dva/router';
 import StandardTable from 'components/StandardTable';
 import SimpleTree from 'components/SimpleTree';
+import StandardTableNoCheck from 'components/StandardTableNoCheck';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
 import styles from './derivationDetail.less';
@@ -38,82 +39,11 @@ const getValue = obj =>
     .join(',');
 let itemDataStatus = 0;
 let listItemData = {};
-let treeSelect = '';
 
-const CreateForm = Form.create()(props => {
-  const { modalVisible, form, handleAdd, handleModalVisible } = props;
-  const okHandle = () => {
-    form.validateFields((err, fieldsValue) => {
-      if (err) return;
-      form.resetFields();
-      if (itemDataStatus === 2)
-        handleModalVisible();
-      else
-        handleAdd(fieldsValue);
-    });
-  };
-  const formItemLayout = {
-    labelCol: {
-      xs: { span: 24 },
-      sm: { span: 7 },
-    },
-    wrapperCol: {
-      xs: { span: 24 },
-      sm: { span: 17 },
-      md: { span: 17 },
-    },
-  };
-  let title = itemDataStatus === 1 ? '编辑分类' : itemDataStatus === 2 ? '查看分类' : '新增分类';
-  return (
-    <Modal
-      title={title}
-      visible={modalVisible}
-      onOk={okHandle}
-      footer={itemDataStatus === 2}
-      destroyOnClose={true}
-      onCancel={() => handleModalVisible()}
-    >
-
-      <FormItem {...formItemLayout} label="父级分类名称">
-        {form.getFieldDecorator('parentName', {
-          rules: [{ message: 'Please input some description...' }],
-          initialValue: listItemData.parentName,
-        })(<Input disabled placeholder="请输入"/>)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="分类名称">
-        {form.getFieldDecorator('name', {
-          rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.name,
-        })(<Input disabled={itemDataStatus === 2} placeholder="请输入"/>)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="排序号">
-        {form.getFieldDecorator('sort', {
-          rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.sort,
-        })(<Input disabled={itemDataStatus === 2} placeholder="请输入"/>)}
-      </FormItem>
-      <FormItem {...formItemLayout} label="分类描述">
-        {form.getFieldDecorator('description', {
-          rules: [
-            {
-              required: true,
-              message: '请输入分类描述',
-            },
-          ], initialValue: listItemData.description,
-        })(
-          <TextArea
-            style={{ minHeight: 32 }}
-            disabled={itemDataStatus === 2}
-            placeholder="请输入你的分类描述"
-            rows={4}
-          />,
-        )}
-      </FormItem>
-    </Modal>
-  );
-});
-
-@connect(({ classify,dervieClassify, loading }) => ({
+@connect(({ classify,dervieClassify,charts, loading }) => ({
   classify,
   dervieClassify,
+  charts,
   loading: loading.models.classify,
 }))
 @Form.create()
@@ -128,11 +58,37 @@ export default class DerivationDetail extends PureComponent {
 
   componentDidMount() {
     const { dispatch } = this.props;
+    // dispatch({
+    //   type: 'dervieClassify/derivechildybyid',
+    // });
     dispatch({
-      type: 'dervieClassify/derivechildybyid',
+      type: 'charts/deriveClassify',
     });
   }
+  handleStandardTableChangeDetail = (pagination, filtersArg, sorter) => {
+    const { dispatch } = this.props;
+    const { formValues } = this.state;
 
+    const filters = Object.keys(filtersArg).reduce((obj, key) => {
+      const newObj = { ...obj };
+      newObj[key] = getValue(filtersArg[key]);
+      return newObj;
+    }, {});
+
+    const params = {
+      pageNum: pagination.current,
+      pageSize: pagination.pageSize,
+      ...formValues,
+      ...filters,
+    };
+    if (sorter.field) {
+      params.sorter = `${sorter.field}_${sorter.order}`;
+    }
+    dispatch({
+      type: 'centersource/fetchTablePage',
+      payload: { ...params, id: listItemData.id },
+    });
+  };
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
     const { dispatch } = this.props;
     const { formValues } = this.state;
@@ -176,9 +132,10 @@ export default class DerivationDetail extends PureComponent {
   }
   render() {
     const {
-      classify: { data, treeData },
+      classify: { treeData },
       dervieClassify:{child},
       loading,
+      charts:{deriveClassify}
     } = this.props;
     const { selectedRows, modalVisible,index } = this.state;
     const parentMethods = {
@@ -187,40 +144,40 @@ export default class DerivationDetail extends PureComponent {
     };
     const columns = [
       {
-        title: '序号',
-        render: (text, record, index) => <span>{index + 1}</span>,
+        title: '衍生库',
+        dataIndex: 'dataSourceName',
       },
       {
-        title: '分类名称',
-        dataIndex: 'name',
+        title: '数据库',
+        dataIndex: 'totalCount',
       },
       {
-        title: '分类结构',
-        render: (text, record, index) => {
-          return (
-            <span>{(text.parentName ? text.parentName : '' + '>') + text.name ? text.name : ''}</span>
-          );
-        },
+        title: '文件',
+        dataIndex: 'totalSize',
       },
       {
-        title: '分类描述',
-        dataIndex: 'description',
+        title: '服务',
+        dataIndex: 'totalCount',
       },
       {
         title: '操作',
+        width: 80,
         render: (text, record, index) => {
           return (
             <Fragment>
-              <a onClick={() => {
-                this.handleModal(text, 2);
-                listItemData = text;
-              }}>查看</a>
+              <Link to="/derivation/dervieSource"  key="main1">
+                查看
+              </Link>
             </Fragment>
           );
         },
       },
     ];
-
+    let item = '';
+    for(let i in deriveClassify[index]){
+      item = i;
+    }
+    let data = deriveClassify[index]?{list:deriveClassify[index][item]}:[];
     return (
       <PageHeaderLayout>
         <div className={styles.flexMain}>
@@ -235,20 +192,29 @@ export default class DerivationDetail extends PureComponent {
               </div>
               <div style={{width:'100%'}}>
                 <Tabs
-                  defaultActiveKey="1"
+                  defaultActiveKey={index}
                   tabPosition='top'
                   onChange={this.handleModeChange}
                 >
-                  {child.map(r=>{
-                    return <TabPane tab={r.name} key={r.id}></TabPane>
+                  {deriveClassify.map((r,index)=>{
+                    let item = '';
+                    for(let i in r){
+                      item = i;
+                    }
+                    return <TabPane tab={item} key={index}></TabPane>
                   })}
                 </Tabs>
-                <span>{index}</span>
+                <StandardTableNoCheck
+                  selectedRows={[]}
+                  loading={loading}
+                  data={data}
+                  columns={columns}
+                  onChange={this.handleStandardTableChangeDetail}
+                />
               </div>
             </div>
           </Card>
         </div>
-        <CreateForm {...parentMethods} modalVisible={modalVisible}/>
       </PageHeaderLayout>
     );
   }

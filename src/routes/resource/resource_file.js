@@ -108,23 +108,20 @@ const ResourceDetail = Form.create()(props => {
       render: (text, record, index) => <span>{index + 1}</span>,
     },
     {
-      title: '文件名称',
-      dataIndex: 'content',
-    }, {
       title: '服务调用用户',
-      dataIndex: 'content',
+      dataIndex: 'userName',
     }, {
       title: '最近一次数据调用开始时间',
-      dataIndex: 'content',
+      dataIndex: 'startTime',
     }, {
       title: '最近一次数据调用结束时间',
-      dataIndex: 'content',
+      dataIndex: 'endTime',
     }, {
       title: '累积调用次数',
-      dataIndex: 'content',
+      dataIndex: 'num',
     }, {
       title: '调用方式',
-      dataIndex: 'content',
+      dataIndex: 'type',
     }];
   return (
     <Modal
@@ -238,7 +235,7 @@ export default class ResourceClassify extends PureComponent {
       params.sorter = `${sorter.field}_${sorter.order}`;
     }
     dispatch({
-      type: 'centersource/fetchTablePage',
+      type: 'centersource/fetchFile',
       payload: { ...params, id: listItemData.id },
     });
   };
@@ -304,8 +301,8 @@ export default class ResourceClassify extends PureComponent {
         ...fieldsValue,
         updatedAt: fieldsValue.updatedAt && fieldsValue.updatedAt.valueOf(),
       };
-      if(values&&values.file == 'all'){
-        values.file = 'ftp,sftp,local,share'
+      if (values && values.file == 'all') {
+        values.file = 'ftp,sftp,local,share';
       }
       this.setState({
         formValues: values,
@@ -365,7 +362,7 @@ export default class ResourceClassify extends PureComponent {
     const { dispatch } = this.props;
     listItemData = index;
     dispatch({
-      type: 'centersource/fetchTablePage',
+      type: 'centersource/fetchFile',
       payload: {
         id: listItemData.id,
       },
@@ -414,7 +411,7 @@ export default class ResourceClassify extends PureComponent {
           this.setState({
             testList: this.state.testList,
           });
-          if (res===true) {
+          if (res === true) {
             this.setState({
               testSuccess: this.state.testSuccess++,
             });
@@ -431,9 +428,62 @@ export default class ResourceClassify extends PureComponent {
     });
   };
 
+  download = (index) => {
+    window.open( '/datasource/download?id='+index.id);
+    // var xmlhttp = new XMLHttpRequest();
+    // xmlhttp.open('get', '/datasource/download?id=' + index.id, true);
+    // xmlhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    // xmlhttp.setRequestHeader('Authorization', localStorage.getItem('token_str'));
+    // xmlhttp.send();
+    // xmlhttp.onreadystatechange = function() {
+    //   if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+    //     var data = new Blob([xmlhttp.response], { type: 'application/octet-binary;charset=UTF-8' });
+    //     var downloadUrl = window.URL.createObjectURL(data);
+    //     var anchor = document.createElement('a');
+    //     anchor.href = downloadUrl;
+    //     anchor.download = index.name;
+    //     anchor.click();
+    //     window.URL.revokeObjectURL(data);
+    //   }
+    // };
+    // const { dispatch } = this.props;
+    // dispatch({
+    //   type: 'centersource/download',
+    //   payload: {
+    //     id: index.id,
+    //   },
+    //   callback: (res) => {
+    //     var data = new Blob([res.body],{type:"application/octet-binary;charset=UTF-8"});
+    //     var downloadUrl = window.URL.createObjectURL(data);
+    //     var anchor = document.createElement("a");
+    //     anchor.href = downloadUrl;
+    //     anchor.download = index.name;
+    //     anchor.click();
+    //     window.URL.revokeObjectURL(data);
+    //   },
+    // });
+  };
+  // download1 = (index) => {
+  //   const { dispatch } = this.props;
+  //   dispatch({
+  //     type: 'centersource/download',
+  //     payload: {
+  //       id: index.id,
+  //     },
+  //     callback: (res) => {
+  //       console.log(res)
+  //       var downloadUrl = window.URL.createObjectURL(res);
+  //       var anchor = document.createElement("a");
+  //       anchor.href = downloadUrl;
+  //       // anchor.download = "文件名.txt";
+  //       anchor.click();
+  //       window.URL.revokeObjectURL(data);
+  //     },
+  //   });
+  // };
   render() {
     const {
-      centersource: { data, lifelist,orgList, dataListPage },
+      centersource: { data, lifelist, orgList },
       loading,
       classify: { treeData },
       catalog: { catalogItem, field, tableAndField, operateLog },
@@ -444,44 +494,58 @@ export default class ResourceClassify extends PureComponent {
       {
         title: '序号',
         render: (text, record, index) => <span>{index + 1}</span>,
+        width: '60px',
       },
       {
         title: '文件名称',
         dataIndex: 'name',
+        width: 100,
       },
       {
         title: '所属数据源',
-        render: (text, record, index) => <span>{listItemData.sourceName}</span>,
+        dataIndex: 'dataSourceName',
+        width: 100,
       },
       {
         title: '数据源类型',
-        render: (text, record, index) => <span>{listItemData.sourceType}</span>,
+        dataIndex: 'dataSourceType',
+        width: 100,
       },
       {
-        title: '文件储存路劲',
-        dataIndex: 'selectedFieldNum',
+        title: '文件储存路径',
+        dataIndex: 'path',
+        width: 100,
       },
       {
         title: '文件大小',
-        dataIndex: 'fieldNum',
+        dataIndex: 'fileSize',
+        width: 100,
       },
       {
-        title: '文件描述',
-        dataIndex: 'description',
+        title: '类型',
+        dataIndex: 'type',
+        width: 100,
       },
       {
         title: '操作',
+        width: '120px',
         render: (text, record, index) => {
           return (
-            <Fragment>
+            <span>
               <a onClick={() => {
                 this.getFileDetailHandle(text, true);
               }}>查看</a>
               <Divider type="vertical"/>
-              <a onClick={() => {
-                this.download(text);
-              }}>下载</a>
-            </Fragment>
+              {/*<a onClick={() => {*/}
+                {/*this.download(text);*/}
+              {/*}}>下载</a>*/}
+              {/*<Divider type="vertical"/>*/}
+              <a href={"/datasource/download?id="+text.id}>下载</a>
+              {/*<Divider type="vertical"/>*/}
+              {/*<a onClick={() => {*/}
+              {/*this.download1(text);*/}
+              {/*}}>下载1</a>*/}
+            </span>
           );
         },
       },
@@ -524,7 +588,7 @@ export default class ResourceClassify extends PureComponent {
         title: '连通状态',
         dataIndex: 'linkStatus',
         render(val) {
-          return <Badge status={val ? 'success' : 'error'} text={val || '未连通'}/>;
+          return <Badge status={val == 'on' ? 'success' : 'error'} text={val == 'on' ? '连通' : '未连通'}/>;
         },
       },
       {
@@ -587,10 +651,10 @@ export default class ResourceClassify extends PureComponent {
                   </FormItem>
                 </Col>
               </Row>
-              <StandardTable
+              <StandardTableNoCheck
                 selectedRows={[]}
                 loading={loading}
-                data={dataListPage}
+                data={lifelist}
                 columns={detailColumns}
                 onSelectRow={this.handleSelectRows}
                 onChange={this.handleStandardTableChangeDetail}
@@ -599,40 +663,40 @@ export default class ResourceClassify extends PureComponent {
           </Card> : <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
               <Form onSubmit={this.handleSearch}>
-              <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
-                <Col md={6} sm={24}>
-                  <FormItem>
-                    <Button icon="desktop" type="primary" onClick={() => this.testHandleAdd(true)}>
-                      测试连通性
-                    </Button>
-                  </FormItem>
-                </Col>
-                <Col md={8} sm={24}>
-                  <FormItem {...formItemLayout} label="数据源类型" style={{ marginBottom: 0 }}>
-                    {getFieldDecorator('file')(
-                    < Select placeholder='请选择数据源类型' style={{width: '100%'}}>
-                      <Option value='all'>全选</Option>
-                      <Option value='ftp'>普通文件系统/ftp</Option>
-                      <Option value="sftp">普通文件系统/sftp</Option>
-                      <Option value='local'>普通文件系统/本地磁盘</Option>
-                      <Option value="share">普通文件系统/共享文件夹</Option>
-                      </Select>
+                <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
+                  <Col md={6} sm={24}>
+                    <FormItem>
+                      <Button icon="desktop" type="primary" onClick={() => this.testHandleAdd(true)}>
+                        测试连通性
+                      </Button>
+                    </FormItem>
+                  </Col>
+                  <Col md={8} sm={24}>
+                    <FormItem {...formItemLayout} label="数据源类型" style={{ marginBottom: 0 }}>
+                      {getFieldDecorator('file')(
+                        < Select placeholder='请选择数据源类型' style={{ width: '100%' }}>
+                          <Option value='all'>全选</Option>
+                          <Option value='ftp'>普通文件系统/ftp</Option>
+                          <Option value="sftp">普通文件系统/sftp</Option>
+                          <Option value='local'>普通文件系统/本地磁盘</Option>
+                          <Option value="share">普通文件系统/共享文件夹</Option>
+                        </Select>,
                       )}
-                  </FormItem>
-                </Col>
-                <Col md={8} sm={24}>
-                  <FormItem>
-                    {getFieldDecorator('sourceName')(<Input placeholder="请输入数据源名称"/>)}
-                  </FormItem>
-                </Col>
-                <Col md={2} sm={24}>
-                  <FormItem>
-                    <Button type="primary" htmlType="submit">
-                      查询
-                    </Button>
-                  </FormItem>
-                </Col>
-              </Row>
+                    </FormItem>
+                  </Col>
+                  <Col md={8} sm={24}>
+                    <FormItem>
+                      {getFieldDecorator('sourceName')(<Input placeholder="请输入数据源名称"/>)}
+                    </FormItem>
+                  </Col>
+                  <Col md={2} sm={24}>
+                    <FormItem>
+                      <Button type="primary" htmlType="submit">
+                        查询
+                      </Button>
+                    </FormItem>
+                  </Col>
+                </Row>
               </Form>
               <StandardTable
                 selectedRows={selectedRows}

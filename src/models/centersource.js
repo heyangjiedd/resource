@@ -1,6 +1,7 @@
 import {
-  resourcelist, resourcelink, addresource, updateresource, removeresource, getresource,
-  resourceapiData, resourcefileLista, mongoDataList, tableDataList, tableList, tableListPage,orgList
+  resourcelist, resourcelink, addresource, updateresource, removeresource, getresource,sync,
+  resourceapiData, resourcefileLista, mongoDataList, tableDataList, tableList, tableListPage, orgList, resourcedownload,
+  linkBefore,
 } from '../services/api';
 
 export default {
@@ -16,11 +17,21 @@ export default {
     dataListPage: [],
     lifelist: [],
     httpItem: {},
-    orgList:[],
-    sqlList:[],
+    orgList: [],
+    sqlList: [],
+    down: '',
   },
 
   effects: {
+    //下载文件
+    * download({ payload, callback }, { call, put }) {
+      const response = yield call(resourcedownload, payload);
+      yield put({
+        type: 'down',
+        payload: response,
+      });
+      if (callback) callback(response);
+    },
     * fetchOrgList({ payload, callback }, { call, put }) {
       const response = yield call(orgList);
       yield put({
@@ -46,6 +57,14 @@ export default {
     },
     * test({ payload, callback }, { call, put }) {
       const response = yield call(resourcelink, payload);
+      if (callback) callback(response);
+    },
+    * sync({ payload, callback }, { call, put }) {
+      const response = yield call(sync, payload);
+      if (callback) callback(response);
+    },
+    * testBefore({ payload, callback }, { call, put }) {
+      const response = yield call(linkBefore, payload);
       if (callback) callback(response);
     },
     * add({ payload, callback }, { call, put }) {
@@ -85,7 +104,7 @@ export default {
     * fetchViewSetNull({ payload, callback }, { call, put }) {
       yield put({
         type: 'sqlList',
-        payload:{data:{}},
+        payload: { data: {} },
       });
       if (callback) callback();
     },
@@ -113,6 +132,12 @@ export default {
   },
 
   reducers: {
+    down(state, action) {
+      return {
+        ...state,
+        down: action.payload,
+      };
+    },
     org(state, action) {
       return {
         ...state,
@@ -134,7 +159,7 @@ export default {
     sqlList(state, action) {
       return {
         ...state,
-        sqlList: action.payload.data.data||[],
+        sqlList: action.payload.data.data || [],
       };
     },
     list(state, action) {

@@ -46,7 +46,7 @@ let createItemData = {};
 let itemDataStatus = 1;
 
 const CreateForm = Form.create()(props => {
-  const { modalVisible, form, handleAdd, handleModalVisible, handleItem, item, orgList } = props;
+  const { modalVisible, form, handleAdd, handleModalVisible, handleItem, item, orgList, testBefore, testBeforeText } = props;
   const okHandle = () => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
@@ -70,6 +70,8 @@ const CreateForm = Form.create()(props => {
           } else if (createItemData.sourceType === 'ftp' || createItemData.sourceType === 'sftp' || createItemData.sourceType === 'local'
             || createItemData.sourceType === '') {
             handleItem(14);
+          } else {
+            message.warn('选择数据源类型');
           }
         } else {
           handleItem(index);
@@ -81,10 +83,17 @@ const CreateForm = Form.create()(props => {
       }
     });
   };
+  const test = () => {
+    form.validateFields((err, fieldsValue) => {
+      if (err) return;
+      createItemData = { ...createItemData, ...fieldsValue };
+      testBefore(createItemData);
+    });
+  };
   const cancel = () => {
     handleModalVisible();
-    let id =  createItemData.resourceId;
-    createItemData = {resourceId:id};
+    let id = createItemData.resourceId;
+    createItemData = { resourceId: id };
     handleItem(1);
   };
   const onChange = (index) => {
@@ -164,7 +173,8 @@ const CreateForm = Form.create()(props => {
   const secondFooter = (<Row>
     <Col md={24} sm={24}>
       <Button onClick={() => {
-        exHandle(1);
+        handleItem(1);
+        // exHandle(1);
       }}>
         上一步
       </Button>
@@ -183,7 +193,7 @@ const CreateForm = Form.create()(props => {
   const thirdFooter = (<Row>
     <Col md={24} sm={24}>
       <Button onClick={() => {
-        exHandle(2);
+        handleItem(2);
       }}>
         上一步
       </Button>
@@ -232,9 +242,10 @@ const CreateForm = Form.create()(props => {
           {form.getFieldDecorator('orgId', {
             initialValue: createItemData.orgId,
           })(
-            <Select placeholder="选择所属组织机构" showSearch={true} style={{ width: '100%' }}>
+            <Select placeholder="选择所属组织机构" optionFilterProp={'search'} showSearch={true} style={{ width: '100%' }}>
               {orgList.map(r => {
-                return <Option value={r.deptCode}>{r.deptShortName}</Option>;
+                return <Option value={r.deptCode} key={r.deptCode + r.deptShortName}
+                               search={r.deptShortName}>{r.deptShortName}</Option>;
               })}
             </Select>,
           )}
@@ -250,7 +261,7 @@ const CreateForm = Form.create()(props => {
               {
                 message: '请输入数据源描述',
               },
-            ], initialValue: listItemData.content,
+            ], initialValue: createItemData.content,
           })(
             <TextArea
               style={{ minHeight: 32 }}
@@ -307,11 +318,14 @@ const CreateForm = Form.create()(props => {
               rules: [{ message: 'Please input some description...' }], initialValue: createItemData.bz,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
-          {/*<Row>*/}
-          {/*<Col>*/}
-          {/*<Button type="primary">测试连通性</Button>*/}
-          {/*</Col>*/}
-          {/*</Row>*/}
+          <Row>
+            <Col>
+              <Button type="primary" onClick={() => {
+                test();
+              }}>测试连通性</Button>
+              <span style={{ marginLeft: 20 }}>{testBeforeText}</span>
+            </Col>
+          </Row>
         </div> : item === 12 ? <div>
           <FormItem {...formItemLayout} label="IP地址">
             {form.getFieldDecorator('ip', {
@@ -359,11 +373,14 @@ const CreateForm = Form.create()(props => {
               rules: [{ message: 'Please input some description...' }], initialValue: createItemData.bz,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
-          {/*<Row>*/}
-          {/*<Col>*/}
-          {/*<Button type="primary">测试连通性</Button>*/}
-          {/*</Col>*/}
-          {/*</Row>*/}
+          <Row>
+            <Col>
+              <Button type="primary" onClick={() => {
+                test();
+              }}>测试连通性</Button>
+              <span style={{ marginLeft: 20 }}>{testBeforeText}</span>
+            </Col>
+          </Row>
         </div> : item === 13 ? <div>
           <FormItem {...formItemLayout} label="接口地址">
             {form.getFieldDecorator('interfaceUrl', {
@@ -387,11 +404,14 @@ const CreateForm = Form.create()(props => {
               rules: [{ message: 'Please input some description...' }], initialValue: createItemData.bz,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
-          {/*<Row>*/}
-          {/*<Col>*/}
-          {/*<Button type="primary">测试连通性</Button>*/}
-          {/*</Col>*/}
-          {/*</Row>*/}
+          <Row>
+            <Col>
+              <Button type="primary" onClick={() => {
+                test();
+              }}>测试连通性</Button>
+              <span style={{ marginLeft: 20 }}>{testBeforeText}</span>
+            </Col>
+          </Row>
         </div> : <div>
           <FormItem {...formItemLayout} label="IP地址">
             {form.getFieldDecorator('ip', {
@@ -427,11 +447,14 @@ const CreateForm = Form.create()(props => {
               rules: [{ message: 'Please input some description...' }], initialValue: createItemData.bz,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
-          {/*<Row>*/}
-          {/*<Col>*/}
-          {/*<Button type="primary">测试连通性</Button>*/}
-          {/*</Col>*/}
-          {/*</Row>*/}
+          <Row>
+            <Col>
+              <Button type="primary" onClick={() => {
+                test();
+              }}>测试连通性</Button>
+              <span style={{ marginLeft: 20 }}>{testBeforeText}</span>
+            </Col>
+          </Row>
         </div>}
 
     </Modal>
@@ -835,6 +858,7 @@ export default class ResourceClassify extends PureComponent {
     testFail: 0,
     item: 1,
     itemDetail: 1,
+    testBeforeText: '',
   };
 
   componentDidMount() {
@@ -968,6 +992,7 @@ export default class ResourceClassify extends PureComponent {
     });
   };
   handleModalVisible = flag => {
+    this.setState({ testBeforeText: '' });
     if (!createItemData.resourceId) {
       message.error('请先选择资源分类');
       return;
@@ -1032,6 +1057,40 @@ export default class ResourceClassify extends PureComponent {
       updateModalVisible: true,
     });
   };
+  handleSync = () => {
+    const { dispatch } = this.props;
+    if (this.state.selectedRows.length > 0) {
+      this.state.selectedRows.forEach((item, index) => {
+        if (index === this.state.selectedRows.length - 1) {
+          dispatch({
+            type: 'centersource/sync',
+            payload: {
+              dataSource: {
+                id: item.id,
+              },
+            }, callback: () => {
+              message.success('同步成功');
+              this.setState({
+                selectedRows: [],
+              });
+              dispatch({
+                type: 'centersource/fetch',
+              });
+            },
+          });
+        } else {
+          dispatch({
+            type: 'centersource/sync',
+            payload: {
+              dataSource: {
+                id: item.id,
+              },
+            },
+          });
+        }
+      });
+    }
+  };
   handleDelete = () => {
     const { dispatch } = this.props;
     if (this.state.selectedRows.length > 0) {
@@ -1042,14 +1101,14 @@ export default class ResourceClassify extends PureComponent {
             payload: {
               id: item.id,
             }, callback: () => {
+              message.success('删除成功');
+              this.setState({
+                selectedRows: [],
+              });
               dispatch({
                 type: 'centersource/fetch',
               });
             },
-          });
-          message.success('删除成功');
-          this.setState({
-            selectedRows: [],
           });
         } else {
           dispatch({
@@ -1068,14 +1127,34 @@ export default class ResourceClassify extends PureComponent {
       type: 'centersource/add',
       payload: fields,
       callback: () => {
+        message.success('添加成功');
+        let id = createItemData.resourceId;
+        createItemData = { resourceId: id };
+        this.handleItem(1);
+        this.setState({
+          modalVisible: false,
+        });
         dispatch({
           type: 'centersource/fetch',
         });
       },
     });
-    message.success('添加成功');
-    this.setState({
-      modalVisible: false,
+  };
+  testBefore = fields => {
+    const { dispatch } = this.props;
+    this.setState({ testBeforeText: '' });
+    dispatch({
+      type: 'centersource/testBefore',
+      payload: fields,
+      callback: (res) => {
+        if (res == true) {
+          createItemData.linkStatus = 'on';
+          this.setState({ testBeforeText: '连通性测试通过' });
+        } else {
+          createItemData.linkStatus = 'off';
+          this.setState({ testBeforeText: '连通性测试不通过' });
+        }
+      },
     });
   };
   testHandleAdd = fields => {
@@ -1284,7 +1363,7 @@ export default class ResourceClassify extends PureComponent {
       classify: { treeData },
       loading,
     } = this.props;
-    const { selectedRows, testList, modalVisible, testModalVisible, updateModalVisible, listItemData, item, itemDetail } = this.state;
+    const { selectedRows, testList, modalVisible, testModalVisible, updateModalVisible, listItemData, item, itemDetail, testBeforeText } = this.state;
 
     const columns = [
       {
@@ -1348,6 +1427,8 @@ export default class ResourceClassify extends PureComponent {
 
     const parentMethods = {
       handleAdd: this.handleAdd,
+      testBefore: this.testBefore,
+      testBeforeText: testBeforeText,
       handleModalVisible: this.handleModalVisible,
       orgList: orgList,
       handleItem: this.handleItem,
@@ -1381,6 +1462,9 @@ export default class ResourceClassify extends PureComponent {
                 </Button>
                 <Button icon="desktop" type="primary" onClick={() => this.testHandleAdd(true)}>
                   测试连通性
+                </Button>
+                <Button icon="reload" type="primary" onClick={() => this.handleSync()}>
+                  同步数据源
                 </Button>
                 <Button icon="delete" onClick={() => this.handleDelete(true)}>
                   批量删除

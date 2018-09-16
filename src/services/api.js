@@ -1,6 +1,7 @@
 import { stringify } from 'qs';
 import request from '../utils/request';
 import requestToken from '../utils/requestToken';
+import requestDown from '../utils/requestDown';
 
 //首页统计
 // 获取目录分类数量和目录个数
@@ -28,7 +29,10 @@ export async function halfYearCount(params) {
 export async function deriveClassifyCount() {
   return request(`/statistic/deriveClassifyCount`);
 }
-
+// 衍生库分类资源统计
+export async function deriveClassify() {
+  return request(`/statistic/deriveCount`);
+}
 
 // 组织机构列表
 export async function orgList() {
@@ -135,6 +139,11 @@ export async function querycatalog(params) {
 export async function operateLog(params) {
   return request(`/operate/list?${stringify(params)}`);
 }
+
+// 查询非关系型数据库资源详情
+export async function catalogTable(params) {
+  return request(`/itemField/catalogTable?${stringify(params)}`);
+}
 // 查询资源详情
 export async function catalogTableAndTableField(params) {
   return request(`/itemField/catalogTableAndTableField?${stringify(params)}`);
@@ -212,17 +221,37 @@ export async function removeresource(params) {
 export async function resourceapiData(params) {
   return request(`/datasource/apiData?${stringify(params)}`);
 }
+
 // downloadFile
 export async function resourcedownload(params) {
-  return request(`/datasource/download?${stringify(params)}`);
+  return requestDown(`/datasource/download?${stringify(params)}`);
 }
 // 查询文件列表
 export async function resourcefileLista(params) {
   return request(`/datasource/fileList?${stringify(params)}`);
 }
+
+// 临时测试连通性
+export async function linkBefore(params) {
+  return request(`/datasource/link`, {
+    method: 'POST',
+    body: {
+      ...params,
+    },
+  });
+}
 // 测试连通性
 export async function resourcelink(params) {
   return request(`/datasource/link/${params.id}`);
+}
+// 同步数据源
+export async function sync(params) {
+  return request(`/datasource/sync`, {
+    method: 'PUT',
+    body: {
+      ...params,
+    },
+  });
 }
 // 获取数据源列表
 export async function resourcelist(params) {
@@ -342,7 +371,15 @@ export async function deriveFile(params) {
     },
   });
 }
-
+// 添加衍生库信息资源
+export async function deriveAdd(params) {
+  return request(`/derivecatalog`, {
+    method: 'POST',
+    body: {
+      ...params,
+    },
+  });
+}
 // 添加衍生库信息资源
 export async function deriveField(params) {
   return request(`/derivecatalog/deriveField`, {

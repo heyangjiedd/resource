@@ -5,6 +5,7 @@ import {
   dataSourceCount,
   halfYearCount,
   deriveClassifyCount,
+  deriveClassify,
 } from '../services/api';
 
 export default {
@@ -19,9 +20,17 @@ export default {
     halfYear1: [],
     halfYear2: [],
     halfYear3: [],
-    deriveCount: 0,
+    deriveCount: {},
+    deriveClassify:[],
   },
   effects: {
+    * deriveClassify({ payload }, { call, put }) {
+      const response = yield call(deriveClassify, payload);
+      yield put({
+        type: 'deriveClass',
+        payload: response,
+      });
+    },
     * deriveClassifyCount({ payload }, { call, put }) {
       const response = yield call(deriveClassifyCount, payload);
       yield put({
@@ -95,6 +104,12 @@ export default {
 
   },
   reducers: {
+    deriveClass(state, { payload }) {
+      return {
+        ...state,
+        deriveClassify: payload,
+      };
+    },
     deriveCount(state, { payload }) {
       return {
         ...state,

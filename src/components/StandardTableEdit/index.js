@@ -1,6 +1,7 @@
 import { Table, Input, Button, Popconfirm, Form ,Row,Select} from 'antd';
 import SimpleTree from '../SimpleTree';
 import moment from 'moment/moment';
+import { message } from 'antd/lib/index';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -133,6 +134,10 @@ class EditableTable extends React.Component {
   handleAdd = () => {
     const { count, dataSource } = this.state;
     const { selectItemTable,selectItemFeild } = this.props;
+    if(selectItemFeild.length == 0){
+      message.warn('请先选择')
+      return
+    }
     const newData = {
       key:count,
       name1:selectItemTable[0].id,

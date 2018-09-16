@@ -37,6 +37,7 @@ import SimpleSelectTree from 'components/SimpleSelectTree';
 import SimpleTree from 'components/SimpleTree';
 import TagSelect from 'components/TagSelect';
 import StandardFormRow from 'components/StandardFormRow';
+import StandardTableNothingNoCloums from 'components/StandardTableNothingNoCloums';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
 import styles from './resource_db.less';
@@ -123,25 +124,16 @@ const ResourceDetail = Form.create()(props => {
   const onChange = (value) => {
     radioSwitcHandle(value.target.value);
   };
-  const gxxsjkdatacolumns = [
-    {
-      title: '姓名',
-      dataIndex: 'sourceName',
-    },
-    {
-      title: '性别',
-      dataIndex: 'sourceType',
-    },
-    {
-      title: '年龄',
-      dataIndex: 'content',
-    }, {
-      title: '身份证号码',
-      dataIndex: 'content',
-    }, {
-      title: '地址',
-      dataIndex: 'content',
-    }];
+  const gxxsjkdatacolumns = [];
+  if(sqlList.length > 0){
+    for (let feild in sqlList[0]){
+      gxxsjkdatacolumns.push({
+        title:feild,
+        dataIndex:feild,
+        width: 100,
+      })
+    }
+  }
   const gxxsjkfieldcolumns = [
     {
       title: '字段名',
@@ -233,7 +225,7 @@ const ResourceDetail = Form.create()(props => {
               </div>}
             <DescriptionList size="large" title="数据详情" style={{ marginBottom: 32 }}>
             </DescriptionList>
-            <StandardTableNothing
+            <StandardTableNothingNoCloums
               loading={loading}
               data={sqlList}
               columns={gxxsjkdatacolumns}
@@ -668,7 +660,7 @@ export default class ResourceClassify extends PureComponent {
         title: '连通状态',
         dataIndex: 'linkStatus',
         render(val) {
-          return <Badge status={val ? 'success' : 'error'} text={val || '未连通'}/>;
+          return <Badge status={val == 'on' ? 'success' : 'error'} text={val == 'on' ? '连通' : '未连通'}/>;
         },
       },
       {
@@ -813,7 +805,7 @@ export default class ResourceClassify extends PureComponent {
                   </FormItem>
                 </Col>
               </Row>
-              <StandardTable
+              <StandardTableNoCheck
                 selectedRows={[]}
                 loading={loading}
                 data={dataListPage}

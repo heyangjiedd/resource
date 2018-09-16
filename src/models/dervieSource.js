@@ -1,4 +1,4 @@
-import { deriveList,getderivecatalog,removederivecatalog,deriveApi,deriveCollection,deriveFile,deriveField} from '../services/api';
+import { deriveList,getderivecatalog,removederivecatalog,deriveApi,deriveCollection,deriveFile,deriveField,deriveAdd} from '../services/api';
 
 export default {
   namespace: 'dervieSource',
@@ -11,6 +11,11 @@ export default {
   },
 
   effects: {
+    // 添加
+    *add({ payload,callback }, { call, put }) {
+      const response = yield call(deriveAdd, payload);
+      if (callback) callback(response);
+    },
     //取数据源列表
     *fetch({ payload }, { call, put }) {
       const response = yield call(deriveList, payload);
@@ -32,34 +37,18 @@ export default {
     },
     *api({ payload, callback }, { call, put }) {
       const response = yield call(deriveApi, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
       if (callback) callback();
     },
     *collection({ payload, callback }, { call, put }) {
       const response = yield call(deriveCollection, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
       if (callback) callback();
     },
     *file({ payload, callback }, { call, put }) {
       const response = yield call(deriveFile, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
       if (callback) callback();
     },
     *field({ payload, callback }, { call, put }) {
       const response = yield call(deriveField, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
       if (callback) callback();
     },
   },

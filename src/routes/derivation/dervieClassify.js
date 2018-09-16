@@ -263,6 +263,7 @@ export default class ResourceClassify extends PureComponent {
   };
   handleAdd = fields => {
     const { dispatch , dervieClassify: { treeData }} = this.props;
+    debugger
     if (itemDataStatus === 1) {
       dispatch({
         type: 'dervieClassify/update',
@@ -277,7 +278,7 @@ export default class ResourceClassify extends PureComponent {
         return treeSelect == r.id;
       });
       if (itemDataStatus == 3) {
-        treeSelect = select[0].parentId;
+        treeSelect = select[0]&&select[0].parentId;
       } else {
         treeSelect = select[0].id;
       }
@@ -349,6 +350,10 @@ export default class ResourceClassify extends PureComponent {
         dataIndex: 'name',
       },
       {
+        title: '下级分类',
+        dataIndex: 'childNum',
+      },
+      {
         title: '分类结构',
         render: (text, record, index) => {
           return (
@@ -388,7 +393,7 @@ export default class ResourceClassify extends PureComponent {
           <SimpleTree
             data={treeData}
             handleTree={this.handleTree}
-            title={'资源分类'}
+            title={'衍生资源库'}
           />
           <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
