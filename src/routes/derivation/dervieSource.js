@@ -1126,11 +1126,11 @@ export default class ResourceClassify extends PureComponent {
     listItemData = item;
     itemDataStatus = status;
     const { dispatch } = this.props;
-    if (!listItemData.sourceType) {
+    if (!listItemData.dataSourceType) {
       return;
     }
-    if (listItemData.sourceType === 'mysql' || listItemData.sourceType === 'oracle' || listItemData.sourceType === 'sqlserver'
-      || listItemData.sourceType === 'db2') {
+    if (listItemData.dataSourceType === 'mysql' || listItemData.dataSourceType === 'oracle' || listItemData.dataSourceType === 'sqlserver'
+      || listItemData.dataSourceType === 'db2') {
       dispatch({
         type: 'catalog/catalogTableAndTableField',
         payload: { catalogId: listItemData.id },
@@ -1138,7 +1138,7 @@ export default class ResourceClassify extends PureComponent {
       this.setState({
         detailType: 1,
       });
-    } else if (listItemData.sourceType === 'mongo' || listItemData.sourceType === 'mongo' || listItemData.sourceType === 'hbase') {
+    } else if (listItemData.dataSourceType === 'mongo'|| listItemData.dataSourceType === 'hbase') {
       dispatch({
         type: 'catalog/catalogTableAndTableField',
         payload: { catalogId: listItemData.id },
@@ -1146,8 +1146,8 @@ export default class ResourceClassify extends PureComponent {
       this.setState({
         detailType: 2,
       });
-    } else if (listItemData.sourceType === 'http' || listItemData.sourceType === 'https' || listItemData.sourceType === 'wsdl'
-      || listItemData.sourceType === 'rest') {
+    } else if (listItemData.dataSourceType === 'http' || listItemData.dataSourceType === 'https' || listItemData.dataSourceType === 'wsdl'
+      || listItemData.dataSourceType === 'rest') {
       dispatch({
         type: 'centersource/get',
         payload: { id: listItemData.dataSourceId },
@@ -1159,8 +1159,8 @@ export default class ResourceClassify extends PureComponent {
       this.setState({
         detailType: 3,
       });
-    } else if (listItemData.sourceType === 'ftp' || listItemData.sourceType === 'sftp' || listItemData.sourceType === 'local'
-      || listItemData.sourceType === 'share') {
+    } else if (listItemData.dataSourceType === 'ftp' || listItemData.dataSourceType === 'sftp' || listItemData.dataSourceType === 'local'
+      || listItemData.dataSourceType === 'share') {
       dispatch({
         type: 'centersource/fetchFile',
         payload: {
@@ -1231,11 +1231,11 @@ export default class ResourceClassify extends PureComponent {
           });
           let fieldIds = choiceFeild.map(item => {
             return item.id;
-          }).join(',');
+          });
           let params = {
             dataSourceId: modalListData.id,
-            classifyId: listItemData.id,
-            fieldIdList: itemFieldList,
+            deriveId: resp,
+            fieldIdList: fieldIds,
             tableRelationList: tableRelationList,
           };
           dispatch({
@@ -1254,7 +1254,7 @@ export default class ResourceClassify extends PureComponent {
             return item.id;
           });
           let params = {};
-          params[treeSelect[0]] = itemFieldList;
+          params[resp] = itemFieldList;
           dispatch({
             type: 'dervieSource/collection',
             payload: params,
@@ -1271,7 +1271,7 @@ export default class ResourceClassify extends PureComponent {
             return item.id;
           });
           let params = {};
-          params[treeSelect[0]] = itemFieldList;
+          params[resp] = itemFieldList;
           dispatch({
             type: 'dervieSource/file',
             payload: params,
@@ -1285,7 +1285,7 @@ export default class ResourceClassify extends PureComponent {
           });
         } else if (this.state.item == 5) {
           let params = {};
-          params[treeSelect[0]] = [modalListData.id];
+          params[resp] = [modalListData.id];
           dispatch({
             type: 'dervieSource/api',
             payload: params,
@@ -1356,13 +1356,15 @@ export default class ResourceClassify extends PureComponent {
             payload: {
               id: item.id,
             }, callback: () => {
+              message.success('删除成功');
+              this.setState({
+                selectedRows: [],
+              });
               dispatch({
                 type: 'dervieSource/fetch',
               });
             },
           });
-          message.success('删除成功');
-
         } else {
           dispatch({
             type: 'dervieSource/remove',
@@ -1519,7 +1521,7 @@ export default class ResourceClassify extends PureComponent {
     const columns = [
       {
         title: '序号',
-        dataIndex: 'id',
+        render: (text, record, index) => <span>{index + 1}</span>,
       },
       {
         title: '数据名称',
