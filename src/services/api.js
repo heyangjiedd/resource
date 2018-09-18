@@ -335,7 +335,7 @@ export async function removederiverclassify(params) {
 
 // 根据id查询衍生库详情
 export async function getderivecatalog(params) {
-  return request(`/derivecatalog/list`+params.id);
+  return request(`/derivecatalog/`+params.id);
 }
 // 删除衍生库
 export async function removederivecatalog(params) {

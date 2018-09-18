@@ -761,14 +761,11 @@ const ResourceDetail = Form.create()(props => {
     }];
   const fgxxsjkdatacolumns = [
     {
-      title: 'Key',
-      dataIndex: 'content',
+      title: '集合名称',
+      dataIndex: 'name',
     }, {
-      title: 'Value',
-      dataIndex: 'content',
-    }, {
-      title: 'Type',
-      dataIndex: 'content',
+      title: '所属数据源',
+      dataIndex: 'description',
     },
   ];
   const lifelistcolumns = [
@@ -817,9 +814,7 @@ const ResourceDetail = Form.create()(props => {
                 }
                 }
                 data={[]}
-                selectItemFeild={[].concat.apply([], tableAndField.map(item => {
-                  return item.tableFieldList;
-                }))}
+                selectItemFeild={tableAndField.tableFieldList||[]}
                 transMsg={(index, andOr) => {
                   indexList = index;
                   indexAndOr = andOr;
@@ -857,28 +852,29 @@ const ResourceDetail = Form.create()(props => {
           />
         </TabPane>
         <TabPane tab="表结构" key="2">
-          {tableAndField.map(item => {
-            return (<div>
               <DescriptionList size="large" col={2} title="信息资源详情" style={{ marginBottom: 32 }}>
-                <Description term="信息资源名称">{item.sourceTable.name}</Description>
-                <Description term="关联资源类型">{item.sourceTable.type}</Description>
-                <Description term="注释">{item.sourceTable.description}</Description>
+                <Description term="信息资源名称">{tableAndField.name}</Description>
+                <Description term="关联资源类型">{tableAndField.dataSourceType}</Description>
               </DescriptionList>
               <DescriptionList size="large" title="字段信息" style={{ marginBottom: 32 }}>
                 <StandardTableNothing
                   loading={loading}
-                  data={item.tableFieldList}
+                  data={tableAndField.tableFieldList||[]}
                   columns={gxxsjkfieldcolumns}
-                /></DescriptionList></div>);
-          })}
-
+                /></DescriptionList>
         </TabPane>
       </Tabs></div> : detailType == 2 ?
         <div>
           <DescriptionList size="large" col={2} title="" style={{ marginBottom: 32 }}>
-            <Description term="集合名称">{httpItem.sourceName}</Description>
-            <Description term="所属数据源">{httpItem.sourceName}</Description>
+            <Description term="信息资源名称">{tableAndField.name}</Description>
+            <Description term="关联资源类型">{tableAndField.dataSourceType}</Description>
           </DescriptionList>
+          <DescriptionList size="large" title="字段信息" style={{ marginBottom: 32 }}>
+            <StandardTableNothing
+              loading={loading}
+              data={tableAndField.tableFieldList||[]}
+              columns={fgxxsjkdatacolumns}
+            /></DescriptionList>
           {/*<StandardTableNoCheck*/}
           {/*loading={loading}*/}
           {/*data={data}*/}
@@ -971,7 +967,7 @@ export default class ResourceClassify extends PureComponent {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
       dispatch({
-        type: 'dervieClassify/fetch',
+        type: 'dervieSource/fetch',
         payload: fieldsValue,
       });
     });
@@ -1132,16 +1128,16 @@ export default class ResourceClassify extends PureComponent {
     if (listItemData.dataSourceType === 'mysql' || listItemData.dataSourceType === 'oracle' || listItemData.dataSourceType === 'sqlserver'
       || listItemData.dataSourceType === 'db2') {
       dispatch({
-        type: 'catalog/catalogTableAndTableField',
-        payload: { catalogId: listItemData.id },
+        type: 'dervieSource/get',
+        payload: { id: listItemData.id },
       });
       this.setState({
         detailType: 1,
       });
     } else if (listItemData.dataSourceType === 'mongo'|| listItemData.dataSourceType === 'hbase') {
       dispatch({
-        type: 'catalog/catalogTableAndTableField',
-        payload: { catalogId: listItemData.id },
+        type: 'dervieSource/get',
+        payload: { id: listItemData.id },
       });
       this.setState({
         detailType: 2,
@@ -1463,7 +1459,7 @@ export default class ResourceClassify extends PureComponent {
 
   render() {
     const {
-      dervieSource: { data },
+      dervieSource: { data,detail },
       dervieClassify: { treeData },
       catalog: { catalogItem, field, tableAndField, operateLog },
       centersource: { sqlList, data: formData, dataList, lifelist: { list: lifelist }, httpItem },
@@ -1514,7 +1510,7 @@ export default class ResourceClassify extends PureComponent {
       httpItem: httpItem,
       searchHandle: this.searchHandle,
       radioSwitch: radioSwitch,
-      tableAndField: tableAndField,
+      tableAndField: detail,
       detailType: detailType,
       handleModalVisible: this.handleModalVisibleResource,
     };

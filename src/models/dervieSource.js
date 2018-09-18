@@ -8,6 +8,9 @@ export default {
       list: [],
       pagination: {},
     },
+    detail:{
+      tableFieldList:[]
+    },
   },
 
   effects: {
@@ -27,7 +30,7 @@ export default {
     *get({ payload }, { call, put }) {
       const response = yield call(getderivecatalog, payload);
       yield put({
-        type: 'get',
+        type: 'getsavetableFieldList',
         payload: response,
       });
     },
@@ -60,7 +63,7 @@ export default {
         data: action.payload,
       };
     },
-    get(state, action){
+    getsavetableFieldList(state, action){
       return {
         ...state,
         detail: action.payload,
