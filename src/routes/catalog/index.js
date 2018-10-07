@@ -1017,9 +1017,7 @@ const ResourceDetail = Form.create()(props => {
           {radioSwitch == 'view' ? <div>
               <SimpleTableEdit
               scroll={{ y: 180 }}
-              search={()=>{
-                searchHandle(indexList,indexAndOr)}
-              }
+              search={searchHandle}
               data={[]}
               selectItemFeild={[].concat.apply([],tableAndField.map(item=>{return  item.tableFieldList}))}
               transMsg={(index,andOr)=>{

@@ -58,7 +58,7 @@ let treeSelect = '';
 let selectValue = [];
 let modalListData = {};//弹窗第一页选择
 let choiseListItemData = {};//弹窗中弹窗选择
-let searchValue = { resourceId: '', relationDb: '', unrelationDb: '', api: '', files: '' }; //查询
+let searchValue = { resourceId: '', relationDb: '', unrelationDb: '', api: '', files: ''}; //查询
 
 const ChoiceList = Form.create()(props => {
   const { modalVisible, handleAdd, handleModalVisible, loadinhandleItemSearchg, data, columns, handleChoiceFeild, choiceFeild } = props;
@@ -191,7 +191,7 @@ const CreateForm = Form.create()(props => {
       title: '连接状态',
       dataIndex: 'linkStatus',
       render(val) {
-        return <Badge status={val ? 'success' : 'error'} text={val || '未连通'}/>;
+        return <Badge status={val == 'on' ? 'success' : 'error'} text={val == 'on' ? '连通' : '未连通'}/>;
       },
     },
   ];
@@ -261,44 +261,6 @@ const CreateForm = Form.create()(props => {
       title: '文件类型',
       dataIndex: 'type',
     }];
-  const columnscatalogfeild = [
-    {
-      title: '信息源',
-      dataIndex: 'name',
-    }, {
-      title: '信息源描述',
-      dataIndex: 'description',
-    }, {
-      title: '信息源类型',
-      dataIndex: 'type',
-    }, {
-      title: '信息源长度',
-      dataIndex: 'len',
-    }, {
-      title: '字段名',
-      dataIndex: 'feild_name',
-      render: (text, record, index) => {
-        return <Select placeholder={'请选择'} style={{ width: 120 }} onSelect={(select, current) => {
-          save(text, record, index, select, current);
-        }}>
-          {choiceFeild.map(item => {
-            return (
-              <Option title={item.name} value={item.id}>{item.name}</Option>
-            );
-          })}
-        </Select>;
-      },
-    }, {
-      title: '字段描述',
-      dataIndex: 'feild_description',
-    }, {
-      title: '字段类型',
-      dataIndex: 'feild_type',
-    }, {
-      title: '字段长度',
-      dataIndex: 'feild_len',
-    },
-  ];
   const tableColumnsNoPage = [
     {
       title: '序号',
@@ -317,7 +279,6 @@ const CreateForm = Form.create()(props => {
   let choiceSelectedRows = [];
   let choiceFeildSelectedRows = [];
   let addTableSelectedRows = [];
-  let addFeilsSelectedRows = [];
   let addTableRows = [];
   let setTableRows = [];
   let fgxxsjkHandleSelectRows = [];
@@ -462,6 +423,7 @@ const CreateForm = Form.create()(props => {
       title="新增"
       visible={modalVisible}
       width={900}
+      destroyOnClose={true}
       footer={item === 1 ? firstFooter : secondFooter}
       onOk={handleItem}
       onCancel={cancel}
@@ -809,13 +771,11 @@ const ResourceDetail = Form.create()(props => {
           {radioSwitch == 'view' ? <div>
               <SimpleTableEdit
                 scroll={{ y: 180 }}
-                search={() => {
-                  searchHandle(indexList, indexAndOr);
-                }
-                }
+                search={searchHandle}
                 data={[]}
                 selectItemFeild={tableAndField.tableFieldList||[]}
                 transMsg={(index, andOr) => {
+                  console.log(index)
                   indexList = index;
                   indexAndOr = andOr;
                 }}
@@ -1101,8 +1061,14 @@ export default class ResourceClassify extends PureComponent {
     });
   };
   handleModalVisibleResource = flag => {
-    this.setState({
-      modalVisibleResource: !!flag,
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'centersource/fetchViewSetNull',
+      callback: () => {
+        this.setState({
+          modalVisibleResource: !!flag,
+        });
+      }
     });
   };
   handleModalVisible = flag => {
@@ -1345,31 +1311,43 @@ export default class ResourceClassify extends PureComponent {
   handleDelete = () => {
     const { dispatch } = this.props;
     if (this.state.selectedRows.length > 0) {
-      this.state.selectedRows.forEach((item, index) => {
-        if (index === this.state.selectedRows.length - 1) {
-          dispatch({
-            type: 'dervieSource/remove',
-            payload: {
-              id: item.id,
-            }, callback: () => {
-              message.success('删除成功');
-              this.setState({
-                selectedRows: [],
-              });
+      confirm({
+        title: '确定删除选中数据?',
+        content: '删除数据不可恢复，请悉知！！！',
+        okText: '确定',
+        cancelText: '取消',
+        onOk:()=> {
+          this.state.selectedRows.forEach((item, index) => {
+            if (index === this.state.selectedRows.length - 1) {
               dispatch({
-                type: 'dervieSource/fetch',
+                type: 'dervieSource/remove',
+                payload: {
+                  id: item.id,
+                }, callback: () => {
+                  message.success('删除成功');
+                  this.setState({
+                    selectedRows: [],
+                  });
+                  dispatch({
+                    type: 'dervieSource/fetch',
+                  });
+                },
               });
-            },
+            } else {
+              dispatch({
+                type: 'dervieSource/remove',
+                payload: {
+                  id: item.id,
+                },
+              });
+            }
           });
-        } else {
-          dispatch({
-            type: 'dervieSource/remove',
-            payload: {
-              id: item.id,
-            },
-          });
-        }
+        },
+        onCancel:()=> {
+        },
       });
+    }else{
+      message.error('请先选择数据')
     }
   };
 
@@ -1448,7 +1426,7 @@ export default class ResourceClassify extends PureComponent {
     });
     let params = {
       'accordWith': value,
-      'catalogId': listItemData.id,
+      'deriveId': listItemData.id,
       'params': param,
     };
     dispatch({

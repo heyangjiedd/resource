@@ -119,14 +119,12 @@ class EditableCell extends React.Component {
                   })(
                     <Input style={{width:'100%'}}
                       ref={node => (this.input = node)}
-                      onPressEnter={this.saveInput}
+                      onBlur={this.saveInput}
                     />,
                   )}
                 </FormItem>
               )) : title == '字段' ? (<FormItem style={{ margin: 0 }}>
-                  {form.getFieldDecorator(dataIndex, {
-                    initialValue: list.length > 0 ? list[0].name : '',
-                  })(<Select placeholder={'请选择'} style={{width:120}} onSelect={this.saveCopy}>
+                  {form.getFieldDecorator(dataIndex)(<Select placeholder={'请选择'} style={{width:120}} onSelect={this.saveCopy}>
                     {list.map(item => {
                       return (
                         <Option title={item.name} key={item.id} tableId={item.tableId} value={item.name}>{item.name}</Option>
@@ -135,9 +133,7 @@ class EditableCell extends React.Component {
                   </Select>)}
                 </FormItem>
               ) : title == '条件' ?(<FormItem style={{ margin: 0 }}>
-                  {form.getFieldDecorator(dataIndex, {
-                    initialValue: list[0].id,
-                  })(<Select style={{width:'100%'}} placeholder={'请选择'} onSelect={this.savecondition}>
+                  {form.getFieldDecorator(dataIndex)(<Select style={{width:'100%'}} placeholder={'请选择'} onSelect={this.savecondition}>
                     {list.map(item => {
                       return (
                         <Option title={item.name} key={item.id} value={item.id}>{item.name}</Option>
@@ -146,9 +142,7 @@ class EditableCell extends React.Component {
                   </Select>)}
                 </FormItem>
               ):(<FormItem style={{ margin: 0 }}>
-                  {form.getFieldDecorator(dataIndex, {
-                    initialValue: list[0].id,
-                  })(<Select style={{width:'100%'}} placeholder={'请选择'} onSelect={this.save}>
+                  {form.getFieldDecorator(dataIndex)(<Select style={{width:'100%'}} placeholder={'请选择'} onSelect={this.save}>
                     {list.map(item => {
                       return (
                         <Option title={item.name} key={item.id} value={item.id}>{item.name}</Option>
@@ -206,7 +200,7 @@ class EditableTable extends React.Component {
       ...item,
       ...row,
     });
-    this.props.transMsg(newData, this.state.andOr);
+    // this.props.transMsg(newData, this.state.andOr);
     this.setState({ dataSource: newData });
   };
   save = (text, record) => {
@@ -288,7 +282,7 @@ class EditableTable extends React.Component {
               添加条件
             </Button> <Button size="small" type="danger" style={{ marginRight: 20 }} onClick={this.deleteAll}>
             清除全部
-          </Button> <Button size="small" style={{ marginRight: 20 }} onClick={search}>
+          </Button> <Button size="small" style={{ marginRight: 20 }} onClick={()=>{search(dataSource, andOr)}}>
             查询数据
           </Button>
           </Col>

@@ -358,13 +358,13 @@ const CreateForm = Form.create()(props => {
           </FormItem>
           <FormItem {...formItemLayout} label="用户名">
             {form.getFieldDecorator('account', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{message: 'Please input some description...' }],
               initialValue: createItemData.account,
             })(<Input placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="密码">
             {form.getFieldDecorator('password', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{message: 'Please input some description...' }],
               initialValue: createItemData.password,
             })(<Input placeholder="请输入"/>)}
           </FormItem>

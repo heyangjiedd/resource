@@ -25,6 +25,7 @@ import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
 import styles from './dervieClassify.less';
 
+const confirm = Modal.confirm;
 const FormItem = Form.Item;
 const { Option } = Select;
 const { TextArea } = Input;
@@ -303,27 +304,39 @@ export default class ResourceClassify extends PureComponent {
   handleDelete = () => {
     const { dispatch } = this.props;
     if (this.state.selectedRows.length > 0) {
-      this.state.selectedRows.forEach((item, index) => {
-        if (index === this.state.selectedRows.length - 1) {
-          dispatch({
-            type: 'dervieClassify/remove',
-            payload: {
-              id: item.id,
-            }, callback: () => {
-              this.fetchAll();
-            },
-          });
-          message.success('删除成功');
+      confirm({
+        title: '确定删除选中数据?',
+        content: '删除数据不可恢复，请悉知！！！',
+        okText: '确定',
+        cancelText: '取消',
+        onOk:()=> {
+          this.state.selectedRows.forEach((item, index) => {
+            if (index === this.state.selectedRows.length - 1) {
+              dispatch({
+                type: 'dervieClassify/remove',
+                payload: {
+                  id: item.id,
+                }, callback: () => {
+                  this.fetchAll();
+                },
+              });
+              message.success('删除成功');
 
-        } else {
-          dispatch({
-            type: 'dervieClassify/remove',
-            payload: {
-              id: item.id,
-            },
+            } else {
+              dispatch({
+                type: 'dervieClassify/remove',
+                payload: {
+                  id: item.id,
+                },
+              });
+            }
           });
-        }
+        },
+        onCancel:()=> {
+        },
       });
+    }else{
+      message.error('请先选择数据')
     }
   };
   handleTree = data => {
