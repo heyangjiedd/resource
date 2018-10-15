@@ -27,6 +27,7 @@ import SimpleTree from 'components/SimpleTree';
 import TagSelect from 'components/TagSelect';
 import StandardFormRow from 'components/StandardFormRow';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
+import ARR from '../../assets/arr';
 
 import styles from './resourceClassify.less';
 import { updateresource } from '../../services/api';
@@ -43,10 +44,11 @@ const getValue = obj =>
 const statusMap = ['default', 'processing', 'success', 'error'];
 let listItemData = {};
 let createItemData = {};
+let createItemDataCascader = [];
 let itemDataStatus = 1;
 
 const CreateForm = Form.create()(props => {
-  const { modalVisible, form, handleAdd, handleModalVisible, handleItem, item, orgList, testBefore, testBeforeText } = props;
+  const { modalVisible, form, handleAdd, handleModalVisible, handleItem, item, itemSteps,orgList, testBefore, testBeforeText } = props;
   const okHandle = () => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
@@ -68,12 +70,16 @@ const CreateForm = Form.create()(props => {
             || createItemData.sourceType === 'rest') {
             handleItem(13);
           } else if (createItemData.sourceType === 'ftp' || createItemData.sourceType === 'sftp' || createItemData.sourceType === 'local'
-            || createItemData.sourceType === '') {
+            || createItemData.sourceType === 'share') {
             handleItem(14);
           } else {
-            message.warn('选择数据源类型');
+
           }
         } else {
+          if(!createItemData.sourceType){
+            message.warn('选择数据源类型');
+            return
+          }
           handleItem(index);
         }
         createItemData = { ...createItemData, ...fieldsValue };
@@ -93,58 +99,14 @@ const CreateForm = Form.create()(props => {
   const cancel = () => {
     handleModalVisible();
     let id = createItemData.resourceId;
+    createItemDataCascader = [];
     createItemData = { resourceId: id };
     handleItem(1);
   };
   const onChange = (index) => {
+    createItemDataCascader = index;
     createItemData.sourceType = index[1];
   };
-  const options = [
-    {
-      value: '关系型数据库',
-      label: '关系型数据库',
-      children: [{
-        value: 'mysql', label: 'mysql',
-      }, {
-        value: 'oracle', label: 'oracle',
-      }, {
-        value: 'sqlserver', label: 'sqlserver',
-      }, {
-        value: 'db2', label: 'db2',
-      }],
-    }, {
-      value: '非关系型数据库',
-      label: '非关系型数据库',
-      children: [{
-        value: 'mongo', label: 'mongo',
-      }, {
-        value: 'hbase', label: 'hbase',
-      }],
-    }, {
-      value: 'API',
-      label: 'API',
-      children: [{
-        value: 'http', label: 'http',
-      }, {
-        value: 'https', label: 'https',
-      }, {
-        value: 'wsdl', label: 'wsdl',
-      }, {
-        value: 'rest', label: 'rest',
-      }],
-    }, {
-      value: '普通文件',
-      label: '普通文件',
-      children: [{
-        value: 'ftp', label: 'ftp',
-      }, {
-        value: 'sftp', label: 'sftp',
-      }, {
-        value: 'local', label: '本地磁盘',
-      }, {
-        value: 'share', label: '共享文件夹',
-      }],
-    }];
   const formItemLayout = {
     labelCol: {
       xs: { span: 24 },
@@ -219,24 +181,25 @@ const CreateForm = Form.create()(props => {
       onCancel={cancel}
     >
       <Row>
-        <Steps current={item - 1} labelPlacement={'vertical'}>
-          <Step key={1} title={'选择数据源类型'}/>
-          <Step key={2} title={'录入基本信息'}/>
-          <Step key={3} title={'配置技术参数'}/>
+        <Steps current={itemSteps-1} labelPlacement={'vertical'}>
+          <Step title={'选择数据源类型'}/>
+          <Step title={'录入基本信息'}/>
+          <Step title={'录入基本信息'}/>
         </Steps>
       </Row>
       {item === 1 ? <div><Row gutter={{ md: 8, lg: 24, xl: 48 }}>
         <Col md={24} sm={24}>
-          <FormItem {...formItemLayout} label="数据源类型"><Cascader style={{ width: 100 + '%' }} options={options}
+          <FormItem {...formItemLayout} label="数据源类型"><Cascader style={{ width: 100 + '%' }} options={ARR.CASCADER}
                                                                 onChange={onChange}
+                                                                defaultValue={createItemDataCascader}
                                                                 placeholder="请选择数据源/数据库"/>
           </FormItem>
         </Col></Row></div> : item === 2 ? <div>
         <FormItem {...formItemLayout} label="数据源名称">
           {form.getFieldDecorator('sourceName', {
-            rules: [{ required: true, message: 'Please input some description...' }],
+            rules: [{ required: true, message: '请输入数据源名称.' }],
             initialValue: createItemData.sourceName,
-          })(<Input placeholder="请输入"/>)}
+          })(<Input placeholder="请输入数据源名称"/>)}
         </FormItem>
         <FormItem {...formItemLayout} label="所属组织机构">
           {form.getFieldDecorator('orgId', {
@@ -253,7 +216,7 @@ const CreateForm = Form.create()(props => {
         <FormItem {...formItemLayout} label="资源分类">
           {form.getFieldDecorator('resourceIdName', {
             initialValue: createItemData.resourceIdName,
-          })(<Input disabled={true} placeholder="请输入"/>)}
+          })(<Input disabled={true} placeholder="请输入资源分类"/>)}
         </FormItem>
         <FormItem {...formItemLayout} label="数据源描述">
           {form.getFieldDecorator('content', {
@@ -274,53 +237,53 @@ const CreateForm = Form.create()(props => {
         <div>
           <FormItem {...formItemLayout} label="IP地址">
             {form.getFieldDecorator('ip', {
-              rules: [{ required: true, message: 'Please input some description...' }], initialValue: createItemData.ip,
-            })(<Input placeholder="请输入"/>)}
+              rules: [{ required: true, message: '请输入IP地址' }], initialValue: createItemData.ip,
+            })(<Input placeholder="请输入IP地址"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="端口">
             {form.getFieldDecorator('port', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入端口' }],
               initialValue: createItemData.port,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input placeholder="请输入端口"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="SID">
             {form.getFieldDecorator('sid', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入SID' }],
               initialValue: createItemData.sid,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input placeholder="请输入SID"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据库名称/服务名称">
             {form.getFieldDecorator('dbName', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入数据库名称/服务名称' }],
               initialValue: createItemData.dbName,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input placeholder="请输入数据库名称/服务名称"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据库版本号">
             {form.getFieldDecorator('dbVersion', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入数据库版本号' }],
               initialValue: createItemData.dbVersion,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input placeholder="请输入数据库版本号"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="用户名">
             {form.getFieldDecorator('account', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入用户名' }],
               initialValue: createItemData.account,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input placeholder="请输入用户名"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="密码">
             {form.getFieldDecorator('password', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入密码' }],
               initialValue: createItemData.password,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input type='password' placeholder="请输入密码"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="备注">
             {form.getFieldDecorator('bz', {
-              rules: [{ message: 'Please input some description...' }], initialValue: createItemData.bz,
-            })(<Input placeholder="请输入"/>)}
+              rules: [{ message: '请输入备注' }], initialValue: createItemData.bz,
+            })(<Input placeholder="请输入备注"/>)}
           </FormItem>
           <Row>
             <Col>
-              <Button type="primary" onClick={() => {
+              <Button onClick={() => {
                 test();
               }}>测试连通性</Button>
               <span style={{ marginLeft: 20 }}>{testBeforeText}</span>
@@ -329,49 +292,49 @@ const CreateForm = Form.create()(props => {
         </div> : item === 12 ? <div>
           <FormItem {...formItemLayout} label="IP地址">
             {form.getFieldDecorator('ip', {
-              rules: [{ required: true, message: 'Please input some description...' }], initialValue: createItemData.ip,
-            })(<Input placeholder="请输入"/>)}
+              rules: [{ required: true, message: '请输入IP地址' }], initialValue: createItemData.ip,
+            })(<Input placeholder="请输入IP地址"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="端口">
             {form.getFieldDecorator('port', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入端口' }],
               initialValue: createItemData.port,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input placeholder="请输入端口"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="SID">
             {form.getFieldDecorator('sid', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入SID' }],
               initialValue: createItemData.sid,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input placeholder="请输入SID"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据库名称">
             {form.getFieldDecorator('dbName', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入数据库名称' }],
               initialValue: createItemData.dbName,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input placeholder="请输入数据库名称"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据库版本号">
             {form.getFieldDecorator('dbVersion', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入数据库版本号' }],
               initialValue: createItemData.dbVersion,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input placeholder="请输入数据库版本号"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="用户名">
             {form.getFieldDecorator('account', {
-              rules: [{message: 'Please input some description...' }],
+              rules: [{message: '请输入用户名' }],
               initialValue: createItemData.account,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input placeholder="请输入用户名"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="密码">
             {form.getFieldDecorator('password', {
-              rules: [{message: 'Please input some description...' }],
+              rules: [{message: '请输入密码' }],
               initialValue: createItemData.password,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input type='password'placeholder="请输入密码"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="备注">
             {form.getFieldDecorator('bz', {
-              rules: [{ message: 'Please input some description...' }], initialValue: createItemData.bz,
-            })(<Input placeholder="请输入"/>)}
+              rules: [{ message: '请输入备注' }], initialValue: createItemData.bz,
+            })(<Input placeholder="请输入备注"/>)}
           </FormItem>
           <Row>
             <Col>
@@ -384,13 +347,13 @@ const CreateForm = Form.create()(props => {
         </div> : item === 13 ? <div>
           <FormItem {...formItemLayout} label="接口地址">
             {form.getFieldDecorator('interfaceUrl', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入接口地址' }],
               initialValue: createItemData.interfaceUrl,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input placeholder="请输入接口地址"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="接口类型">
             {form.getFieldDecorator('interfaceType', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入接口类型' }],
               initialValue: createItemData.interfaceType,
             })(
               <Select key={123} placeholder="选择接口类型" style={{ width: '100%' }}>
@@ -401,8 +364,8 @@ const CreateForm = Form.create()(props => {
           </FormItem>
           <FormItem {...formItemLayout} label="备注">
             {form.getFieldDecorator('bz', {
-              rules: [{ message: 'Please input some description...' }], initialValue: createItemData.bz,
-            })(<Input placeholder="请输入"/>)}
+              rules: [{ message: '请输入备注' }], initialValue: createItemData.bz,
+            })(<Input placeholder="请输入备注"/>)}
           </FormItem>
           <Row>
             <Col>
@@ -415,37 +378,37 @@ const CreateForm = Form.create()(props => {
         </div> : <div>
           <FormItem {...formItemLayout} label="IP地址">
             {form.getFieldDecorator('ip', {
-              rules: [{ message: 'Please input some description...' }], initialValue: createItemData.ip,
-            })(<Input placeholder="请输入"/>)}
+              rules: [{ required: true,message: '请输入IP地址' }], initialValue: createItemData.ip,
+            })(<Input placeholder="请输入IP地址"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="端口">
             {form.getFieldDecorator('port', {
-              rules: [{ message: 'Please input some description...' }],
+              rules: [{required: true, message: '请输入端口' }],
               initialValue: createItemData.port,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input placeholder="请输入端口"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="用户名">
             {form.getFieldDecorator('account', {
-              rules: [{ message: 'Please input some description...' }],
+              rules: [{required: true, message: '请输入用户名' }],
               initialValue: createItemData.account,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input placeholder="请输入用户名"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="密码">
             {form.getFieldDecorator('password', {
-              rules: [{ message: 'Please input some description...' }],
+              rules: [{ required: true,message: '请输入密码' }],
               initialValue: createItemData.password,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input type='password' placeholder="请输入密码"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="根路径">
             {form.getFieldDecorator('path', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入根路径' }],
               initialValue: createItemData.path,
-            })(<Input placeholder="请输入"/>)}
+            })(<Input placeholder="请输入根路径"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="备注">
             {form.getFieldDecorator('bz', {
-              rules: [{ message: 'Please input some description...' }], initialValue: createItemData.bz,
-            })(<Input placeholder="请输入"/>)}
+              rules: [{ message: '请输入备注' }], initialValue: createItemData.bz,
+            })(<Input placeholder="请输入备注"/>)}
           </FormItem>
           <Row>
             <Col>
@@ -518,57 +481,57 @@ const UpdateForm = Form.create()(props => {
         itemDetail == 1 ? <div>
           <FormItem {...formItemLayout} label="数据源类型">
             {form.getFieldDecorator('sourceType', {
-              rules: [{ message: 'Please input some description...' }], initialValue: listItemData.resourceType,
-            })(<Input disabled placeholder="请输入"/>)}
+              rules: [{ message: '请输入数据源类型' }], initialValue: listItemData.resourceType,
+            })(<Input disabled placeholder="请输入数据源类型"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据库类型">
             {form.getFieldDecorator('sourceType', {
-              rules: [{ message: 'Please input some description...' }], initialValue: listItemData.sourceType,
-            })(<Input disabled placeholder="请输入"/>)}
+              rules: [{ message: '请输入数据库类型' }], initialValue: listItemData.sourceType,
+            })(<Input disabled placeholder="请输入数据库类型"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据源名称">
             {form.getFieldDecorator('sourceName', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入数据源名称' }],
               initialValue: listItemData.sourceName,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入数据源名称"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="所属组织机构">
             {form.getFieldDecorator('orgIdName', {
-              rules: [{ message: 'Please input some description...' }],
+              rules: [{ message: '请输入所属组织机构' }],
               initialValue: listItemData.orgIdName,
-            })(<Input disabled={true} placeholder="请输入"/>)}
+            })(<Input disabled={true} placeholder="请输入所属组织机构"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="资源分类">
             {form.getFieldDecorator('resourceIdName', {
               initialValue: listItemData.resourceIdName,
-            })(<Input disabled={true} placeholder="请输入"/>)}
+            })(<Input disabled={true} placeholder="请输入资源分类"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="IP地址">
             {form.getFieldDecorator('ip', {
-              rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.ip,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+              rules: [{ required: true, message: '请输入IP地址' }], initialValue: listItemData.ip,
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入IP地址"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="端口">
             {form.getFieldDecorator('port', {
-              rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.port,
+              rules: [{ required: true, message: '请输入...' }], initialValue: listItemData.port,
             })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据库名称/SID">
             {form.getFieldDecorator('sid', {
-              rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.sid,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+              rules: [{ required: true, message: '请输入数据库名称/SID' }], initialValue: listItemData.sid,
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入数据库名称/SID"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="用户名">
             {form.getFieldDecorator('account', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入用户名' }],
               initialValue: listItemData.account,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入用户名"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="密码">
             {form.getFieldDecorator('password', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入密码' }],
               initialValue: listItemData.password,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+            })(<Input type='password' disabled={itemDataStatus === 1} placeholder="请输入密码"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据源描述">
             {form.getFieldDecorator('content', {
@@ -589,57 +552,57 @@ const UpdateForm = Form.create()(props => {
         </div> : itemDetail == 2 ? <div>
           <FormItem {...formItemLayout} label="数据源类型">
             {form.getFieldDecorator('sourceType', {
-              rules: [{ message: 'Please input some description...' }], initialValue: listItemData.resourceType,
-            })(<Input disabled placeholder="请输入"/>)}
+              rules: [{ message: '请输入数据源类型' }], initialValue: listItemData.resourceType,
+            })(<Input disabled placeholder="请输入数据源类型"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据库类型">
             {form.getFieldDecorator('sourceType', {
-              rules: [{ message: 'Please input some description...' }], initialValue: listItemData.sourceType,
-            })(<Input disabled placeholder="请输入"/>)}
+              rules: [{ message: '请输入数据库类型' }], initialValue: listItemData.sourceType,
+            })(<Input disabled placeholder="请输入数据库类型"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据源名称">
             {form.getFieldDecorator('sourceName', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入数据源名称' }],
               initialValue: listItemData.sourceName,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入数据源名称"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="所属组织机构">
             {form.getFieldDecorator('orgIdName', {
-              rules: [{ message: 'Please input some description...' }],
+              rules: [{ message: '请输入所属组织机构' }],
               initialValue: listItemData.orgIdName,
-            })(<Input disabled={true} placeholder="请输入"/>)}
+            })(<Input disabled={true} placeholder="请输入所属组织机构"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="资源分类">
             {form.getFieldDecorator('resourceIdName', {
               initialValue: listItemData.resourceIdName,
-            })(<Input disabled={true} placeholder="请输入"/>)}
+            })(<Input disabled={true} placeholder="请输入资源分类"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="IP地址">
             {form.getFieldDecorator('ip', {
-              rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.ip,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+              rules: [{ required: true, message: '请输入IP地址' }], initialValue: listItemData.ip,
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入IP地址"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="端口">
             {form.getFieldDecorator('port', {
-              rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.port,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+              rules: [{ required: true, message: '请输入端口' }], initialValue: listItemData.port,
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入端口"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据库名称/SID">
             {form.getFieldDecorator('sid', {
-              rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.sid,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+              rules: [{ required: true, message: '请输入数据库名称/SID' }], initialValue: listItemData.sid,
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入数据库名称/SID"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="用户名">
             {form.getFieldDecorator('account', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入用户名' }],
               initialValue: listItemData.account,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入用户名"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="密码">
             {form.getFieldDecorator('password', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入密码' }],
               initialValue: listItemData.password,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+            })(<Input type='password' disabled={itemDataStatus === 1} placeholder="请输入密码"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据源描述">
             {form.getFieldDecorator('content', {
@@ -670,9 +633,9 @@ const UpdateForm = Form.create()(props => {
           </FormItem>
           <FormItem {...formItemLayout} label="数据源名称">
             {form.getFieldDecorator('sourceName', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入数据源名称' }],
               initialValue: listItemData.sourceName,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入数据源名称"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="所属组织机构">
             {form.getFieldDecorator('orgIdName', {
@@ -687,21 +650,21 @@ const UpdateForm = Form.create()(props => {
           </FormItem>
           <FormItem {...formItemLayout} label="接口名称">
             {form.getFieldDecorator('interfaceName', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入接口名称' }],
               initialValue: listItemData.interfaceName,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入接口名称"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="接口地址">
             {form.getFieldDecorator('interfaceUrl', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入接口地址' }],
               initialValue: listItemData.interfaceUrl,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入接口地址"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="接口类型">
             {form.getFieldDecorator('interfaceType', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入接口类型' }],
               initialValue: listItemData.interfaceType,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入接口类型"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据源描述">
             {form.getFieldDecorator('content', {
@@ -723,18 +686,18 @@ const UpdateForm = Form.create()(props => {
           <FormItem {...formItemLayout} label="数据源类型">
             {form.getFieldDecorator('sourceType', {
               rules: [{ message: 'Please input some description...' }], initialValue: listItemData.resourceType,
-            })(<Input disabled placeholder="请输入"/>)}
+            })(<Input disabled placeholder="请输入数据源类型"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="文件类型">
             {form.getFieldDecorator('sourceType', {
-              rules: [{ message: 'Please input some description...' }], initialValue: listItemData.sourceType,
-            })(<Input disabled placeholder="请输入"/>)}
+              rules: [{ message: '请输入文件类型' }], initialValue: listItemData.sourceType,
+            })(<Input disabled placeholder="请输入文件类型"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据源名称">
             {form.getFieldDecorator('sourceName', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入数据源名称' }],
               initialValue: listItemData.sourceName,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入数据源名称"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="所属组织机构">
             {form.getFieldDecorator('orgIdName', {
@@ -754,30 +717,30 @@ const UpdateForm = Form.create()(props => {
           </FormItem>
           <FormItem {...formItemLayout} label="IP地址">
             {form.getFieldDecorator('ip', {
-              rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.ip,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+              rules: [{ required: true, message: '请输入IP地址' }], initialValue: listItemData.ip,
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入IP地址"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="端口">
             {form.getFieldDecorator('port', {
-              rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.port,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+              rules: [{ required: true, message: '请输入端口' }], initialValue: listItemData.port,
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入端口"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="用户名">
             {form.getFieldDecorator('account', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入用户名' }],
               initialValue: listItemData.account,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+            })(<Input disabled={itemDataStatus === 1} placeholder="请输入用户名"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="密码">
             {form.getFieldDecorator('password', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入密码' }],
               initialValue: listItemData.password,
-            })(<Input disabled={itemDataStatus === 1} placeholder="请输入"/>)}
+            })(<Input type='password' disabled={itemDataStatus === 1} placeholder="请输入密码"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="根路径">
             {form.getFieldDecorator('path', {
               initialValue: listItemData.path,
-            })(<Input disabled={true} placeholder="请输入"/>)}
+            })(<Input disabled={true} placeholder="请输入根路径"/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="数据源描述">
             {form.getFieldDecorator('content', {
@@ -811,13 +774,14 @@ const TestForm = Form.create()(props => {
       destroyOnClose={true}
       onCancel={() => handleModalVisible()}
     >
+      <span>{testList.length == selectedRows.length?'测试完毕':'测试中...'}</span>
       <Row>
         <Progress percent={percent}/>
       </Row>
       <Row>
         <Col xl={16} lg={12} md={12} sm={24} xs={24}>
           <div>
-            测试连通：<span style={{ marginLeft: '10px' }}>{testList.filter(item => {
+            测试连通：<span style={{color: 'green', marginLeft: '10px' }}>{testList.filter(item => {
             return item;
           }).length}</span>条
           </div>
@@ -830,9 +794,9 @@ const TestForm = Form.create()(props => {
           </div>
         </Col>
       </Row>
-      <Row>
+      <Row style={{marginTop:10}}>
         <Col xl={16} lg={12} md={12} sm={24} xs={24}>
-          <Button type="primary" onClick={testHandleAdd}>重试</Button>
+          <Button onClick={testHandleAdd}>重试</Button>
         </Col>
       </Row>
     </Modal>
@@ -859,6 +823,7 @@ export default class ResourceClassify extends PureComponent {
     item: 1,
     itemDetail: 1,
     testBeforeText: '',
+    itemSteps:1,
   };
 
   componentDidMount() {
@@ -906,6 +871,9 @@ export default class ResourceClassify extends PureComponent {
   handleItem = (index) => {
     this.setState({
       item: index,
+    });
+    this.setState({
+      itemSteps: index>2?3:index,
     });
   };
   handleFormReset = () => {
@@ -1094,6 +1062,12 @@ export default class ResourceClassify extends PureComponent {
   handleDelete = () => {
     const { dispatch } = this.props;
     if (this.state.selectedRows.length > 0) {
+      confirm({
+        title: '确定删除选中数据?',
+        content: '删除数据不可恢复，请悉知！！！',
+        okText: '确定',
+        cancelText: '取消',
+        onOk:()=> {
       this.state.selectedRows.forEach((item, index) => {
         if (index === this.state.selectedRows.length - 1) {
           dispatch({
@@ -1119,6 +1093,12 @@ export default class ResourceClassify extends PureComponent {
           });
         }
       });
+        },
+        onCancel:()=> {
+        },
+      });
+    }else{
+      message.error('请先选择数据')
     }
   };
   handleAdd = fields => {
@@ -1159,6 +1139,10 @@ export default class ResourceClassify extends PureComponent {
   };
   testHandleAdd = fields => {
     const { dispatch } = this.props;
+    if(this.state.selectedRows.length <= 0){
+      message.error('请先选择数据')
+      return
+    }
     // 之前信息的置空
     this.setState({
       testList: [],
@@ -1304,7 +1288,7 @@ export default class ResourceClassify extends PureComponent {
             <FormItem style={{ marginBottom: 0 }}>
               {getFieldDecorator('unrelationDb')(
                 <TagSelect onChange={this.handleFormSubmit}>
-                  <TagSelect.Option value="mongo">mongo</TagSelect.Option>
+                  <TagSelect.Option value="mongo">MongoDB</TagSelect.Option>
                   <TagSelect.Option value="hbase">hbase</TagSelect.Option>
                 </TagSelect>,
               )}
@@ -1363,19 +1347,22 @@ export default class ResourceClassify extends PureComponent {
       classify: { treeData },
       loading,
     } = this.props;
-    const { selectedRows, testList, modalVisible, testModalVisible, updateModalVisible, listItemData, item, itemDetail, testBeforeText } = this.state;
+    const { selectedRows, testList, modalVisible, testModalVisible, updateModalVisible, listItemData, item,itemSteps, itemDetail, testBeforeText } = this.state;
 
     const columns = [
       {
         title: '数据源名称',
+        width:'150px',
         dataIndex: 'sourceName',
       },
       {
         title: '数据源类型',
+        width:'150px',
         dataIndex: 'sourceType',
       },
       {
         title: '所属组织机构',
+        width:'150px',
         dataIndex: 'orgId',
         render(val) {
           let org = orgList.filter(r => {
@@ -1386,6 +1373,7 @@ export default class ResourceClassify extends PureComponent {
       },
       {
         title: '所属资源分类',
+        width:'150px',
         dataIndex: 'resourceId',
         render(val) {
           let classfy = treeData.filter(r => {
@@ -1396,12 +1384,13 @@ export default class ResourceClassify extends PureComponent {
       },
       {
         title: '最近连接时间',
+        width:'150px',
         dataIndex: 'createTime',
-        sorter: true,
         render: val => <span>{val ? moment(val).format('YYYY-MM-DD HH:mm:ss') : '-'}</span>,
       },
       {
         title: '连通状态',
+        width:'150px',
         dataIndex: 'linkStatus',
         render(val) {
           return <Badge status={val == 'on' ? 'success' : 'error'} text={val == 'on' ? '连通' : '未连通'}/>;
@@ -1409,6 +1398,7 @@ export default class ResourceClassify extends PureComponent {
       },
       {
         title: '操作',
+        width:'150px',
         render: (text, record, index) => {
           return (
             <Fragment>
@@ -1433,6 +1423,7 @@ export default class ResourceClassify extends PureComponent {
       orgList: orgList,
       handleItem: this.handleItem,
       item: item,
+      itemSteps:itemSteps,
     };
     const testParentMethods = {
       handleAdd: this.testHandleAdd,

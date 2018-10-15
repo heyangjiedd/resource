@@ -78,12 +78,16 @@ class StandardTable extends PureComponent {
       pageSize:pageSize,
     };
     const paginationProps = {
+      showTotal:(total, range)=>{
+        return `当前显示 ${range[0]} 至 ${range[1]} 条 共计 ${total} 条`
+      },
       showSizeChanger: true,
       showQuickJumper: true,
       ...pagination,
     };
     const rowSelection = {
       selectedRowKeys,
+      columnWidth:'50px',
       onChange: this.handleRowSelectChange,
       getCheckboxProps: record => ({
         disabled: record.disabled,
@@ -94,7 +98,8 @@ class StandardTable extends PureComponent {
       <div className={styles.standardTable}>
         <Table
           loading={loading}
-          rowKey={rowKey || 'key'}
+          size='small'
+          rowKey={'id'}
           rowSelection={rowSelection}
           dataSource={list}
           columns={columns}

@@ -59,6 +59,7 @@ const TestForm = Form.create()(props => {
       destroyOnClose={true}
       onCancel={() => handleModalVisible()}
     >
+      <span>{testList.length == selectedRows.length?'测试完毕':'测试中...'}</span>
       <Row>
         <Progress percent={percent}/>
       </Row>
@@ -78,9 +79,9 @@ const TestForm = Form.create()(props => {
           </div>
         </Col>
       </Row>
-      <Row>
+      <Row  style={{marginTop:10}}>
         <Col xl={16} lg={12} md={12} sm={24} xs={24}>
-          <Button type="primary" onClick={testHandleAdd}>重试</Button>
+          <Button onClick={testHandleAdd}>重试</Button>
         </Col>
       </Row>
     </Modal>
@@ -105,22 +106,20 @@ const ResourceDetail = Form.create()(props => {
   const filelogcolumns = [
     {
       title: '序号',
+      width:'150px',
       render: (text, record, index) => <span>{index + 1}</span>,
     },
     {
-      title: '服务调用用户',
+      title: '文件调用用户',
+      width:'150px',
       dataIndex: 'userName',
     }, {
-      title: '最近一次数据调用开始时间',
-      dataIndex: 'startTime',
-    }, {
-      title: '最近一次数据调用结束时间',
-      dataIndex: 'endTime',
-    }, {
       title: '累积调用次数',
+      width:'150px',
       dataIndex: 'num',
     }, {
       title: '调用方式',
+      width:'150px',
       dataIndex: 'type',
     }];
   return (
@@ -301,7 +300,7 @@ export default class ResourceClassify extends PureComponent {
         ...fieldsValue,
         updatedAt: fieldsValue.updatedAt && fieldsValue.updatedAt.valueOf(),
       };
-      if (values && values.file == 'all') {
+      if (values && (values.file == 'all'||!values.file)) {
         values.file = 'ftp,sftp,local,share';
       }
       this.setState({
@@ -389,6 +388,10 @@ export default class ResourceClassify extends PureComponent {
   };
   testHandleAdd = fields => {
     const { dispatch } = this.props;
+    if(this.state.selectedRows.length <= 0){
+      message.error('请先选择数据')
+      return
+    }
     // 之前信息的置空
     this.setState({
       testList: [],
@@ -493,42 +496,42 @@ export default class ResourceClassify extends PureComponent {
     const detailColumns = [
       {
         title: '序号',
+        width:'150px',
         render: (text, record, index) => <span>{index + 1}</span>,
-        width: '60px',
       },
       {
         title: '文件名称',
         dataIndex: 'name',
-        width: 100,
+        width:'150px',
       },
       {
         title: '所属数据源',
         dataIndex: 'dataSourceName',
-        width: 100,
+        width:'150px',
       },
       {
         title: '数据源类型',
         dataIndex: 'dataSourceType',
-        width: 100,
+        width:'150px',
       },
       {
         title: '文件储存路径',
         dataIndex: 'path',
-        width: 100,
+        width:'150px',
       },
       {
         title: '文件大小',
         dataIndex: 'fileSize',
-        width: 100,
+        width:'150px',
       },
       {
         title: '类型',
         dataIndex: 'type',
-        width: 100,
+        width:'150px',
       },
       {
         title: '操作',
-        width: '120px',
+        width:'150px',
         render: (text, record, index) => {
           return (
             <span>
@@ -553,39 +556,28 @@ export default class ResourceClassify extends PureComponent {
     const columns = [
       {
         title: '数据源名称',
+        width:'150px',
         dataIndex: 'sourceName',
       },
       {
         title: '数据源类型',
+        width:'150px',
         dataIndex: 'sourceType',
       },
       {
-        title: '所属组织机构',
-        dataIndex: 'orgId',
-        render(val) {
-          let org = orgList.filter(r => {
-            return val == r.deptCode;
-          });
-          return <span>{org[0] && org[0].deptShortName}</span>;
-        },
-      },
-      {
-        title: '所属资源分类',
-        dataIndex: 'resourceId',
-        render(val) {
-          let classfy = treeData.filter(r => {
-            return val == r.id;
-          });
-          return <span>{classfy[0] && classfy[0].name}</span>;
-        },
+        title: '数据源描述',
+        width:'150px',
+        dataIndex: 'content',
       },
       {
         title: '最近连接时间',
+        width:'150px',
         dataIndex: 'createTime',
         render: val => <span>{val ? moment(val).format('YYYY-MM-DD HH:mm:ss') : '-'}</span>,
       },
       {
         title: '连通状态',
+        width:'150px',
         dataIndex: 'linkStatus',
         render(val) {
           return <Badge status={val == 'on' ? 'success' : 'error'} text={val == 'on' ? '连通' : '未连通'}/>;
@@ -593,6 +585,7 @@ export default class ResourceClassify extends PureComponent {
       },
       {
         title: '操作',
+        width:'150px',
         render: (text, record, index) => {
           return (
             <Fragment>
@@ -662,7 +655,7 @@ export default class ResourceClassify extends PureComponent {
             </div>
           </Card> : <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
-              <Form onSubmit={this.handleSearch}>
+                <Form onSubmit={this.handleSearch} >
                 <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
                   <Col md={6} sm={24}>
                     <FormItem>
@@ -685,7 +678,7 @@ export default class ResourceClassify extends PureComponent {
                     </FormItem>
                   </Col>
                   <Col md={8} sm={24}>
-                    <FormItem>
+                    <FormItem {...formItemLayout} label="数据源名称">
                       {getFieldDecorator('sourceName')(<Input placeholder="请输入数据源名称"/>)}
                     </FormItem>
                   </Col>

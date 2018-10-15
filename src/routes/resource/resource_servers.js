@@ -82,27 +82,27 @@ const CreateForm = Form.create()(props => {
     >
       <FormItem {...formItemLayout} label="数据源类型">
         {form.getFieldDecorator('desc', {
-          rules: [{ required: true, message: 'Please input some description...' }],
+          rules: [{ required: true, message: '请输入...' }],
         })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据库类型">
         {form.getFieldDecorator('desc1', {
-          rules: [{ required: true, message: 'Please input some description...' }],
+          rules: [{ required: true, message: '请输入...' }],
         })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据源名称">
         {form.getFieldDecorator('desc2', {
-          rules: [{ required: true, message: 'Please input some description...' }],
+          rules: [{ required: true, message: '请输入...' }],
         })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="所属组织机构">
         {form.getFieldDecorator('desc3', {
-          rules: [{ required: true, message: 'Please input some description...' }],
+          rules: [{ required: true, message: '请输入...' }],
         })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="资源分类">
         {form.getFieldDecorator('desc4', {
-          rules: [{ required: true, message: 'Please input some description...' }],
+          rules: [{ required: true, message: '请输入...' }],
         })(
           <Select placeholder="请选择" style={{ width: '100%' }}>
             <Option value="0">关闭</Option>
@@ -111,27 +111,27 @@ const CreateForm = Form.create()(props => {
       </FormItem>
       <FormItem {...formItemLayout} label="IP地址">
         {form.getFieldDecorator('desc5', {
-          rules: [{ required: true, message: 'Please input some description...' }],
+          rules: [{ required: true, message: '请输入...' }],
         })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="端口">
         {form.getFieldDecorator('desc6', {
-          rules: [{ required: true, message: 'Please input some description...' }],
+          rules: [{ required: true, message: '请输入...' }],
         })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据库名称/SID">
         {form.getFieldDecorator('desc7', {
-          rules: [{ required: true, message: 'Please input some description...' }],
+          rules: [{ required: true, message: '请输入...' }],
         })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="用户名">
         {form.getFieldDecorator('desc8', {
-          rules: [{ required: true, message: 'Please input some description...' }],
+          rules: [{ required: true, message: '请输入...' }],
         })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="密码">
         {form.getFieldDecorator('desc9', {
-          rules: [{ required: true, message: 'Please input some description...' }],
+          rules: [{ required: true, message: '请输入...' }],
         })(<Input placeholder="请输入"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="数据源描述">
@@ -169,45 +169,31 @@ const ResourceDetail = Form.create()(props => {
       md: { span: 16 },
     },
   };
-  const apifieldcolumns = [
-    {
-      title: '字段名称',
-      dataIndex: 'content',
-    }, {
-      title: '字段别名',
-      dataIndex: 'content',
-    }, {
-      title: '字段中文名',
-      dataIndex: 'content',
-    }, {
-      title: '字段描述',
-      dataIndex: 'content',
-    }, {
-      title: '来源数据表',
-      dataIndex: 'content',
-    }, {
-      title: '来源数据库',
-      dataIndex: 'content',
-    }];
   const apilogcolumns = [
     {
       title: '序号',
+      twidth:'150px',
       render: (text, record, index) => <span>{index + 1}</span>,
     },
     {
       title: '服务调用用户',
+      twidth:'150px',
       dataIndex: 'userName',
     }, {
       title: '最近一次接口调用开始时间',
+      twidth:'150px',
       dataIndex: 'startTime',
     }, {
       title: '最近一次接口调用结束时间',
+      twidth:'150px',
       dataIndex: 'endTime',
     }, {
       title: '累积调用次数',
+      twidth:'150px',
       dataIndex: 'num',
     }, {
       title: '调用方式',
+      twidth:'150px',
       dataIndex: 'type',
     },
   ];
@@ -455,26 +441,32 @@ export default class ResourceClassify extends PureComponent {
     const columns = [
       {
         title: '序号',
+        twidth:'150px',
         render: (text, record, index) => <span>{index + 1}</span>,
       },
       {
         title: '服务名称',
+        twidth:'150px',
         dataIndex: 'sourceName',
       },
       {
         title: '数据源类型',
+        twidth:'150px',
         dataIndex: 'sourceType',
       },
       {
         title: '服务类型',
+        twidth:'150px',
         dataIndex: 'interfaceType',
       },
       {
         title: '服务描述',
+        twidth:'150px',
         dataIndex: 'content',
       },
       {
         title: '操作',
+        twidth:'150px',
         render: (text, record, index) => {
           return (
             <Fragment>
@@ -509,11 +501,11 @@ export default class ResourceClassify extends PureComponent {
           />
           <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
-              <Form onSubmit={this.handleSearch} layout="inline">
+              <Form onSubmit={this.handleSearch}>
               <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
                 <Col md={8} sm={24}>
                   <FormItem>
-                    {getFieldDecorator('sourceName')(<Input placeholder="请输入数据源名称"/>)}
+                    {getFieldDecorator('sourceName')(<Input placeholder="请输入服务名称"/>)}
                   </FormItem>
                 </Col>
                 <Col md={2} sm={24}>

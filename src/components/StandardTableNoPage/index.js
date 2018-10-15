@@ -81,6 +81,7 @@ class StandardTable extends PureComponent {
 
     const rowSelection = {
       selectedRowKeys,
+      columnWidth:'50px',
       onChange: this.handleRowSelectChange,
       getCheckboxProps: record => ({
         disabled: record.disabled,
@@ -91,6 +92,7 @@ class StandardTable extends PureComponent {
         <Table
           loading={loading}
           rowKey={rowKey || 'key'}
+          size='small'
           rowSelection={rowSelection}
           dataSource={list}
           columns={columns}

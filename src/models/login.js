@@ -26,7 +26,7 @@ export default {
         // reloadAuthorized();
         localStorage.setItem('antd-pro-authority','admin');
         localStorage.setItem('token_str', response.token_type+response.access_token);
-        dispatch(routerRedux.push('/base/resourceClassify'));
+        dispatch(routerRedux.push('/'));
       }
       return
       if (response.status === 'ok') {

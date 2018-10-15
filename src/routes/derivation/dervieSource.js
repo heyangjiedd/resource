@@ -40,6 +40,7 @@ import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
 import styles from './dervieSource.less';
 import { Tabs } from 'antd/lib/index';
+import ARR from '../../assets/arr';
 
 const confirm = Modal.confirm;
 const FormItem = Form.Item;
@@ -70,14 +71,17 @@ const ChoiceList = Form.create()(props => {
   let columnsNoPage = [
     {
       title: '序号',
-      dataIndex: 'id',
+      width:'150px',
+      render: (text, record, index) => <span>{index + 1}</span>,
     },
     {
       title: '字段',
+      width:'150px',
       dataIndex: 'name',
     },
     {
       title: '备注',
+      width:'150px',
       dataIndex: 'tableDesc',
     },
 
@@ -123,72 +127,31 @@ const CreateForm = Form.create()(props => {
     selectHttpItem, httpItem, lifelist, handleStandardTableChange, selectChange, selectItem,
   } = props;
   const { getFieldDecorator } = form;
-  const options = [
-    {
-      value: '关系型数据库',
-      label: '关系型数据库',
-      children: [{
-        value: 'mysql', label: 'mysql',
-      }, {
-        value: 'oracle', label: 'oracle',
-      }, {
-        value: 'sqlserver', label: 'sqlserver',
-      }, {
-        value: 'db2', label: 'db2',
-      }],
-    }, {
-      value: '非关系型数据库',
-      label: '非关系型数据库',
-      children: [{
-        value: 'mongo', label: 'mongo',
-      }, {
-        value: 'hbase', label: 'hbase',
-      }],
-    }, {
-      value: 'API',
-      label: 'API',
-      children: [{
-        value: 'http', label: 'http',
-      }, {
-        value: 'https', label: 'https',
-      }, {
-        value: 'wsdl', label: 'wsdl',
-      }, {
-        value: 'rest', label: 'rest',
-      }],
-    }, {
-      value: '普通文件',
-      label: '普通文件',
-      children: [{
-        value: 'ftp', label: 'ftp',
-      }, {
-        value: 'sftp', label: 'sftp',
-      }, {
-        value: 'local', label: '本地磁盘',
-      }, {
-        value: 'share', label: '共享文件夹',
-      }],
-    }];
   const columns = [
     {
       title: '数据源名称',
+      width:'150px',
       dataIndex: 'sourceName',
     },
     {
       title: '数据源类型',
+      width:'150px',
       dataIndex: 'sourceType',
     },
     {
       title: '数据源描述',
+      width:'150px',
       dataIndex: 'content',
     },
     {
       title: '最近连接时间',
+      width:'150px',
       dataIndex: 'createTime',
       render: val => <span>{val ? moment(val).format('YYYY-MM-DD HH:mm:ss') : '-'}</span>,
     },
     {
       title: '连接状态',
+      width:'150px',
       dataIndex: 'linkStatus',
       render(val) {
         return <Badge status={val == 'on' ? 'success' : 'error'} text={val == 'on' ? '连通' : '未连通'}/>;
@@ -197,23 +160,33 @@ const CreateForm = Form.create()(props => {
   ];
   const columnsdataList = [
     {
+      title: '序号',
+      width:'150px',
+      render: (text, record, index) => <span>{index + 1}</span>,
+    },
+    {
       title: '表名',
+      width:'150px',
       dataIndex: 'name',
     },
     {
       title: '字段数',
+      width:'150px',
       dataIndex: 'fieldNum',
     },
     {
       title: '表描述',
+      width:'150px',
       dataIndex: 'description',
     },
     {
       title: '已选字段',
+      width:'150px',
       dataIndex: 'selectedFieldNum',
     },
     {
       title: '选择字段',
+      width:'150px',
       render: (text, record, index) => {
         return (
           <Fragment>
@@ -229,49 +202,60 @@ const CreateForm = Form.create()(props => {
   const columnscatalogItem = [
     {
       title: '信息项',
+      width:'150px',
       dataIndex: 'name',
     },
     {
       title: '信息项描述',
+      width:'150px',
       dataIndex: 'description',
     },
     {
       title: '信息项类型',
+      width:'150px',
       dataIndex: 'type',
     },
     {
       title: '信息项长度',
+      width:'150px',
       dataIndex: 'len',
     },
   ];
   const fgxxsjkcolumns = [
     {
       title: '序号',
-      dataIndex: 'id',
+      width:'150px',
+      render: (text, record, index) => <span>{index + 1}</span>,
     }, {
       title: '集合',
+      width:'150px',
       dataIndex: 'name',
 
     }];
   const filecolumns = [
     {
       title: '文件名称',
+      width:'150px',
       dataIndex: 'name',
     }, {
       title: '文件类型',
+      width:'150px',
       dataIndex: 'type',
     }];
   const tableColumnsNoPage = [
     {
       title: '序号',
+      width:'150px',
       render: (text, record, index) => <span>{index + 1}</span>,
     },
     {
       title: '表名',
+      width:'150px',
       dataIndex: 'name',
     },
     {
       title: '表描述',
+      width:'150px',
       dataIndex: 'description',
     },
   ];
@@ -335,7 +319,7 @@ const CreateForm = Form.create()(props => {
         if (choiceSelectedRows[0].sourceType === 'mysql' || choiceSelectedRows[0].sourceType === 'oracle' || choiceSelectedRows[0].sourceType === 'sqlserver'
           || choiceSelectedRows[0].sourceType === 'db2') {
           getListBuyId(choiceSelectedRows[0], 2);
-        } else if (choiceSelectedRows[0].sourceType === 'mongo' || choiceSelectedRows[0].sourceType === 'mongo' || choiceSelectedRows[0].sourceType === 'hbase') {
+        } else if (choiceSelectedRows[0].sourceType === 'mongo' || choiceSelectedRows[0].sourceType === 'hbase') {
           getListBuyId(choiceSelectedRows[0], 3);
         } else if (choiceSelectedRows[0].sourceType === 'http' || choiceSelectedRows[0].sourceType === 'https' || choiceSelectedRows[0].sourceType === 'wsdl'
           || choiceSelectedRows[0].sourceType === 'rest') {
@@ -440,7 +424,7 @@ const CreateForm = Form.create()(props => {
         </Row>
         <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
           <Col md={12} sm={24}>
-            <FormItem {...formItemLayout} label="数据源类型"><Cascader style={{ width: 100 + '%' }} options={options}
+            <FormItem {...formItemLayout} label="数据源类型"><Cascader style={{ width: 100 + '%' }} options={ARR.CASCADER}
                                                                   onChange={onChange}
                                                                   placeholder="请选择数据源/数据库"/>
             </FormItem>
@@ -652,93 +636,119 @@ const ResourceDetail = Form.create()(props => {
   const gxxsjkfieldcolumns = [
     {
       title: '字段名',
+      width:'150px',
       dataIndex: 'name',
     }, {
       title: '字段描述',
+      width:'150px',
       dataIndex: 'tableDesc',
     }, {
       title: '类型',
+      width:'150px',
       dataIndex: 'type',
     }, {
       title: '长度',
+      width:'150px',
       dataIndex: 'len',
     }];
   const apifieldcolumns = [
     {
       title: '字段名称',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '字段别名',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '字段中文名',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '字段描述',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '来源数据表',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '来源数据库',
+      width:'150px',
       dataIndex: 'content',
     }];
   const apilogcolumns = [
     {
       title: '服务调用用户',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '最近一次接口调用开始时间',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '最近一次接口调用结束时间',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '累积调用次数',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '调用方式',
+      width:'150px',
       dataIndex: 'content',
     },
   ];
   const filelogcolumns = [
     {
       title: '文件名称',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '服务调用用户',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '最近一次数据调用开始时间',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '最近一次数据调用结束时间',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '累积调用次数',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '调用方式',
+      width:'150px',
       dataIndex: 'content',
     }];
   const fgxxsjkdatacolumns = [
     {
       title: '集合名称',
+      width:'150px',
       dataIndex: 'name',
     }, {
       title: '所属数据源',
+      width:'150px',
       dataIndex: 'description',
     },
   ];
   const lifelistcolumns = [
     {
       title: '文件名称',
+      width:'150px',
       dataIndex: 'name',
     }, {
       title: '文件类型',
+      width:'150px',
       dataIndex: 'type',
     }, {
       title: '文件描述',
+      width:'150px',
       dataIndex: 'description',
     },
   ];
@@ -754,7 +764,7 @@ const ResourceDetail = Form.create()(props => {
       width={900}
       onCancel={() => handleModalVisible()}
     >
-      {detailType == 1 ? <div><Tabs defaultActiveKey="2">
+      {detailType == 1 ? <div><Tabs defaultActiveKey="1">
         <TabPane tab="数据详情" key="1">
           <DescriptionList size="large" title="过滤条件" style={{ marginBottom: 0 }}>
           </DescriptionList>
@@ -1495,26 +1505,32 @@ export default class ResourceClassify extends PureComponent {
     const columns = [
       {
         title: '序号',
+        width:'150px',
         render: (text, record, index) => <span>{index + 1}</span>,
       },
       {
         title: '数据名称',
+        width:'150px',
         dataIndex: 'name',
       },
       {
         title: '所属数据源',
+        width:'150px',
         dataIndex: 'dataSourceName',
       },
       {
         title: '数据源类型',
+        width:'150px',
         dataIndex: 'dataSourceType',
       },
       {
         title: '数据来源',
+        width:'150px',
         dataIndex: 'dataSourceId',
       },
       {
         title: '操作',
+        width:'150px',
         render: (text, record, index) => {
           return (
             <Fragment>

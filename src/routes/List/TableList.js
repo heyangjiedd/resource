@@ -53,7 +53,7 @@ const CreateForm = Form.create()(props => {
     >
       <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="描述">
         {form.getFieldDecorator('desc', {
-          rules: [{ required: true, message: 'Please input some description...' }],
+          rules: [{ required: true, message: '请输入...' }],
         })(<Input placeholder="请输入"/>)}
       </FormItem>
     </Modal>
@@ -93,7 +93,7 @@ const CatlogDetail = Form.create()(props => {
         <Col span={24}>
           <FormItem labelCol={{ span: 4 }} wrapperCol={{ span: 20 }} label="目录分类">
             {form.getFieldDecorator('mlfl', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
@@ -102,14 +102,14 @@ const CatlogDetail = Form.create()(props => {
         <Col span={12}>
           <FormItem {...formItemLayout} label="信息资源名称">
             {form.getFieldDecorator('xxzymc', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
         <Col span={12}>
           <FormItem {...formItemLayout} label="信息资源名称">
             {form.getFieldDecorator('xxzybm', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
@@ -118,14 +118,14 @@ const CatlogDetail = Form.create()(props => {
         <Col span={12}>
           <FormItem {...formItemLayout} label="资源提供方">
             {form.getFieldDecorator('zttgf', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
         <Col span={12}>
           <FormItem {...formItemLayout} label="资源提供方">
             {form.getFieldDecorator('zttgfbm', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
@@ -134,7 +134,7 @@ const CatlogDetail = Form.create()(props => {
       <Col span={24}>
         <FormItem labelCol={{ span: 4 }} wrapperCol={{ span: 20 }} label="关联资源分类">
           {form.getFieldDecorator('glzyfl', {
-            rules: [{ required: true, message: 'Please input some description...' }],
+            rules: [{ required: true, message: '请输入...' }],
           })(<Input disabled={true} placeholder="请输入"/>)}
         </FormItem>
       </Col>
@@ -143,21 +143,21 @@ const CatlogDetail = Form.create()(props => {
         <Col span={12}>
           <FormItem {...formItemLayout} label="所属资源格式">
             {form.getFieldDecorator('sszygs', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
         <Col span={6}>
           <FormItem labelCol={{ span: 16 }} wrapperCol={{ span: 8 }} label="涉密标识">
             {form.getFieldDecorator('smbs', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
         <Col span={6}>
           <FormItem labelCol={{ span: 8 }} wrapperCol={{ span: 16}} label="周期">
             {form.getFieldDecorator('zq', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
@@ -166,21 +166,21 @@ const CatlogDetail = Form.create()(props => {
         <Col span={6}>
           <FormItem labelCol={{ span: 16 }} wrapperCol={{ span: 8 }} label="共享类型">
             {form.getFieldDecorator('gxlx', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
         <Col span={6}>
           <FormItem labelCol={{ span: 12 }} wrapperCol={{ span: 12 }} label="共享方式">
             {form.getFieldDecorator('gxff', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
         <Col span={12}>
           <FormItem {...formItemLayout} label="是否开放">
             {form.getFieldDecorator('sfkf', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
@@ -189,14 +189,14 @@ const CatlogDetail = Form.create()(props => {
         <Col span={12}>
           <FormItem {...formItemLayout} label="共享条件">
             {form.getFieldDecorator('gxtj', {
-              rules: [{ required: true, message: 'Please input some description...', },],
+              rules: [{ required: true, message: '请输入...', },],
             })(<TextArea disabled={true} placeholder="请输入" rows={4}/>,)}
           </FormItem>
         </Col>
         <Col span={12}>
           <FormItem {...formItemLayout} label="开放条件">
             {form.getFieldDecorator('kftj', {
-              rules: [{ required: true, message: 'Please input some description...', },],
+              rules: [{ required: true, message: '请输入...', },],
             })(<TextArea disabled={true} placeholder="请输入" rows={4}/>,)}
           </FormItem>
         </Col>
@@ -210,14 +210,14 @@ const CatlogDetail = Form.create()(props => {
         <Col span={12}>
           <FormItem {...formItemLayout} label="数据存储总量(G)">
             {form.getFieldDecorator('sjcczl', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
         <Col span={12}>
           <FormItem {...formItemLayout} label="结构化信息(万)">
             {form.getFieldDecorator('jghxx', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
@@ -226,14 +226,14 @@ const CatlogDetail = Form.create()(props => {
         <Col span={12}>
           <FormItem {...formItemLayout} label="已共享数据量(G)">
             {form.getFieldDecorator('ygxsjl', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
         <Col span={12}>
           <FormItem {...formItemLayout} label="已共享结构化(万)">
             {form.getFieldDecorator('ygxjgh', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
@@ -242,14 +242,14 @@ const CatlogDetail = Form.create()(props => {
         <Col span={12}>
           <FormItem {...formItemLayout} label="已放开数据量(G)">
             {form.getFieldDecorator('ykfsjl', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
         <Col span={12}>
           <FormItem {...formItemLayout} label="已开放结构化(万)">
             {form.getFieldDecorator('ykfjgh', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>

@@ -39,6 +39,7 @@ import TagSelect from 'components/TagSelect';
 import StandardFormRow from 'components/StandardFormRow';
 import StandardTableNothingNoCloums from 'components/StandardTableNothingNoCloums';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
+import ARR from '../../assets/arr';
 
 import styles from './resource_db.less';
 
@@ -72,6 +73,7 @@ const TestForm = Form.create()(props => {
       destroyOnClose={true}
       onCancel={() => handleModalVisible()}
     >
+      <span>{testList.length == selectedRows.length?'测试完毕':'测试中...'}</span>
       <Row>
         <Progress percent={percent}/>
       </Row>
@@ -91,9 +93,9 @@ const TestForm = Form.create()(props => {
           </div>
         </Col>
       </Row>
-      <Row>
+      <Row  style={{marginTop:10}}>
         <Col xl={16} lg={12} md={12} sm={24} xs={24}>
-          <Button type="primary" onClick={testHandleAdd}>重试</Button>
+          <Button onClick={testHandleAdd}>重试</Button>
         </Col>
       </Row>
     </Modal>
@@ -137,26 +139,33 @@ const ResourceDetail = Form.create()(props => {
   const gxxsjkfieldcolumns = [
     {
       title: '字段名',
+      width:'150px',
       dataIndex: 'name',
     }, {
       title: '字段描述',
+      width:'150px',
       dataIndex: 'tableDesc',
     }, {
       title: '类型',
+      width:'150px',
       dataIndex: 'type',
     }, {
       title: '长度',
+      width:'150px',
       dataIndex: 'len',
     }];
   const fgxxsjkdatacolumns = [
     {
       title: 'Key',
+      width:'150px',
       dataIndex: 'key',
     }, {
       title: 'Value',
+      width:'150px',
       dataIndex: 'value',
     }, {
       title: 'Type',
+      width:'150px',
       dataIndex: 'type',
     },
   ];
@@ -172,7 +181,7 @@ const ResourceDetail = Form.create()(props => {
       onCancel={() => handleModalVisible()}
     >
       {detailType == 1 ?
-        <div><Tabs defaultActiveKey="2">
+        <div><Tabs defaultActiveKey="1" >
           <TabPane tab="数据详情" key="1">
             <DescriptionList size="large" title="过滤条件" style={{ marginBottom: 0 }}>
             </DescriptionList>
@@ -491,6 +500,10 @@ export default class ResourceClassify extends PureComponent {
 
   testHandleAdd = fields => {
     const { dispatch } = this.props;
+    if(this.state.selectedRows.length <= 0){
+      message.error('请先选择数据')
+      return
+    }
     // 之前信息的置空
     this.setState({
       testList: [],
@@ -553,7 +566,7 @@ export default class ResourceClassify extends PureComponent {
   getFileDetailHandle = (index, flag) => {
     const { dispatch } = this.props;
     itemData = index;
-    if (listItemData.sourceType == 'hbase' || listItemData.sourceType == 'mongo') {
+    if (listItemData.sourceType == 'hbase' || listItemData.sourceType == 'MongoDB') {
       this.setState({
         detailType: 2,
       });
@@ -625,14 +638,17 @@ export default class ResourceClassify extends PureComponent {
     const columns = [
       {
         title: '数据源名称',
+        width:'150px',
         dataIndex: 'sourceName',
       },
       {
         title: '数据源类型',
+        width:'150px',
         dataIndex: 'sourceType',
       },
       {
         title: '所属组织机构',
+        width:'150px',
         dataIndex: 'orgId',
         render(val) {
           let org = orgList.filter(r => {
@@ -643,6 +659,7 @@ export default class ResourceClassify extends PureComponent {
       },
       {
         title: '所属资源分类',
+        width:'150px',
         dataIndex: 'resourceId',
         render(val) {
           let classfy = treeData.filter(r => {
@@ -653,11 +670,13 @@ export default class ResourceClassify extends PureComponent {
       },
       {
         title: '最近连接时间',
+        width:'150px',
         dataIndex: 'createTime',
         render: val => <span>{val ? moment(val).format('YYYY-MM-DD HH:mm:ss') : '-'}</span>,
       },
       {
         title: '连通状态',
+        width:'150px',
         dataIndex: 'linkStatus',
         render(val) {
           return <Badge status={val == 'on' ? 'success' : 'error'} text={val == 'on' ? '连通' : '未连通'}/>;
@@ -665,7 +684,7 @@ export default class ResourceClassify extends PureComponent {
       },
       {
         title: '操作',
-        width: 10,
+        width:'100px',
         render: (text, record, index) => {
           return (
             <Fragment>
@@ -680,34 +699,42 @@ export default class ResourceClassify extends PureComponent {
     const detailColumns = [
       {
         title: '序号',
+        width:'150px',
         render: (text, record, index) => <span>{index + 1}</span>,
       },
       {
         title: '表名',
+        width:'150px',
         dataIndex: 'name',
       },
       {
         title: '表描述',
+        width:'150px',
         dataIndex: 'description',
       },
       {
         title: '所属数据源',
+        width:'150px',
         render: (text, record, index) => <span>{listItemData.sourceName}</span>,
       },
       {
         title: '数据源类型',
+        width:'150px',
         render: (text, record, index) => <span>{listItemData.sourceType}</span>,
       },
       {
         title: '表类型',
+        width:'150px',
         dataIndex: 'type',
       },
       {
         title: '字段数',
+        width:'150px',
         dataIndex: 'selectedFieldNum',
       },
       {
         title: '操作',
+        width:'150px',
         render: (text, record, index) => {
           return (
             <Fragment>
@@ -744,34 +771,6 @@ export default class ResourceClassify extends PureComponent {
       detailType: detailType,
       handleModalVisible: this.handleModalVisible,
     };
-    const options = [{
-      value: 'all',
-      label: '全选',
-    }, {
-      value: '关系型数据库',
-      label: '关系型数据库',
-      children: [{
-        value: 'all', label: '全选',
-      }, {
-        value: 'mysql', label: 'mysql',
-      }, {
-        value: 'oracle', label: 'oracle',
-      }, {
-        value: 'sqlserver', label: 'sqlserver',
-      }, {
-        value: 'db2', label: 'db2',
-      }],
-    }, {
-      value: '非关系型数据库',
-      label: '非关系型数据库',
-      children: [{
-        value: 'all', label: '全选',
-      }, {
-        value: 'mongo', label: 'mongo',
-      }, {
-        value: 'hbase', label: 'hbase',
-      }],
-    }];
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },
@@ -816,7 +815,7 @@ export default class ResourceClassify extends PureComponent {
             </div>
           </Card> : <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
-              <Form onSubmit={this.handleSearch}>
+              <Form onSubmit={this.handleSearch} >
                 <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
                   <Col md={6} sm={24}>
                     <FormItem>
@@ -827,7 +826,7 @@ export default class ResourceClassify extends PureComponent {
                   </Col>
                   <Col md={8} sm={24}>
                     <FormItem {...formItemLayout} label="数据源类型">
-                      {getFieldDecorator('sourceType')(<Cascader style={{ width: 100 + '%' }} options={options}
+                      {getFieldDecorator('sourceType')(<Cascader style={{ width: 100 + '%' }} options={ARR.CASCADERTWO}
                                                                  placeholder="请选择数据源/数据库"/>)}
                     </FormItem>
                   </Col>

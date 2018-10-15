@@ -25,6 +25,7 @@ import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
 import styles from './resourceClassify.less';
 
+const confirm = Modal.confirm;
 const FormItem = Form.Item;
 const { Option } = Select;
 const { TextArea } = Input;
@@ -84,28 +85,23 @@ const CreateForm = Form.create()(props => {
 
       {itemDataStatus==3||itemDataStatus==4?'':<FormItem {...formItemLayout} label="父级分类名称">
         {form.getFieldDecorator('parentName', {
-          rules: [{ message: 'Please input some description...' }],
+          rules: [{ message: '请输入父级分类名称' }],
           initialValue: listItemData.parentName,
-        })(<Input disabled placeholder="请输入"/>)}
+        })(<Input disabled placeholder="请输入父级分类名称"/>)}
       </FormItem>}
       <FormItem {...formItemLayout} label="分类名称">
         {form.getFieldDecorator('name', {
-          rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.name,
-        })(<Input disabled={itemDataStatus === 2} placeholder="请输入"/>)}
+          rules: [{ required: true, message: '请输入分类名称' }], initialValue: listItemData.name,
+        })(<Input disabled={itemDataStatus === 2} placeholder="请输入分类名称"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="排序号">
         {form.getFieldDecorator('sort', {
-          rules: [{ required: true, message: 'Please input some description...' }], initialValue: listItemData.sort,
-        })(<Input disabled={itemDataStatus === 2} placeholder="请输入"/>)}
+          rules: [{ required: true, message: '请输入排序号' },{pattern:/^[1-9]+\d*$/,message:'输入正整数'}], initialValue: listItemData.sort,
+        })(<Input type='number' disabled={itemDataStatus === 2} placeholder="请输入排序号"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="分类描述">
         {form.getFieldDecorator('description', {
-          rules: [
-            {
-              required: true,
-              message: '请输入分类描述',
-            },
-          ], initialValue: listItemData.description,
+           initialValue: listItemData.description,
         })(
           <TextArea
             style={{ minHeight: 32 }}
@@ -194,28 +190,36 @@ export default class ResourceClassify extends PureComponent {
       dispatch({
         type: 'classify/update',
         payload: { ...listItemData, ...fields },
-        callback: () => {
-         this.fetchAll()
+        callback: (res) => {
+          if(res=='success'){
+            message.success('修改成功');
+            this.fetchAll();
+          }else{
+            message.error('修改失败');
+          }
         },
       });
-      message.success('修改成功');
     } else {
       let select = treeData.filter(r => {
         return treeSelect == r.id;
       });
       if (itemDataStatus == 3) {
-        treeSelect = select[0].parentId;
+        treeSelect = select[0]?select[0].parentId:null;
       } else {
-        treeSelect = select[0].id;
+        treeSelect = select[0]?select[0].id:null;
       }
       dispatch({
         type: 'classify/add',
         payload: { ...fields, parentId: treeSelect },
-        callback: () => {
-          this.fetchAll()
+        callback: (res) => {
+          if(res=='success'){
+            message.success('添加成功');
+            this.fetchAll();
+          }else{
+            message.error('添加失败');
+          }
         },
       });
-      message.success('添加成功');
     }
     this.setState({
       modalVisible: false,
@@ -224,6 +228,12 @@ export default class ResourceClassify extends PureComponent {
   handleDelete = () => {
     const { dispatch } = this.props;
     if (this.state.selectedRows.length > 0) {
+      confirm({
+        title: '确定删除选中数据?',
+        content: '删除数据不可恢复，请悉知！！！',
+        okText: '确定',
+        cancelText: '取消',
+        onOk:()=> {
       this.state.selectedRows.forEach((item, index) => {
         if (index === this.state.selectedRows.length - 1) {
           dispatch({
@@ -247,6 +257,12 @@ export default class ResourceClassify extends PureComponent {
           });
         }
       });
+        },
+        onCancel:()=> {
+        },
+      });
+    }else{
+      message.error('请先选择数据')
     }
   };
   handleTree = (data, e) => {
@@ -265,27 +281,32 @@ export default class ResourceClassify extends PureComponent {
     };
     const columns = [
       {
-        title: '序号',
-        render: (text, record, index) => <span>{index + 1}</span>,
+        title: '排序号',
+        width:'150px',
+        dataIndex: 'sort',
       },
       {
         title: '分类名称',
+        width:'150px',
         dataIndex: 'name',
       },
       {
         title: '分类结构',
+        width:'150px',
         render: (text, record, index) => {
           return (
-            <span>{(text.parentName ? text.parentName : '' + '>') + text.name ? text.name : ''}</span>
+            <div title={text.parentName} style={{textOverflow:'hidden'}}>{(text.parentName ? text.parentName : '' + '>') + text.name ? text.name : ''}</div>
           );
         },
       },
       {
         title: '分类描述',
+        width:'150px',
         dataIndex: 'description',
       },
       {
         title: '操作',
+        width:'150px',
         render: (text, record, index) => {
           return (
             <Fragment>

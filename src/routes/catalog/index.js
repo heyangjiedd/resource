@@ -38,6 +38,7 @@ import StandardTableNothingNoCloums from 'components/StandardTableNothingNoCloum
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
 import styles from './index.less';
+import ARR from '../../assets/arr';
 
 const FormItem = Form.Item;
 const { Option } = Select;
@@ -53,7 +54,7 @@ let itemDataStatus = 0;
 let listItemData = {};//列表选择
 let modalListData = {};//弹窗第一页选择
 let choiseListItemData = {};//弹窗中弹窗选择
-let searchValue = {resourceId:'',relationDb:'',unrelationDb:'',api:'',files:""} //关联查询
+let searchValue = { resourceId: '', relationDb: '', unrelationDb: '', api: '', files: '' }; //关联查询
 
 const CatlogDetail = Form.create()(props => {
   const { modalVisible, form, handleModalVisible, loading, data, columns } = props;
@@ -89,8 +90,8 @@ const CatlogDetail = Form.create()(props => {
         <Col span={24}>
           <FormItem labelCol={{ span: 4 }} wrapperCol={{ span: 20 }} label="目录分类">
             {form.getFieldDecorator('mlfl', {
-              rules: [{ required: true, message: 'Please input some description...' }],
-            })(<Input disabled={true} placeholder="请输入"/>)}
+              rules: [{ required: true, message: '请输入目录分类' }],
+            })(<Input disabled={true} placeholder="请输入目录分类"/>)}
           </FormItem>
         </Col>
       </Row>
@@ -98,15 +99,15 @@ const CatlogDetail = Form.create()(props => {
         <Col span={12}>
           <FormItem {...formItemLayout} label="信息资源名称">
             {form.getFieldDecorator('xxzymc', {
-              rules: [{ required: true, message: 'Please input some description...' }],
-            })(<Input disabled={true} placeholder="请输入"/>)}
+              rules: [{ required: true, message: '请输入信息资源名称' }],
+            })(<Input disabled={true} placeholder="请输入信息资源名称"/>)}
           </FormItem>
         </Col>
         <Col span={12}>
           <FormItem {...formItemLayout} label="信息资源名称">
             {form.getFieldDecorator('xxzybm', {
-              rules: [{ required: true, message: 'Please input some description...' }],
-            })(<Input disabled={true} placeholder="请输入"/>)}
+              rules: [{ required: true, message: '请输入信息资源名称' }],
+            })(<Input disabled={true} placeholder="请输入信息资源名称"/>)}
           </FormItem>
         </Col>
       </Row>
@@ -114,14 +115,14 @@ const CatlogDetail = Form.create()(props => {
         <Col span={12}>
           <FormItem {...formItemLayout} label="资源提供方">
             {form.getFieldDecorator('zttgf', {
-              rules: [{ required: true, message: 'Please input some description...' }],
-            })(<Input disabled={true} placeholder="请输入"/>)}
+              rules: [{ required: true, message: '请输入资源提供方' }],
+            })(<Input disabled={true} placeholder="请输入资源提供方"/>)}
           </FormItem>
         </Col>
         <Col span={12}>
           <FormItem {...formItemLayout} label="资源提供方">
             {form.getFieldDecorator('zttgfbm', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
@@ -130,7 +131,7 @@ const CatlogDetail = Form.create()(props => {
         <Col span={24}>
           <FormItem labelCol={{ span: 4 }} wrapperCol={{ span: 20 }} label="关联资源分类">
             {form.getFieldDecorator('glzyfl', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
@@ -139,21 +140,21 @@ const CatlogDetail = Form.create()(props => {
         <Col span={12}>
           <FormItem {...formItemLayout} label="所属资源格式">
             {form.getFieldDecorator('sszygs', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
         <Col span={6}>
           <FormItem labelCol={{ span: 16 }} wrapperCol={{ span: 8 }} label="涉密标识">
             {form.getFieldDecorator('smbs', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
         <Col span={6}>
           <FormItem labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} label="周期">
             {form.getFieldDecorator('zq', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
@@ -162,21 +163,21 @@ const CatlogDetail = Form.create()(props => {
         <Col span={6}>
           <FormItem labelCol={{ span: 16 }} wrapperCol={{ span: 8 }} label="共享类型">
             {form.getFieldDecorator('gxlx', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
         <Col span={6}>
           <FormItem labelCol={{ span: 12 }} wrapperCol={{ span: 12 }} label="共享方式">
             {form.getFieldDecorator('gxff', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
         <Col span={12}>
           <FormItem {...formItemLayout} label="是否开放">
             {form.getFieldDecorator('sfkf', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
@@ -185,14 +186,14 @@ const CatlogDetail = Form.create()(props => {
         <Col span={12}>
           <FormItem {...formItemLayout} label="共享条件">
             {form.getFieldDecorator('gxtj', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<TextArea disabled={true} placeholder="请输入" rows={4}/>)}
           </FormItem>
         </Col>
         <Col span={12}>
           <FormItem {...formItemLayout} label="开放条件">
             {form.getFieldDecorator('kftj', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<TextArea disabled={true} placeholder="请输入" rows={4}/>)}
           </FormItem>
         </Col>
@@ -206,14 +207,14 @@ const CatlogDetail = Form.create()(props => {
         <Col span={12}>
           <FormItem {...formItemLayout} label="数据存储总量(G)">
             {form.getFieldDecorator('sjcczl', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
         <Col span={12}>
           <FormItem {...formItemLayout} label="结构化信息(万)">
             {form.getFieldDecorator('jghxx', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
@@ -222,14 +223,14 @@ const CatlogDetail = Form.create()(props => {
         <Col span={12}>
           <FormItem {...formItemLayout} label="已共享数据量(G)">
             {form.getFieldDecorator('ygxsjl', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
         <Col span={12}>
           <FormItem {...formItemLayout} label="已共享结构化(万)">
             {form.getFieldDecorator('ygxjgh', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
@@ -238,14 +239,14 @@ const CatlogDetail = Form.create()(props => {
         <Col span={12}>
           <FormItem {...formItemLayout} label="已放开数据量(G)">
             {form.getFieldDecorator('ykfsjl', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
         <Col span={12}>
           <FormItem {...formItemLayout} label="已开放结构化(万)">
             {form.getFieldDecorator('ykfjgh', {
-              rules: [{ required: true, message: 'Please input some description...' }],
+              rules: [{ required: true, message: '请输入...' }],
             })(<Input disabled={true} placeholder="请输入"/>)}
           </FormItem>
         </Col>
@@ -273,14 +274,17 @@ const ChoiceList = Form.create()(props => {
   let columnsNoPage = [
     {
       title: '序号',
-      dataIndex: 'id',
+      width:'150px',
+      render: (text, record, index) => <span>{index + 1}</span>,
     },
     {
       title: '字段',
+      width:'150px',
       dataIndex: 'name',
     },
     {
       title: '备注',
+      width:'150px',
       dataIndex: 'tableDesc',
     },
 
@@ -323,104 +327,68 @@ const CreateForm = Form.create()(props => {
   const {
     modalVisible, form, handleAdd, handleModalVisible, data, handleItem, item, catalogItem, dataList, handleItemSearch,
     searchHandle, getListBuyId, choiseFeild, choiseList, type, handleType, choiceFeild, choiceFeildCount, catalogItemChange,
-    selectHttpItem, httpItem, lifelist,handleStandardTableChange
+    selectHttpItem, httpItem, lifelist, handleStandardTableChange,
   } = props;
   const { getFieldDecorator } = form;
-  const options = [
-    {
-    value: '关系型数据库',
-    label: '关系型数据库',
-    children: [{
-      value: 'mysql', label: 'mysql',
-    }, {
-      value: 'oracle', label: 'oracle',
-    }, {
-      value: 'sqlserver', label: 'sqlserver',
-    }, {
-      value: 'db2', label: 'db2',
-    }],
-  }, {
-    value: '非关系型数据库',
-    label: '非关系型数据库',
-    children: [{
-      value: 'mongo', label: 'mongo',
-    }, {
-      value: 'hbase', label: 'hbase',
-    }],
-  }, {
-    value: 'API',
-    label: 'API',
-    children: [{
-      value: 'http', label: 'http',
-    }, {
-      value: 'https', label: 'https',
-    }, {
-      value: 'wsdl', label: 'wsdl',
-    }, {
-      value: 'rest', label: 'rest',
-    }],
-  }, {
-    value: '普通文件',
-    label: '普通文件',
-    children: [{
-      value: 'ftp', label: 'ftp',
-    }, {
-      value: 'sftp', label: 'sftp',
-    }, {
-      value: 'local', label: '本地磁盘',
-    }, {
-      value: 'share', label: '共享文件夹',
-    }],
-  }];
   const columns = [
     {
       title: '数据源名称',
+      width:'150px',
       dataIndex: 'sourceName',
     },
     {
       title: '数据源类型',
+      width:'150px',
       dataIndex: 'sourceType',
     },
     {
       title: '数据源描述',
+      width:'150px',
       dataIndex: 'content',
     },
     {
       title: '最近连接时间',
+      width:'150px',
       dataIndex: 'createTime',
       render: val => <span>{val ? moment(val).format('YYYY-MM-DD HH:mm:ss') : '-'}</span>,
     },
     {
       title: '连接状态',
+      width:'150px',
       dataIndex: 'linkStatus',
       render(val) {
-        return <Badge status={val ? 'success' : 'error'} text={val || '未连通'}/>;
+        return <Badge status={val == 'on' ? 'success' : 'error'} text={val == 'on' ? '连通' : '未连通'}/>;
       },
     },
   ];
   const columnsdataList = [
-    // {
-    //   title: '序号',
-    //   dataIndex: 'no',
-    // },
+    {
+      title: '序号',
+      render: (text, record, index) => <span>{index + 1}</span>,
+    },
     {
       title: '表名',
+      width:'150px',
       dataIndex: 'name',
     },
     {
       title: '字段数',
+      width:'150px',
       dataIndex: 'fieldNum',
     },
     {
       title: '表描述',
+      width:'150px',
       dataIndex: 'description',
     },
     {
       title: '已选字段',
+      width:'150px',
       dataIndex: 'selectedFieldNum',
     },
     {
       title: '选择字段',
+      width:'150px',
       render: (text, record, index) => {
         return (
           <Fragment>
@@ -434,80 +402,97 @@ const CreateForm = Form.create()(props => {
     },
   ];
   const columnscatalogItem = [
-    // {
-    //   title: '序号',
-    //   dataIndex: 'no',
-    // },
+    {
+      title: '序号',
+      render: (text, record, index) => <span>{index + 1}</span>,
+    },
     {
       title: '信息项',
+      width:'150px',
       dataIndex: 'name',
     },
     {
       title: '信息项描述',
+      width:'150px',
       dataIndex: 'description',
     },
     {
       title: '信息项类型',
+      width:'150px',
       dataIndex: 'type',
     },
     {
       title: '信息项长度',
+      width:'150px',
       dataIndex: 'len',
     },
   ];
   const filecolumns = [
     {
-    title: '文件名称',
-    dataIndex: 'name',
-  }, {
-    title: '文件类型',
-    dataIndex: 'type',
-  }];
+      title: '文件名称',
+      width:'150px',
+      dataIndex: 'name',
+    }, {
+      title: '文件类型',
+      width:'150px',
+      dataIndex: 'type',
+    }];
   const fgxxsjkcolumns = [
     {
-    title: '序号',
-    dataIndex: 'id',
-  }, {
-    title: '集合',
-    dataIndex: 'name',
-  }];
+      title: '序号',
+      width: '150px',
+      render: (text, record, index) => <span>{index + 1}</span>,
+    }, {
+      title: '集合',
+      width: '150px',
+      dataIndex: 'name',
+    }];
   const columnscatalogfeild = [
     {
-    title: '信息源',
-    dataIndex: 'name',
-  }, {
-    title: '信息源描述',
-    dataIndex: 'description',
-  }, {
-    title: '信息源类型',
-    dataIndex: 'type',
-  }, {
-    title: '信息源长度',
-    dataIndex: 'len',
-  }, {
-    title: '字段名',
-    dataIndex: 'feild_name',
-    render: (text, record, index) => {
-      return <Select placeholder={'请选择'} style={{ width: 120 }} getPopupContainer={triggerNode => triggerNode.parentNode} onSelect={(select, current) => {
-        save(text, record, index, select, current);
-      }}>
-        {choiceFeild.map(item => {
-          return (
-            <Option title={item.name} value={item.id}>{item.name}</Option>
-          );
-        })}
-      </Select>;
+      title: '信息源',
+      width:'150px',
+      dataIndex: 'name',
+    }, {
+      title: '信息源描述',
+      width:'150px',
+      dataIndex: 'description',
+    }, {
+      title: '信息源类型',
+      width:'150px',
+      dataIndex: 'type',
+    }, {
+      title: '信息源长度',
+      width:'150px',
+      dataIndex: 'len',
+    }, {
+      title: '字段名',
+      width:'150px',
+      dataIndex: 'feild_name',
+      render: (text, record, index) => {
+        return <Select placeholder={'请选择'} style={{ width: 120 }}
+                       getPopupContainer={triggerNode => triggerNode.parentNode} onSelect={(select, current) => {
+          save(text, record, index, select, current);
+        }}>
+          {choiceFeild.map(item => {
+            return (
+              <Option title={item.name} value={item.id}>{item.name}</Option>
+            );
+          })}
+        </Select>;
+      },
+    }, {
+      title: '字段描述',
+      width:'150px',
+      dataIndex: 'feild_description',
+    }, {
+      title: '字段类型',
+      width:'150px',
+      dataIndex: 'feild_type',
+    }, {
+      title: '字段长度',
+      width:'150px',
+      dataIndex: 'feild_len',
     },
-  }, {
-    title: '字段描述',
-    dataIndex: 'feild_description',
-  }, {
-    title: '字段类型',
-    dataIndex: 'feild_type',
-  }, {
-    title: '字段长度',
-    dataIndex: 'feild_len',
-  },
   ];
   let selectedRows = [];
   let choiceSelectedRows = [];
@@ -532,6 +517,10 @@ const CreateForm = Form.create()(props => {
     if (item == 2) {
       handleAdd(catalogItem, setTableRows);
     } else if (item == 3) {
+      if(fgxxsjkHandleSelectRows.length <= 0){
+        message.error('请先勾选数据');
+        return
+      }
       handleAdd(fgxxsjkHandleSelectRows);
     } else if (item == 4) {
       handleAdd(fileTableSelectedRows);
@@ -554,19 +543,20 @@ const CreateForm = Form.create()(props => {
     catalogItemChange(record);
   };
   const cancel = () => {
-    handleItem(1,true);
+    handleItem(1, true);
     handleModalVisible(false);
   };
   const firstFooter = (<Row>
     <Col md={24} sm={24}>
       <Button type="primary" onClick={() => {
         if (!choiceSelectedRows || choiceSelectedRows.length == 0) {
+          message.error('请先勾选数据');
           return;
         }
         if (choiceSelectedRows[0].sourceType === 'mysql' || choiceSelectedRows[0].sourceType === 'oracle' || choiceSelectedRows[0].sourceType === 'sqlserver'
           || choiceSelectedRows[0].sourceType === 'db2') {
           getListBuyId(choiceSelectedRows[0], 2);
-        } else if (choiceSelectedRows[0].sourceType === 'mongo' || choiceSelectedRows[0].sourceType === 'mongo' || choiceSelectedRows[0].sourceType === 'hbase') {
+        } else if (choiceSelectedRows[0].sourceType === 'mongo' || choiceSelectedRows[0].sourceType === 'hbase') {
           getListBuyId(choiceSelectedRows[0], 3);
         } else if (choiceSelectedRows[0].sourceType === 'http' || choiceSelectedRows[0].sourceType === 'https' || choiceSelectedRows[0].sourceType === 'wsdl'
           || choiceSelectedRows[0].sourceType === 'rest') {
@@ -606,7 +596,7 @@ const CreateForm = Form.create()(props => {
     if (index[1] === 'mysql' || index[1] === 'oracle' || index[1] === 'sqlserver'
       || index[1] === 'db2') {
       searchValue.relationDb = index[1];
-    } else if (index[1] === 'mongo' ||  index[1] === 'hbase') {
+    } else if (index[1] === 'mongo' || index[1] === 'hbase') {
       searchValue.unrelationDb = index[1];
     } else if (index[1] === 'http' || index[1] === 'https' || index[1] === 'wsdl'
       || index[1] === 'rest') {
@@ -650,6 +640,7 @@ const CreateForm = Form.create()(props => {
       title="目数关联"
       visible={modalVisible}
       width={900}
+      destroyOnClose={true}
       footer={item === 1 ? firstFooter : secondFooter}
       onOk={handleItem}
       onCancel={cancel}
@@ -666,7 +657,7 @@ const CreateForm = Form.create()(props => {
         </Row>
         <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
           <Col md={12} sm={24}>
-            <FormItem {...formItemLayout} label="数据源类型"><Cascader style={{ width: 100 + '%' }} options={options}
+            <FormItem {...formItemLayout} label="数据源类型"><Cascader style={{ width: 100 + '%' }} options={ARR.CASCADER}
                                                                   onChange={onChange}
                                                                   placeholder="请选择数据源/数据库"/>
             </FormItem>
@@ -691,7 +682,7 @@ const CreateForm = Form.create()(props => {
         columns={columns}
         onSelectRow={handleSelectRows}
         onChange={handleStandardTableChange}
-        /></div> : item === 2 ? <div>
+      /></div> : item === 2 ? <div>
         {/*<Row gutter={{ md: 8, lg: 24, xl: 48 }}>*/}
         {/*<Col md={12} sm={24}>*/}
         {/*<FormItem {...formItemLayout} label="新增类型">*/}
@@ -737,14 +728,14 @@ const CreateForm = Form.create()(props => {
           </Col>
         </Row>
         {/*<Row>*/}
-          {/*<Col md={12} sm={24}>*/}
-            {/*<FormItem {...formItemLayout} label="请选择表/视图">*/}
-              {/*<RadioGroup onChange={this.onChange}>*/}
-                {/*<Radio value='table'>表</Radio>*/}
-                {/*<Radio value='view'>视图</Radio>*/}
-              {/*</RadioGroup>*/}
-            {/*</FormItem>*/}
-          {/*</Col>*/}
+        {/*<Col md={12} sm={24}>*/}
+        {/*<FormItem {...formItemLayout} label="请选择表/视图">*/}
+        {/*<RadioGroup onChange={this.onChange}>*/}
+        {/*<Radio value='table'>表</Radio>*/}
+        {/*<Radio value='view'>视图</Radio>*/}
+        {/*</RadioGroup>*/}
+        {/*</FormItem>*/}
+        {/*</Col>*/}
         {/*</Row>*/}
         <Row>
           <StandardTableNothing
@@ -765,7 +756,7 @@ const CreateForm = Form.create()(props => {
         <Row>
           <Col>
             <span>
-              已选择<span>{choiceFeildCount}</span>张表，共<span>{choiceFeild.length}</span>个字段，需设置至少<span>{(choiceFeildCount||1) - 1}</span>个表间关系
+              已选择<span>{choiceFeildCount}</span>张表，共<span>{choiceFeild.length}</span>个字段，需设置至少<span>{(choiceFeildCount || 1) - 1}</span>个表间关系
             </span>
           </Col>
         </Row>
@@ -848,7 +839,7 @@ const CreateForm = Form.create()(props => {
 const ResourceDetail = Form.create()(props => {
   const {
     modalVisible, form, handleModalVisible, loading, data, columns, detailType, tableAndField,
-    radioSwitch, radioSwitcHandle, operateLog, lifelist, httpItem,searchHandle,sqlList,excSql,catalogTable
+    radioSwitch, radioSwitcHandle, operateLog, lifelist, httpItem, searchHandle, sqlList, excSql, catalogTable,
   } = props;
   const okHandle = () => {
     form.validateFields((err, fieldsValue) => {
@@ -878,113 +869,115 @@ const ResourceDetail = Form.create()(props => {
     radioSwitcHandle(value.target.value);
   };
   const gxxsjkdatacolumns = [];
-  if(sqlList.length > 0){
-    for (let feild in sqlList[0]){
+  if (sqlList.length > 0) {
+    for (let feild in sqlList[0]) {
       gxxsjkdatacolumns.push({
-        title:feild,
-        dataIndex:feild,
+        title: feild,
+        dataIndex: feild,
         width: 100,
-      })
+      });
     }
   }
   const gxxsjkfieldcolumns = [
     {
       title: '字段名',
+      width:'150px',
       dataIndex: 'name',
     }, {
       title: '字段描述',
+      width:'150px',
       dataIndex: 'tableDesc',
     }, {
       title: '类型',
+      width:'150px',
       dataIndex: 'type',
     }, {
       title: '长度',
+      width:'150px',
       dataIndex: 'len',
-    }];
-  const apifieldcolumns = [
-    {
-      title: '字段名称',
-      dataIndex: 'content',
-    }, {
-      title: '字段别名',
-      dataIndex: 'content',
-    }, {
-      title: '字段中文名',
-      dataIndex: 'content',
-    }, {
-      title: '字段描述',
-      dataIndex: 'content',
-    }, {
-      title: '来源数据表',
-      dataIndex: 'content',
-    }, {
-      title: '来源数据库',
-      dataIndex: 'content',
     }];
   const apilogcolumns = [
     {
       title: '序号',
-      render: (text, record, index) => <span>{index+1}</span>
+      width:'150px',
+      render: (text, record, index) => <span>{index + 1}</span>,
     },
     {
       title: '服务调用用户',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '最近一次接口调用开始时间',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '最近一次接口调用结束时间',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '累积调用次数',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '调用方式',
+      width:'150px',
       dataIndex: 'content',
     },
   ];
   const filelogcolumns = [
     {
       title: '序号',
-      render: (text, record, index) => <span>{index+1}</span>
+      width:'150px',
+      render: (text, record, index) => <span>{index + 1}</span>,
     },
     {
       title: '文件名称',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '服务调用用户',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '最近一次数据调用开始时间',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '最近一次数据调用结束时间',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '累积调用次数',
+      width:'150px',
       dataIndex: 'content',
     }, {
       title: '调用方式',
+      width:'150px',
       dataIndex: 'content',
     }];
   const fgxxsjkdatacolumns = [
     {
       title: '集合名称',
+      width:'150px',
       dataIndex: 'name',
     }, {
       title: '所属数据源',
+      width:'150px',
       dataIndex: 'description',
     },
   ];
   const lifelistcolumns = [
     {
       title: '文件名称',
+      width:'150px',
       dataIndex: 'name',
     }, {
       title: '文件类型',
+      width:'150px',
       dataIndex: 'type',
     }, {
       title: '文件描述',
+      width:'150px',
       dataIndex: 'description',
     },
   ];
@@ -1000,8 +993,8 @@ const ResourceDetail = Form.create()(props => {
       width={900}
       onCancel={() => handleModalVisible()}
     >
-      {detailType == 1 ? <div><Tabs defaultActiveKey="2">
-        <TabPane tab="数据详情" key="1">
+      {detailType == 1 ? <div><Tabs defaultActiveKey='1'>
+        <TabPane tab="数据详情" key="1" >
           <DescriptionList size="large" title="过滤条件" style={{ marginBottom: 0 }}>
           </DescriptionList>
           <Row>
@@ -1016,22 +1009,24 @@ const ResourceDetail = Form.create()(props => {
           </Row>
           {radioSwitch == 'view' ? <div>
               <SimpleTableEdit
-              scroll={{ y: 180 }}
-              search={searchHandle}
-              data={[]}
-              selectItemFeild={[].concat.apply([],tableAndField.map(item=>{return  item.tableFieldList}))}
-              transMsg={(index,andOr)=>{
-                indexList = index;
-                indexAndOr = andOr;
-              }}
+                scroll={{ y: 180 }}
+                search={searchHandle}
+                data={[]}
+                selectItemFeild={[].concat.apply([], tableAndField.map(item => {
+                  return item.tableFieldList;
+                }))}
+                transMsg={(index, andOr) => {
+                  indexList = index;
+                  indexAndOr = andOr;
+                }}
               />
               <DescriptionList size="large" col={1} title="描述" style={{ marginBottom: 32 }}>
-                <Description ></Description>
+                <Description></Description>
               </DescriptionList>
-          </div> :
+            </div> :
             <div>
-            <DescriptionList size="large" title="请编写SQL语句" style={{ marginBottom: 0 }}>
-            </DescriptionList>
+              <DescriptionList size="large" title="请编写SQL语句" style={{ marginBottom: 0 }}>
+              </DescriptionList>
               <FormItem>
                 {form.getFieldDecorator('sql')(
                   <TextArea
@@ -1042,22 +1037,22 @@ const ResourceDetail = Form.create()(props => {
               </FormItem>
               {/*<Button size="small" style={{ marginRight: 20 }} onClick={() => {*/}
               {/*}}>*/}
-                {/*SQL语法检测*/}
+              {/*SQL语法检测*/}
               {/*</Button>*/}
               <Button size='small' style={{ marginTop: 20 }} type="primary" onClick={exHandle}>
                 执行SQL语句
               </Button>
-          </div>}
+            </div>}
           <DescriptionList size="large" title="数据详情" style={{ marginBottom: 32 }}>
           </DescriptionList>
           <StandardTableNothingNoCloums
-            scroll={{x:true}}
+            scroll={{ x: true }}
             loading={loading}
             data={sqlList}
             columns={gxxsjkdatacolumns}
           />
         </TabPane>
-        <TabPane tab="表结构" key="2">
+        <TabPane tab="表结构" key="2" >
           {tableAndField.map(item => {
             return (<div>
               <DescriptionList size="large" col={2} title="信息资源详情" style={{ marginBottom: 32 }}>
@@ -1077,8 +1072,8 @@ const ResourceDetail = Form.create()(props => {
       </Tabs></div> : detailType == 2 ?
         <div>
           {/*<DescriptionList size="large" col={2} title="" style={{ marginBottom: 32 }}>*/}
-            {/*<Description term="集合名称">{catalogTable[0]&&catalogTable[0].name||''}</Description>*/}
-            {/*<Description term="所属数据源">{catalogTable[0]&&catalogTable[0].description||''}</Description>*/}
+          {/*<Description term="集合名称">{catalogTable[0]&&catalogTable[0].name||''}</Description>*/}
+          {/*<Description term="所属数据源">{catalogTable[0]&&catalogTable[0].description||''}</Description>*/}
           {/*</DescriptionList>*/}
           <StandardTableNothing
             loading={loading}
@@ -1114,24 +1109,24 @@ const ResourceDetail = Form.create()(props => {
                 columns={lifelistcolumns}
               />
               {/*<List*/}
-                {/*rowKey="id"*/}
-                {/*grid={{ gutter: 24, lg: 3, md: 2, sm: 1, xs: 1 }}*/}
-                {/*dataSource={lifelist}*/}
-                {/*renderItem={item =>*/}
-                  {/*<List.Item key={item.id}>*/}
-                    {/*<Card hoverable className={styles.card}>*/}
-                      {/*<Card.Meta*/}
-                        {/*description={*/}
-                          {/*<DescriptionList size="large"  col={1} title="" style={{ marginBottom: 12 }}>*/}
-                            {/*<Description term="文件名称">{item.name}</Description>*/}
-                            {/*<Description term="文件类型">{item.type}</Description>*/}
-                            {/*<Description term="文件描述">{item.description}</Description>*/}
-                          {/*</DescriptionList>*/}
-                        {/*}*/}
-                      {/*/>*/}
-                    {/*</Card>*/}
-                  {/*</List.Item>*/}
-                {/*}*/}
+              {/*rowKey="id"*/}
+              {/*grid={{ gutter: 24, lg: 3, md: 2, sm: 1, xs: 1 }}*/}
+              {/*dataSource={lifelist}*/}
+              {/*renderItem={item =>*/}
+              {/*<List.Item key={item.id}>*/}
+              {/*<Card hoverable className={styles.card}>*/}
+              {/*<Card.Meta*/}
+              {/*description={*/}
+              {/*<DescriptionList size="large"  col={1} title="" style={{ marginBottom: 12 }}>*/}
+              {/*<Description term="文件名称">{item.name}</Description>*/}
+              {/*<Description term="文件类型">{item.type}</Description>*/}
+              {/*<Description term="文件描述">{item.description}</Description>*/}
+              {/*</DescriptionList>*/}
+              {/*}*/}
+              {/*/>*/}
+              {/*</Card>*/}
+              {/*</List.Item>*/}
+              {/*}*/}
               {/*/>*/}
             </DescriptionList>
             <DescriptionList size="large" title="数据调用记录" style={{ marginBottom: 32 }}>
@@ -1181,6 +1176,7 @@ export default class ResourceClassify extends PureComponent {
     //   payload: {region:'000000',type:'7'},
     // });
   }
+
   handleStandardTableChangeDataSource = (pagination, filtersArg, sorter) => {
     const { dispatch } = this.props;
     const { formValues } = this.state;
@@ -1316,11 +1312,11 @@ export default class ResourceClassify extends PureComponent {
         this.setState({
           modalVisibleResource: !!flag,
         });
-      }
+      },
     });
   };
   handleModalVisible = flag => {
-    searchValue = {resourceId:'',relationDb:'',unrelationDb:'',api:'',files:""}
+    searchValue = { resourceId: '', relationDb: '', unrelationDb: '', api: '', files: '' };
     this.setState({
       modalVisible: !!flag,
       choiceFeild: [],
@@ -1697,7 +1693,7 @@ export default class ResourceClassify extends PureComponent {
     const { dispatch, catalog: { catalogItem } } = this.props;
     let list = catalogItem.map(item => {
       if (item.id == index.id)
-      item = index;
+        item = index;
       return item;
     });
     dispatch({
@@ -1710,49 +1706,50 @@ export default class ResourceClassify extends PureComponent {
       radioSwitch: index,
     });
   };
-  excSql = (index) =>{
+  excSql = (index) => {
     const { dispatch } = this.props;
     let params = {
-      "params": index.sql,
-      "dataSourceId": listItemData.dataSourceId,
+      'params': index.sql,
+      'dataSourceId': listItemData.dataSourceId,
     };
     dispatch({
       type: 'centersource/fetchTableData',
       payload: params,
     });
   };
-  searchHandle = (list,value)=>{
+  searchHandle = (list, value) => {
     const { dispatch } = this.props;
-    let param = list.map(item=>{
+    let param = list.map(item => {
       return {
-        "fieldName": item.field,
-        "operation": item.condition,
-        "value": item.value,
-        'tableId':item.tableId,
-        "valueType": item.valueType
-      }
+        'fieldName': item.field,
+        'operation': item.condition,
+        'value': item.value,
+        'tableId': item.tableId,
+        'valueType': item.valueType,
+      };
     });
     let params = {
-      "accordWith": value,
-      "catalogId": listItemData.id,
-      "params":param
+      'accordWith': value,
+      'catalogId': listItemData.id,
+      'params': param,
     };
     dispatch({
       type: 'centersource/fetchView',
       payload: params,
     });
-  }
+  };
+
   render() {
     const {
-      catalog: { data, catalogItem, field, tableAndField, operateLog,catTable },
+      catalog: { data, catalogItem, field, tableAndField, operateLog, catTable },
       loading,
-      centersource: {sqlList, data: formData, dataList, lifelist: { list: lifelist }, httpItem },
+      centersource: { sqlList, data: formData, dataList, lifelist: { list: lifelist }, httpItem },
       form,
     } = this.props;
     const { selectedRows, modalVisible, modalVisibleCatlog, radioSwitch, modalVisibleResource, modalVisibleChoice, item, type, choiceFeild, choiceFeildCount, detailType } = this.state;
     const parentMethods = {
       httpItem: httpItem,
-      handleStandardTableChange:this.handleStandardTableChangeDataSource,
+      handleStandardTableChange: this.handleStandardTableChangeDataSource,
       lifelist: lifelist,
       handleAdd: this.handleAdd,
       handleItem: this.handleItem,
@@ -1786,47 +1783,52 @@ export default class ResourceClassify extends PureComponent {
       handleAdd: this.handleAddResource,
       radioSwitcHandle: this.radioSwitcHandle,
       operateLog: operateLog,
-      sqlList:sqlList,
-      excSql:this.excSql,
+      sqlList: sqlList,
+      excSql: this.excSql,
       lifelist: lifelist,
       httpItem: httpItem,
-      searchHandle:this.searchHandle,
+      searchHandle: this.searchHandle,
       radioSwitch: radioSwitch,
       tableAndField: tableAndField,
-      catalogTable:catTable,
+      catalogTable: catTable,
       detailType: detailType,
       handleModalVisible: this.handleModalVisibleResource,
     };
     const columns = [
       {
         title: '序号',
-        render: (text, record, index) => <span>{index+1}</span>
+        width:'150px',
+        render: (text, record, index) => <span>{index + 1}</span>,
       },
       {
         title: '信息资源名称',
+        width:'150px',
         dataIndex: 'datasetName',
       },
       {
         title: '目录分类',
+        width:'150px',
         dataIndex: 'classifyStructureName',
       },
       {
         title: '关联资源类型',
+        width:'150px',
         dataIndex: 'sourceType',
       },
       {
         title: '操作',
+        width:'150px',
         render: (text, record, index) => {
           return (
             <Fragment>
               {/*<a onClick={() => {*/}
-                {/*// listItemData = text;*/}
-                {/*// this.handleModalCatlog()*/}
+              {/*// listItemData = text;*/}
+              {/*// this.handleModalCatlog()*/}
               {/*}}>目录详情</a>*/}
               {/*<Divider type="vertical"/>*/}
               <a onClick={() => {
                 this.handleModalResource(text, true);
-              }}>配置详情</a>
+              }}>资源详情</a>
               <Divider type="vertical"/>
               <a onClick={() => {
                 this.handleModal(text, true);
@@ -1848,21 +1850,21 @@ export default class ResourceClassify extends PureComponent {
           <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
               <Form onSubmit={this.handleSearch}>
-              {/*<div className={styles.tableListForm}>{this.renderForm()}</div>*/}
-              <Row>
-                <Col md={10} sm={24}>
-                  <FormItem>
-                    {getFieldDecorator('name')(<Input placeholder="请输入数据源名称"/>)}
-                  </FormItem>
-                </Col>
-                <Col md={4} sm={24}>
-                  <FormItem>
-                    <Button type="primary" htmlType="submit">
-                      查询
-                    </Button>
-                  </FormItem>
-                </Col>
-              </Row>
+                {/*<div className={styles.tableListForm}>{this.renderForm()}</div>*/}
+                <Row>
+                  <Col md={10} sm={24}>
+                    <FormItem>
+                      {getFieldDecorator('name')(<Input placeholder="请输入信息资源名称"/>)}
+                    </FormItem>
+                  </Col>
+                  <Col md={4} sm={24}>
+                    <FormItem>
+                      <Button type="primary" htmlType="submit">
+                        查询
+                      </Button>
+                    </FormItem>
+                  </Col>
+                </Row>
               </Form>
               <StandardTableNoCheck
                 selectedRows={selectedRows}

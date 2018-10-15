@@ -227,6 +227,7 @@ class EditableTable extends React.Component {
     });
     const rowSelection = {
       selectedRowKeys,
+      columnWidth:'50px',
       onChange: this.handleRowSelectChange,
       getCheckboxProps: record => ({
         disabled: record.disabled,
@@ -246,6 +247,7 @@ class EditableTable extends React.Component {
           components={components}
           rowClassName={() => 'editable-row'}
           rowKey={'key'}
+          size='small'
           rowSelection={rowSelection}
           pagination={false}
           dataSource={dataSource}

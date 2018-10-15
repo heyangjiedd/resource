@@ -78,6 +78,9 @@ class StandardTable extends PureComponent {
       pageSize:pageSize,
     };
     const paginationProps = {
+      showTotal:(total, range)=>{
+        return `当前显示 ${range[0]} 至 ${range[1]} 条 共计 ${total} 条`
+      },
       showSizeChanger: true,
       showQuickJumper: true,
       ...pagination,
@@ -96,6 +99,7 @@ class StandardTable extends PureComponent {
         <Table
           loading={loading}
           rowKey={rowKey || 'key'}
+          size='small'
           dataSource={list}
           columns={columns}
           pagination={paginationProps}

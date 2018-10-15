@@ -92,6 +92,7 @@ class StandardTable extends PureComponent {
         <Table
           loading={loading}
           rowKey={rowKey || 'key'}
+          size='small'
           dataSource={list}
           columns={columns}
           scroll={scroll}
