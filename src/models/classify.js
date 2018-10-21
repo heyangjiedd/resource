@@ -37,15 +37,15 @@ export default {
     },
     *add({ payload, callback }, { call, put }) {
       const response = yield call(addresourceclassify, payload);
-      if (callback) callback();
+      if (callback) callback(response);
     },
     *remove({ payload, callback }, { call, put }) {
       const response = yield call(removeresourceclassify, payload);
-      if (callback) callback();
+      if (callback) callback(response);
     },
     *update({ payload, callback }, { call, put }) {
       const response = yield call(updateresourceclassify, payload);
-      if (callback) callback();
+      if (callback) callback(response);
     },
   },
 

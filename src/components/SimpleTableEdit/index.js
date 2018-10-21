@@ -2,9 +2,11 @@ import { Table, Input, Button, Popconfirm, Form, Row, Col, Select } from 'antd';
 import React, { Fragment } from 'react';
 import SimpleTree from '../SimpleTree';
 import moment from 'moment/moment';
+import DescriptionList from 'components/DescriptionList';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
+const { Description } = DescriptionList;
 const EditableContext = React.createContext();
 
 const EditableRow = ({ form, index, ...props }) => (
@@ -167,6 +169,7 @@ class EditableTable extends React.Component {
       dataSource: data,
       count: 0,
       andOr: '$and',
+      description:'',
     };
   }
 
@@ -202,14 +205,46 @@ class EditableTable extends React.Component {
     });
     // this.props.transMsg(newData, this.state.andOr);
     this.setState({ dataSource: newData });
-  };
+  }
+  searchhandle = ()=>{
+    const { selectItemFeild, search } = this.props;
+    const { dataSource, andOr } = this.state;
+    const arr = dataSource.map(item =>{
+      let str = '';
+      switch (item.condition) {
+        case '$gte':str = '大于等于';break;
+        case '$eq':str = '等于';break;
+        case '$gt':str = '大于';break;
+        case '$lt':str = '小于';break;
+        case '$lte':str = '小于登录';break;
+        case '$ne':str = '不等于';break;
+        case '$null':str = '空';break;
+        case '$in':str = '包含';break;
+        case '$nin':str = '不包含';break;
+        case '$and':str = '是';break;
+        case '$or':str = '不是';break;
+      }
+      return '"'+item.field + '"'+ str + '"'+ item.value+ '"'
+    })
+    let description =  arr.join('，'+(andOr=='$and'?'全部':'任何')+'，')
+    this.setState({ description:description });
+    search(dataSource, andOr);
+  }
+
   save = (text, record) => {
     debugger;
   };
-
+  componentDidMount(){
+    const {  search } = this.props;
+    const { dataSource, andOr } = this.state;
+    search(dataSource, andOr)
+  }
+  onSelect = (index)=>{
+    this.setState({ andOr:index });
+  }
   render() {
     const { selectItemFeild, search } = this.props;
-    const { dataSource, andOr } = this.state;
+    const { dataSource, andOr,description } = this.state;
     const components = {
       body: {
         row: EditableFormRow,
@@ -271,7 +306,8 @@ class EditableTable extends React.Component {
       <div>
         <Row>
           <Col md={12} sm={12}>
-            <span>符合</span><Select defaultValue={andOr} placeholder="请选择"
+            <span>符合</span>
+            <Select onSelect={this.onSelect} defaultValue={andOr} placeholder="请选择"
                                    style={{ width: 80, marginLeft: 10, marginRight: 10 }}>
             <Option value="$and">全部</Option>
             <Option value="$or">任何</Option>
@@ -282,7 +318,7 @@ class EditableTable extends React.Component {
               添加条件
             </Button> <Button size="small" type="danger" style={{ marginRight: 20 }} onClick={this.deleteAll}>
             清除全部
-          </Button> <Button size="small" style={{ marginRight: 20 }} onClick={()=>{search(dataSource, andOr)}}>
+          </Button> <Button size="small" style={{ marginRight: 20 }} onClick={this.searchhandle}>
             查询数据
           </Button>
           </Col>
@@ -296,6 +332,9 @@ class EditableTable extends React.Component {
           dataSource={dataSource}
           columns={columns}
         />
+        <DescriptionList size="large" col={1} title="描述" style={{ marginBottom: 32 ,marginTop:32}}>
+          <Description>{description}</Description>
+        </DescriptionList>
       </div>
     );
   }

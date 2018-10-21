@@ -82,7 +82,6 @@ class SimpleTree extends PureComponent {
     return (
       <div className={styles.tree_back_ground}>
         <TreeSelect
-          showSearch
           style={{ width: 300 }}
           value={this.state.value}
           dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}

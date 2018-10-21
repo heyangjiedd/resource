@@ -153,6 +153,10 @@ const ResourceDetail = Form.create()(props => {
       title: '长度',
       width:'150px',
       dataIndex: 'len',
+    }, {
+      title: '所属表',
+      width:'150px',
+      dataIndex: 'tableName',
     }];
   const fgxxsjkdatacolumns = [
     {
@@ -209,9 +213,6 @@ const ResourceDetail = Form.create()(props => {
                     indexAndOr = andOr;
                   }}
                 />
-                <DescriptionList size="large" col={1} title="描述" style={{ marginBottom: 32 }}>
-                  <Description></Description>
-                </DescriptionList>
               </div> :
               <div>
                 <DescriptionList size="large" title="请编写SQL语句" style={{ marginBottom: 0 }}>
@@ -454,7 +455,18 @@ export default class ResourceClassify extends PureComponent {
       this.fetchHandle(values);
     });
   };
+  handleSearchTable = e => {
+    e.preventDefault();
 
+    const { dispatch, form } = this.props;
+    form.validateFields((err, fieldsValue) => {
+      if (err) return;
+      dispatch({
+        type: 'centersource/fetchTablePage',
+        payload: { tableId: listItemData.id ,name:fieldsValue.name},
+      });
+    });
+  };
   handleModalVisible = flag => {
     this.setState({
       modalVisible: !!flag,
@@ -647,27 +659,32 @@ export default class ResourceClassify extends PureComponent {
         dataIndex: 'sourceType',
       },
       {
-        title: '所属组织机构',
+        title: '数据源描述',
         width:'150px',
-        dataIndex: 'orgId',
-        render(val) {
-          let org = orgList.filter(r => {
-            return val == r.deptCode;
-          });
-          return <span>{org[0] && org[0].deptShortName}</span>;
-        },
+        dataIndex: 'content',
       },
-      {
-        title: '所属资源分类',
-        width:'150px',
-        dataIndex: 'resourceId',
-        render(val) {
-          let classfy = treeData.filter(r => {
-            return val == r.id;
-          });
-          return <span>{classfy[0] && classfy[0].name}</span>;
-        },
-      },
+      // {
+      //   title: '所属组织机构',
+      //   width:'150px',
+      //   dataIndex: 'orgId',
+      //   render(val) {
+      //     let org = orgList.filter(r => {
+      //       return val == r.deptCode;
+      //     });
+      //     return <span>{org[0] && org[0].deptShortName}</span>;
+      //   },
+      // },
+      // {
+      //   title: '所属资源分类',
+      //   width:'150px',
+      //   dataIndex: 'resourceId',
+      //   render(val) {
+      //     let classfy = treeData.filter(r => {
+      //       return val == r.id;
+      //     });
+      //     return <span>{classfy[0] && classfy[0].name}</span>;
+      //   },
+      // },
       {
         title: '最近连接时间',
         width:'150px',
@@ -789,12 +806,13 @@ export default class ResourceClassify extends PureComponent {
           <SimpleTree
             data={treeData}
             handleTree={this.handleTree}
-            title={'数据库'}
+            title={'资源分类'}
           />
           {isFileDetail ? <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
+              <Form onSubmit={this.handleSearchTable} >
               <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
-                <Col md={6} sm={24}>
+                <Col md={2} sm={24}>
                   <FormItem>
                     <Button onClick={() => {
                       this.getFileListHandleModalVisible(false);
@@ -803,7 +821,20 @@ export default class ResourceClassify extends PureComponent {
                     </Button>
                   </FormItem>
                 </Col>
+                <Col offset={8} md={12} sm={24}>
+                  <FormItem {...formItemLayout} label="表名">
+                    {getFieldDecorator('name')(<Input placeholder="请输入表名"/>)}
+                  </FormItem>
+                </Col>
+                <Col md={2} sm={24}>
+                  <FormItem>
+                    <Button type="primary" htmlType="submit">
+                      查询
+                    </Button>
+                  </FormItem>
+                </Col>
               </Row>
+              </Form>
               <StandardTableNoCheck
                 selectedRows={[]}
                 loading={loading}
@@ -831,7 +862,7 @@ export default class ResourceClassify extends PureComponent {
                     </FormItem>
                   </Col>
                   <Col md={8} sm={24}>
-                    <FormItem>
+                    <FormItem {...formItemLayout} label="数据源名称">
                       {getFieldDecorator('sourceName')(<Input placeholder="请输入数据源名称"/>)}
                     </FormItem>
                   </Col>

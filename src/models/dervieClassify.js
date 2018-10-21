@@ -57,7 +57,7 @@ export default {
     },
     * remove({ payload, callback }, { call, put }) {
       const response = yield call(removederiverclassify, payload);
-      if (callback) callback();
+      if (callback) callback(response);
     },
     * update({ payload, callback }, { call, put }) {
       const response = yield call(updatederiverclassify, payload);

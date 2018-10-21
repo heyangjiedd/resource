@@ -128,6 +128,7 @@ class SimpleTree extends PureComponent {
     });
     return (
       <div className={styles.tree_back_ground} style={ss}>
+        <div className={styles.tree_box}>
         <div className={styles.tree_title}>{!open&&title}
           {open?<Icon
             className={styles.trigger}
@@ -148,6 +149,7 @@ class SimpleTree extends PureComponent {
         >
           {loop(treeData)}
         </Tree>}
+        </div>
       </div>
     );
   }

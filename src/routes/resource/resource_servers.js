@@ -172,28 +172,28 @@ const ResourceDetail = Form.create()(props => {
   const apilogcolumns = [
     {
       title: '序号',
-      twidth:'150px',
+      width:'150px',
       render: (text, record, index) => <span>{index + 1}</span>,
     },
     {
       title: '服务调用用户',
-      twidth:'150px',
+      width:'150px',
       dataIndex: 'userName',
     }, {
       title: '最近一次接口调用开始时间',
-      twidth:'150px',
+      width:'200px',
       dataIndex: 'startTime',
     }, {
       title: '最近一次接口调用结束时间',
-      twidth:'150px',
+      width:'200px',
       dataIndex: 'endTime',
     }, {
       title: '累积调用次数',
-      twidth:'150px',
+      width:'150px',
       dataIndex: 'num',
     }, {
       title: '调用方式',
-      twidth:'150px',
+      width:'150px',
       dataIndex: 'type',
     },
   ];
@@ -212,7 +212,8 @@ const ResourceDetail = Form.create()(props => {
           <Description term="所属数据源">{httpItem.sourceType}</Description>
           <Description term="接口类型">{httpItem.interfaceType}</Description>
           <Description term="数据格式">{httpItem.content}</Description>
-          <Description term="服务类型">{httpItem.interfaceName}</Description>
+          <Description term="服务类型">原生接口</Description>
+          <Description term="调用记录">0</Description>
           <Description term="服务地址">{httpItem.interfaceUrl}</Description>
         </DescriptionList>
         <DescriptionList size="large" title="接口调用记录" style={{ marginBottom: 32 }}>
@@ -441,32 +442,37 @@ export default class ResourceClassify extends PureComponent {
     const columns = [
       {
         title: '序号',
-        twidth:'150px',
+        width:'150px',
         render: (text, record, index) => <span>{index + 1}</span>,
       },
       {
         title: '服务名称',
-        twidth:'150px',
+        width:'150px',
         dataIndex: 'sourceName',
       },
       {
         title: '数据源类型',
-        twidth:'150px',
+        width:'150px',
         dataIndex: 'sourceType',
       },
       {
         title: '服务类型',
-        twidth:'150px',
+        width:'150px',
         dataIndex: 'interfaceType',
+        render: (text, record, index) => {
+          return (
+            <span>原生接口</span>
+          );
+        },
       },
       {
         title: '服务描述',
-        twidth:'150px',
+        width:'150px',
         dataIndex: 'content',
       },
       {
         title: '操作',
-        twidth:'150px',
+        width:'150px',
         render: (text, record, index) => {
           return (
             <Fragment>
@@ -497,7 +503,7 @@ export default class ResourceClassify extends PureComponent {
           <SimpleTree
             data={treeData}
             handleTree={this.handleTree}
-            title={'资源库'}
+            title={'资源分类'}
           />
           <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>

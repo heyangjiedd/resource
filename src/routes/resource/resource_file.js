@@ -430,7 +430,20 @@ export default class ResourceClassify extends PureComponent {
       });
     });
   };
-
+  handleSearchTable = e => {
+    e.preventDefault();
+    const { dispatch, form } = this.props;
+    form.validateFields((err, fieldsValue) => {
+      if (err) return;
+      dispatch({
+        type: 'centersource/fetchFile',
+        payload: {
+          id: listItemData.id,
+          name:fieldsValue.name
+        },
+      });
+    });
+  };
   download = (index) => {
     window.open( '/datasource/download?id='+index.id);
     // var xmlhttp = new XMLHttpRequest();
@@ -629,21 +642,35 @@ export default class ResourceClassify extends PureComponent {
           <SimpleTree
             data={treeData}
             handleTree={this.handleTree}
-            title={'资源库'}
+            title={'资源分类'}
           />
           {isFileDetail ? <Card bordered={false} className={styles.flexTable}>
             <div className={styles.tableList}>
-              <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
-                <Col md={6} sm={24}>
-                  <FormItem>
-                    <Button onClick={() => {
-                      this.getFileListHandleModalVisible(false);
-                    }}>
-                      返回
-                    </Button>
-                  </FormItem>
-                </Col>
-              </Row>
+              <Form onSubmit={this.handleSearchTable} >
+                <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
+                  <Col md={2} sm={24}>
+                    <FormItem>
+                      <Button onClick={() => {
+                        this.getFileListHandleModalVisible(false);
+                      }}>
+                        返回
+                      </Button>
+                    </FormItem>
+                  </Col>
+                  <Col offset={8} md={12} sm={24}>
+                    <FormItem {...formItemLayout} label="文件名称">
+                      {getFieldDecorator('name')(<Input placeholder="请输入文件名称"/>)}
+                    </FormItem>
+                  </Col>
+                  <Col md={2} sm={24}>
+                    <FormItem>
+                      <Button type="primary" htmlType="submit">
+                        查询
+                      </Button>
+                    </FormItem>
+                  </Col>
+                </Row>
+              </Form>
               <StandardTableNoCheck
                 selectedRows={[]}
                 loading={loading}

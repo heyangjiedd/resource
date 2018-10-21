@@ -36,6 +36,7 @@ const getValue = obj =>
 let itemDataStatus = 1;
 let listItemData = {};
 let treeSelect = '';
+let treeSelectValue = '';
 
 const CreateForm = Form.create()(props => {
   const { modalVisible, form, handleAdd, handleModalVisible } = props;
@@ -89,7 +90,7 @@ const CreateForm = Form.create()(props => {
       onCancel={() => handleModalVisible()}
     >
 
-      {itemDataStatus==3||itemDataStatus==4?'':<FormItem {...formItemLayout} label="父级分类名称">
+      {itemDataStatus==3||!listItemData.parentName?'':<FormItem {...formItemLayout} label="父级分类名称">
         {form.getFieldDecorator('parentName', {
           rules: [{  message: '请输入父级分类名称' }],
           initialValue: listItemData.parentName,
@@ -97,22 +98,18 @@ const CreateForm = Form.create()(props => {
       </FormItem>}
       <FormItem {...formItemLayout} label="分类名称">
         {form.getFieldDecorator('name', {
-          rules: [{ required: true, message: '请输入父级分类名称' }], initialValue: listItemData.name,
-        })(<Input disabled={itemDataStatus === 2} placeholder="请输入父级分类名称"/>)}
+          rules: [{ required: true, message: '请输入分类名称' },{ max: 20, message: '最大长度不超过20' }], initialValue: listItemData.name,
+        })(<Input disabled={itemDataStatus === 2} placeholder="请输入分类名称"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="排序号">
         {form.getFieldDecorator('sort', {
-          rules: [{ required: true, message: '请输入父级分类名称' },{pattern:/^[1-9]+\d*$/,message:'输入正整数'}], initialValue: listItemData.sort,
-        })(<Input type='number' disabled={itemDataStatus === 2} placeholder="请输入父级分类名称"/>)}
+          rules: [{ required: true, message: '请输入排序号' },{pattern:/^[1-9]+\d*$/,message:'输入正整数'},{ max: 11, message: '最大长度不超过11' }], initialValue: listItemData.sort,
+        })(<Input type='number' disabled={itemDataStatus === 2} placeholder="请输入排序号"/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="分类描述">
         {form.getFieldDecorator('description', {
-          rules: [
-            {
-              required: true,
-              message: '请输入分类描述',
-            },
-          ], initialValue: listItemData.description,
+          rules: [{ max: 100, message: '最大长度不超过100' }],
+          initialValue: listItemData.description,
         })(
           <TextArea
             style={{ minHeight: 32 }}
@@ -138,7 +135,11 @@ export default class ResourceClassify extends PureComponent {
     selectedRows: [],
     formValues: {},
   };
-
+  componentWillUnmount(){
+     itemDataStatus = 1;
+     listItemData = {};
+     treeSelect = '';
+  }
   componentDidMount() {
     const { dispatch } = this.props;
     this.fetchAll();
@@ -202,10 +203,20 @@ export default class ResourceClassify extends PureComponent {
           payload: {
             no: selectedRows.map(row => row.no).join(','),
           },
-          callback: () => {
+          callback: (response) => {
+            console.log( response );
+            if( response.code !== 200 ) {
+              message.error( response.error );
+              return;
+            }
+            message.success('删除成功');
             this.setState({
               selectedRows: [],
             });
+            this.fetchAll()
+            // this.setState({
+            //   selectedRows: [],
+            // });
           },
         });
         break;
@@ -259,23 +270,32 @@ export default class ResourceClassify extends PureComponent {
   };
   handleModal = (item,status) => {
     listItemData = item;
+    const {
+      dervieClassify: { treeData },
+    } = this.props;
+    treeData.forEach(item=>{
+      if(item.id == treeSelect){
+        listItemData.parentName = item.name
+        return
+      }
+    });
     itemDataStatus = status;
     this.handleModalVisible(true);
   };
   handleAdd = fields => {
     const { dispatch , dervieClassify: { treeData }} = this.props;
-    debugger
     if (itemDataStatus === 1) {
       dispatch({
         type: 'dervieClassify/update',
         payload: { ...listItemData, ...fields },
         callback: (res) => {
-          if(res=='success'){
-            message.success('修改成功');
-            this.fetchAll();
-          }else{
-            message.error('修改失败');
-          }
+          message.success('修改成功');
+          this.fetchAll();
+          // if(res=='success'){
+          //
+          // }else{
+          //   message.error('修改失败');
+          // }
         },
       });
 
@@ -283,21 +303,23 @@ export default class ResourceClassify extends PureComponent {
       let select = treeData.filter(r => {
         return treeSelect == r.id;
       });
+      let parentId = '';
       if (itemDataStatus == 3) {
-        treeSelect = select[0]&&select[0].parentId;
+        parentId = select[0]&&select[0].parentId;
       } else {
-        treeSelect = select[0].id;
+        parentId = select[0].id;
       }
       dispatch({
         type: 'dervieClassify/add',
-        payload: {...fields,parentId:treeSelect},
+        payload: {...fields,parentId:parentId},
         callback: (res) => {
-          if(res=='success'){
-            message.success('添加成功');
-            this.fetchAll();
-          }else{
-            message.error('添加失败');
-          }
+          message.success('添加成功');
+          this.fetchAll();
+          // if(res=='success'){
+          //
+          // }else{
+          //   message.error('添加失败');
+          // }
         },
       });
     }
@@ -325,12 +347,23 @@ export default class ResourceClassify extends PureComponent {
                 type: 'dervieClassify/remove',
                 payload: {
                   id: item.id,
-                }, callback: () => {
+                }, callback: (response) => {
+                  console.log( response );
+                  if( response.code !== 200 ) {
+                    message.error( response.error );
+                    return;
+                  }
+                  message.success('删除成功');
+                  this.setState({
+                    selectedRows: [],
+                  });
                   this.fetchAll();
                 },
               });
-              message.success('删除成功');
-
+              // message.success('删除成功');
+              // this.setState({
+              //   selectedRows: [],
+              // });
             } else {
               dispatch({
                 type: 'dervieClassify/remove',
@@ -349,7 +382,20 @@ export default class ResourceClassify extends PureComponent {
     }
   };
   handleTree = data => {
-    treeSelect = data[0]
+    const {
+      dervieClassify: { treeData },
+    } = this.props;
+    treeSelect = data[0];
+    treeData.forEach(item=>{
+      if(item.id == treeSelect){
+        listItemData.parentName = item.name
+        return
+      }
+    });
+    dispatch({
+      type: 'dervieClassify/fetch',
+      payload: { pid: treeSelect },
+    });
   };
 
   render() {
@@ -381,11 +427,12 @@ export default class ResourceClassify extends PureComponent {
       {
         title: '分类结构',
         width:'150px',
-        render: (text, record, index) => {
-          return (
-            <span>{(text.parentName ? text.parentName : '' + '>') + text.name ? text.name : ''}</span>
-          );
-        },
+        dataIndex: 'treeName'
+      },
+      {
+        title: '分类来源',
+        width:'150px',
+        dataIndex: 'source',
       },
       {
         title: '分类描述',
@@ -400,14 +447,10 @@ export default class ResourceClassify extends PureComponent {
             <Fragment>
               <a onClick={() => {
                 this.handleModal(text,2);
-
-                listItemData = text;
               }}>查看</a>
               <Divider type="vertical"/>
               <a onClick={() => {
                 this.handleModal(text,1);
-
-                listItemData = text;
               }}>编辑</a>
             </Fragment>
           );

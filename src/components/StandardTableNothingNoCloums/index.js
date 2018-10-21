@@ -73,11 +73,19 @@ class StandardTable extends PureComponent {
       rowKey,
       scroll,
     } = this.props;
-
-    const paginationProps = {
-      showSizeChanger: true,
-      showQuickJumper: true,
-    };
+    // let pagination = {
+    //   current:pageNum,
+    //   total:total,
+    //   pageSize:pageSize,
+    // };
+    // const paginationProps = {
+    //   showTotal:(total, range)=>{
+    //     return `当前显示 ${range[0]} 至 ${range[1]} 条 共计 ${total} 条`
+    //   },
+    //   showSizeChanger: true,
+    //   showQuickJumper: true,
+    //   ...pagination,
+    // };
 
     const rowSelection = {
       selectedRowKeys,

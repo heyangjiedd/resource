@@ -179,10 +179,16 @@ class EditableTable extends React.Component {
         cell: EditableCell,
       },
     };
-    this.columns = [{
+    this.columns = [
+      {
+        title: '序号',
+        width:'10%',
+        render: (text, record, index) => <span>{index + 1}</span>,
+      },
+      {
       title: '表名',
       dataIndex: 'name1',
-      width:'25%',
+      width:'20%',
       render:val=><span>{selectItemTable&&selectItemTable.filter(item=>{ return item.id ===val})&&
       selectItemTable.filter(item=>{ return item.id ===val}).length>0&&selectItemTable.filter(item=>{ return item.id ===val})[0].name}</span>,
       editable: true,
@@ -196,7 +202,7 @@ class EditableTable extends React.Component {
     },{
       title: '表名',
       dataIndex: 'name2',
-      width:'25%',
+      width:'20%',
       render:val=><span>{selectItemTable&&selectItemTable.filter(item=>{ return item.id ===val})&&
       selectItemTable.filter(item=>{ return item.id ===val}).length>0&&selectItemTable.filter(item=>{ return item.id ===val})[0].name}</span>,
       editable: true,

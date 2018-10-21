@@ -1,5 +1,5 @@
 import fetch from 'dva/fetch';
-import { notification } from 'antd';
+import { notification,message } from 'antd';
 import { routerRedux } from 'dva/router';
 import store from '../index';
 
@@ -25,10 +25,14 @@ function checkStatus(response) {
     return response;
   }
   const errortext = codeMessage[response.status] || response.statusText;
-  notification.error({
-    message: `请求错误 ${response.status}: ${response.url}`,
-    description: errortext,
-  });
+  if( response.status === 400 ) {
+    message.error("用户名或者密码错误!");
+  } else {
+    notification.error({
+      message: `请求错误 ${response.status}: ${response.url}`,
+      description: errortext,
+    });
+  }
   const error = new Error(errortext);
   error.name = response.status;
   error.response = response;

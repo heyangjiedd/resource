@@ -54,6 +54,7 @@ let itemDataStatus = 0;
 let listItemData = {};//列表选择
 let modalListData = {};//弹窗第一页选择
 let choiseListItemData = {};//弹窗中弹窗选择
+let choiceSelectedRows = [];
 let searchValue = { resourceId: '', relationDb: '', unrelationDb: '', api: '', files: '' }; //关联查询
 
 const CatlogDetail = Form.create()(props => {
@@ -326,7 +327,7 @@ const ChoiceList = Form.create()(props => {
 const CreateForm = Form.create()(props => {
   const {
     modalVisible, form, handleAdd, handleModalVisible, data, handleItem, item, catalogItem, dataList, handleItemSearch,
-    searchHandle, getListBuyId, choiseFeild, choiseList, type, handleType, choiceFeild, choiceFeildCount, catalogItemChange,
+    searchHandle, getListBuyId, choiseFeild, choiseList, type, handleType, choiceFeild, choiceFeildCount,choicelist, catalogItemChange,
     selectHttpItem, httpItem, lifelist, handleStandardTableChange,
   } = props;
   const { getFieldDecorator } = form;
@@ -449,6 +450,11 @@ const CreateForm = Form.create()(props => {
     }];
   const columnscatalogfeild = [
     {
+      title: '序号',
+      width: '150px',
+      render: (text, record, index) => <span>{index + 1}</span>,
+    },
+    {
       title: '信息源',
       width:'150px',
       dataIndex: 'name',
@@ -495,7 +501,6 @@ const CreateForm = Form.create()(props => {
     },
   ];
   let selectedRows = [];
-  let choiceSelectedRows = [];
   let choiceFeildSelectedRows = [];
   let addTableSelectedRows = [];
   let addFeilsSelectedRows = [];
@@ -515,6 +520,10 @@ const CreateForm = Form.create()(props => {
   };
   const submitHandle = () => {
     if (item == 2) {
+      if(choiceFeildCount>=2){
+        message.error('请先设置表间关系');
+        return
+      }
       handleAdd(catalogItem, setTableRows);
     } else if (item == 3) {
       if(fgxxsjkHandleSelectRows.length <= 0){
@@ -543,6 +552,7 @@ const CreateForm = Form.create()(props => {
     catalogItemChange(record);
   };
   const cancel = () => {
+    choiceSelectedRows = [];
     handleItem(1, true);
     handleModalVisible(false);
   };
@@ -647,27 +657,27 @@ const CreateForm = Form.create()(props => {
     >
       {item === 1 ? <div><Form onSubmit={handleSubmit}>
         <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <Col md={12} sm={24}>
+          <Col md={12} sm={12}>
             <FormItem {...formItemLayout} label="资源分类">
               <SimpleSelectTree url={'classify/tree'} transMsg={(index) => {
                 searchValue.resourceId = index;
               }}></SimpleSelectTree>
             </FormItem>
           </Col>
-        </Row>
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <Col md={12} sm={24}>
+          <Col md={12} sm={12}>
             <FormItem {...formItemLayout} label="数据源类型"><Cascader style={{ width: 100 + '%' }} options={ARR.CASCADER}
                                                                   onChange={onChange}
                                                                   placeholder="请选择数据源/数据库"/>
             </FormItem>
           </Col>
-          <Col md={8} sm={24}>
-            <FormItem>
+        </Row>
+        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
+          <Col md={12} sm={12}>
+            <FormItem {...formItemLayout} label="数据源名称">
               {getFieldDecorator('sourceName')(<Input placeholder="请输入数据源名称"/>)}
             </FormItem>
           </Col>
-          <Col md={4} sm={24}>
+          <Col md={4} sm={12}>
             <span className={styles.submitButtons}>
               <Button type="primary" htmlType="submit">
                 查询
@@ -760,23 +770,23 @@ const CreateForm = Form.create()(props => {
             </span>
           </Col>
         </Row>
-        <Row>
+        {choiceFeildCount > 1?<div>        <Row>
           <Col>
             <span>
               设置表间关系：
             </span>
           </Col>
         </Row>
-        <Row>
-          <StandardTableEdit
-            selectedRows={addTableSelectedRows}
-            data={addTableRows}
-            selectItemTable={dataList}
-            selectItemFeild={choiceFeild}
-            transMsg={getSelectRows}
-            scroll={{ y: 180 }}
-          />
-        </Row>
+          <Row>
+            <StandardTableEdit
+              selectedRows={addTableSelectedRows}
+              data={addTableRows}
+              selectItemTable={choicelist}
+              selectItemFeild={choiceFeild}
+              transMsg={getSelectRows}
+              scroll={{ y: 180 }}
+            />
+          </Row></div>:''}
         <Row>
           <Col>
             <span>
@@ -839,7 +849,7 @@ const CreateForm = Form.create()(props => {
 const ResourceDetail = Form.create()(props => {
   const {
     modalVisible, form, handleModalVisible, loading, data, columns, detailType, tableAndField,
-    radioSwitch, radioSwitcHandle, operateLog, lifelist, httpItem, searchHandle, sqlList, excSql, catalogTable,
+    radioSwitch, radioSwitcHandle, operateLog, lifelist, httpItem, searchHandle, sqlList, excSql, excSqlTableChange,catalogTable,
   } = props;
   const okHandle = () => {
     form.validateFields((err, fieldsValue) => {
@@ -895,6 +905,10 @@ const ResourceDetail = Form.create()(props => {
       title: '长度',
       width:'150px',
       dataIndex: 'len',
+    }, {
+      title: '所属表',
+      width:'150px',
+      dataIndex: 'tableName',
     }];
   const apilogcolumns = [
     {
@@ -908,11 +922,11 @@ const ResourceDetail = Form.create()(props => {
       dataIndex: 'content',
     }, {
       title: '最近一次接口调用开始时间',
-      width:'150px',
+      width:'200px',
       dataIndex: 'content',
     }, {
       title: '最近一次接口调用结束时间',
-      width:'150px',
+      width:'200px',
       dataIndex: 'content',
     }, {
       title: '累积调用次数',
@@ -1020,9 +1034,6 @@ const ResourceDetail = Form.create()(props => {
                   indexAndOr = andOr;
                 }}
               />
-              <DescriptionList size="large" col={1} title="描述" style={{ marginBottom: 32 }}>
-                <Description></Description>
-              </DescriptionList>
             </div> :
             <div>
               <DescriptionList size="large" title="请编写SQL语句" style={{ marginBottom: 0 }}>
@@ -1050,6 +1061,7 @@ const ResourceDetail = Form.create()(props => {
             loading={loading}
             data={sqlList}
             columns={gxxsjkdatacolumns}
+            onChange={excSqlTableChange}
           />
         </TabPane>
         <TabPane tab="表结构" key="2" >
@@ -1165,7 +1177,6 @@ export default class ResourceClassify extends PureComponent {
     choiceFeildCount: 0,
     radioSwitch: 'view',
   };
-
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
@@ -1321,6 +1332,7 @@ export default class ResourceClassify extends PureComponent {
       modalVisible: !!flag,
       choiceFeild: [],
       choiceFeildCount: 0,
+      choicelist:[],
       item: 1,
     });
   };
@@ -1681,9 +1693,12 @@ export default class ResourceClassify extends PureComponent {
     });
   };
   handleChoiceFeild = (list) => {
-    const { choiceFeild, choiceFeildCount } = this.state;
+    const { choiceFeild, choiceFeildCount ,choicelist} = this.state;
     this.setState({
       choiceFeildCount: choiceFeildCount + 1,
+    });
+    this.setState({
+      choicelist:choicelist.concat([{...choiseListItemData}]),
     });
     this.setState({
       choiceFeild: [...new Set(choiceFeild.concat(list))],
@@ -1711,6 +1726,20 @@ export default class ResourceClassify extends PureComponent {
     let params = {
       'params': index.sql,
       'dataSourceId': listItemData.dataSourceId,
+      tableId:0,
+      pageSize:10,
+      pageNum:1,
+    };
+    dispatch({
+      type: 'centersource/fetchTableData',
+      payload: params,
+    });
+  };
+  excSqlTableChange = (pagination, filtersArg, sorter) => {
+    const { dispatch } = this.props;
+    const params = {
+      pageNum: pagination.current,
+      pageSize: pagination.pageSize,
     };
     dispatch({
       type: 'centersource/fetchTableData',
@@ -1732,6 +1761,10 @@ export default class ResourceClassify extends PureComponent {
       'accordWith': value,
       'catalogId': listItemData.id,
       'params': param,
+      deriveId:0,
+      tableId:0,
+      pageSize:10,
+      pageNum:1,
     };
     dispatch({
       type: 'centersource/fetchView',
@@ -1746,7 +1779,7 @@ export default class ResourceClassify extends PureComponent {
       centersource: { sqlList, data: formData, dataList, lifelist: { list: lifelist }, httpItem },
       form,
     } = this.props;
-    const { selectedRows, modalVisible, modalVisibleCatlog, radioSwitch, modalVisibleResource, modalVisibleChoice, item, type, choiceFeild, choiceFeildCount, detailType } = this.state;
+    const { selectedRows, modalVisible, modalVisibleCatlog, radioSwitch, modalVisibleResource, modalVisibleChoice, item, type, choiceFeild, choiceFeildCount,choicelist, detailType } = this.state;
     const parentMethods = {
       httpItem: httpItem,
       handleStandardTableChange: this.handleStandardTableChangeDataSource,
@@ -1766,6 +1799,7 @@ export default class ResourceClassify extends PureComponent {
       type: type,
       handleType: this.handleType,
       choiceFeild: choiceFeild,
+      choicelist:choicelist,
       choiceFeildCount: choiceFeildCount,
     };
     const parentMethodsChoice = {
@@ -1785,6 +1819,7 @@ export default class ResourceClassify extends PureComponent {
       operateLog: operateLog,
       sqlList: sqlList,
       excSql: this.excSql,
+      excSqlTableChange:this.excSqlTableChange,
       lifelist: lifelist,
       httpItem: httpItem,
       searchHandle: this.searchHandle,
@@ -1827,18 +1862,34 @@ export default class ResourceClassify extends PureComponent {
               {/*}}>目录详情</a>*/}
               {/*<Divider type="vertical"/>*/}
               <a onClick={() => {
-                this.handleModalResource(text, true);
-              }}>资源详情</a>
-              <Divider type="vertical"/>
-              <a onClick={() => {
                 this.handleModal(text, true);
               }}>目数关联</a>
+              <Divider type="vertical"/>
+              {
+                text.sourceType? <a onClick={() => {
+                  this.handleModalResource(text, true);
+                }}>资源详情</a>: <span style={{color:'#a8abaf'}} onClick={() => {
+                  }}>资源详情</span>
+              }
+
+
             </Fragment>
           );
         },
       },
     ];
     const { getFieldDecorator } = form;
+    const formItemLayout = {
+      labelCol: {
+        xs: { span: 24 },
+        sm: { span: 6 },
+      },
+      wrapperCol: {
+        xs: { span: 24 },
+        sm: { span: 18 },
+        md: { span: 18 },
+      },
+    };
     return (
       <PageHeaderLayout>
         {/*<Col xl={6} lg={6} md={6} sm={6} xs={6} style={{ marginBottom: 24 }}>*/}
@@ -1852,8 +1903,8 @@ export default class ResourceClassify extends PureComponent {
               <Form onSubmit={this.handleSearch}>
                 {/*<div className={styles.tableListForm}>{this.renderForm()}</div>*/}
                 <Row>
-                  <Col md={10} sm={24}>
-                    <FormItem>
+                  <Col md={14} sm={24}>
+                    <FormItem {...formItemLayout} label="信息资源名称">
                       {getFieldDecorator('name')(<Input placeholder="请输入信息资源名称"/>)}
                     </FormItem>
                   </Col>
