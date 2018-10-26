@@ -1,4 +1,4 @@
-import { resourcefileLista} from '../services/api';
+import { resourcefileLista, downloadfile} from '../services/api';
 
 export default {
   namespace: 'resource_file',
@@ -25,6 +25,13 @@ export default {
         type: 'get',
         payload: response,
       });
+    },
+    *downloadfile({ payload }, { call, put }) {
+      const response = yield call(downloadfile, payload);
+      // yield put({
+      //   type: 'get',
+      //   payload: response,
+      // });
     },
     *add({ payload, callback }, { call, put }) {
       const response = yield call(addresourceclassify, payload);

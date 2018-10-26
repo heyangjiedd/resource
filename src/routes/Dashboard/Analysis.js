@@ -103,9 +103,9 @@ export default class Analysis extends Component {
       payload: { isCheck: 'check' },
     });
     // 2
-    dispatch({
-      type: 'charts/dataSourceCount',
-    });
+    // dispatch({
+    //   type: 'charts/dataSourceCount',
+    // });
     dispatch({
       type: 'charts/halfYearCount1',
       payload: { sourceType: 'db' },

@@ -1,5 +1,6 @@
 import { stringify } from 'qs';
 import request from '../utils/request';
+import download from '../utils/download';
 import requestToken from '../utils/requestToken';
 import requestDown from '../utils/requestDown';
 
@@ -136,7 +137,7 @@ export async function querycatalog(params) {
 }
 
 // 查询操作日志
-export async function operateLog(params) {
+export async function operateLogApi(params) {
   return request(`/operate/list?${stringify(params)}`);
 }
 
@@ -229,6 +230,11 @@ export async function resourcedownload(params) {
 // 查询文件列表
 export async function resourcefileLista(params) {
   return request(`/datasource/fileList?${stringify(params)}`);
+}
+
+// 下载文件
+export async function downloadfile(params) {
+  return download(`/datasource/download?${stringify(params)}`, params.fileName);
 }
 
 // 临时测试连通性

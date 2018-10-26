@@ -208,11 +208,11 @@ const ResourceDetail = Form.create()(props => {
     >
       <div>
         <DescriptionList size="large" col={2} title="基本信息详情" style={{ marginBottom: 32 }}>
-          <Description term="服务名称">{httpItem.sourceName}</Description>
-          <Description term="所属数据源">{httpItem.sourceType}</Description>
+          <Description term="服务名称">{httpItem.interfaceName}</Description>
+          <Description term="所属数据源">{httpItem.sourceName}</Description>
           <Description term="接口类型">{httpItem.interfaceType}</Description>
           <Description term="数据格式">{httpItem.content}</Description>
-          <Description term="服务类型">原生接口</Description>
+          <Description term="服务类型">代理接口</Description>
           <Description term="调用记录">0</Description>
           <Description term="服务地址">{httpItem.interfaceUrl}</Description>
         </DescriptionList>
@@ -433,7 +433,7 @@ export default class ResourceClassify extends PureComponent {
     const {
       centersource: { sqlList, data: formData, dataList, lifelist: { list: lifelist }, httpItem },
       loading,
-      catalog: { catalogItem, field, tableAndField, operateLog },
+      catalog: { catalogItem, field, tableAndField, logdata },
       classify: { treeData },
       form,
     } = this.props;
@@ -448,20 +448,36 @@ export default class ResourceClassify extends PureComponent {
       {
         title: '服务名称',
         width:'150px',
+        dataIndex: 'interfaceName',
+      },
+      {
+        title: '所属数据源',
+        width:'150px',
         dataIndex: 'sourceName',
       },
       {
         title: '数据源类型',
         width:'150px',
         dataIndex: 'sourceType',
+        render: (text, record, index) => {
+          return (
+            <span>API/{text}</span>
+          );
+        },
       },
+      //
+      // {
+      //   title: '接口类型',
+      //   width:'150px',
+      //   dataIndex: 'interfaceType',
+      // },
       {
         title: '服务类型',
         width:'150px',
-        dataIndex: 'interfaceType',
+        dataIndex: 'serviceType',
         render: (text, record, index) => {
           return (
-            <span>原生接口</span>
+            <span>代理接口</span>
           );
         },
       },
@@ -490,7 +506,7 @@ export default class ResourceClassify extends PureComponent {
       handleModalVisible: this.handleModalVisible,
     };
     const parentMethodsResource = {
-      operateLog: operateLog,
+      operateLog: logdata,
       lifelist: lifelist,
       httpItem: httpItem,
       handleModalVisible: this.handleModalVisibleResource,
@@ -509,9 +525,9 @@ export default class ResourceClassify extends PureComponent {
             <div className={styles.tableList}>
               <Form onSubmit={this.handleSearch}>
               <Row gutter={{ md: 2, lg: 6, xl: 12 }}>
-                <Col md={8} sm={24}>
+                <Col offset={14} md={8} sm={24}>
                   <FormItem>
-                    {getFieldDecorator('sourceName')(<Input placeholder="请输入服务名称"/>)}
+                    {getFieldDecorator('interfaceName')(<Input placeholder="请输入服务名称"/>)}
                   </FormItem>
                 </Col>
                 <Col md={2} sm={24}>

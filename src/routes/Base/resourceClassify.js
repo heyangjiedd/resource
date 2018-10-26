@@ -61,6 +61,9 @@ const CreateForm = Form.create()(props => {
     },
   };
   let title = itemDataStatus === 1 ? '编辑分类' : itemDataStatus === 2 ? '查看分类' : '新增分类';
+  if( title === '新增分类' && listItemData.parentName) {
+    title = "新增子类";
+  }
   const footer = (<Row>
     <Col md={24} sm={24}>
       <Button onClick={() => {
@@ -87,17 +90,17 @@ const CreateForm = Form.create()(props => {
         {form.getFieldDecorator('parentName', {
           rules: [{ message: '请输入父级分类名称' }],
           initialValue: listItemData.parentName,
-        })(<Input disabled placeholder="请输入父级分类名称"/>)}
+        })(<Input disabled/>)}
       </FormItem>}
       <FormItem {...formItemLayout} label="分类名称">
         {form.getFieldDecorator('name', {
           rules: [{ required: true, message: '请输入分类名称' },{ max: 20, message: '最大长度不超过20' }], initialValue: listItemData.name,
-        })(<Input disabled={itemDataStatus === 2} placeholder="请输入分类名称"/>)}
+        })(<Input disabled={itemDataStatus === 2} placeholder={itemDataStatus === 2?'':"请输入分类名称"}/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="排序号">
         {form.getFieldDecorator('sort', {
-          rules: [{ required: true, message: '请输入排序号' },{pattern:/^[1-9]+\d*$/,message:'输入正整数'},{ max: 11, message: '最大长度不超过11' }], initialValue: listItemData.sort,
-        })(<Input type='number' disabled={itemDataStatus === 2} placeholder="请输入排序号"/>)}
+          rules: [{ required: true, message: '请输入排序号' },{pattern:/^[1-9]+\d*$/,message:'输入正整数'},{ max: 9, message: '最大长度不超过9' }], initialValue: listItemData.sort+'',
+        })(<Input type='number' disabled={itemDataStatus === 2} placeholder={itemDataStatus === 2?'':"请输入排序号"}/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="分类描述">
         {form.getFieldDecorator('description', {
@@ -107,7 +110,7 @@ const CreateForm = Form.create()(props => {
           <TextArea
             style={{ minHeight: 32 }}
             disabled={itemDataStatus === 2}
-            placeholder="请输入你的分类描述"
+            placeholder={itemDataStatus === 2?'':"请输入你的分类描述"}
             rows={4}
           />,
         )}

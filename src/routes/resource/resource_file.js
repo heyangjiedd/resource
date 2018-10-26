@@ -134,7 +134,7 @@ const ResourceDetail = Form.create()(props => {
       <div>
         <DescriptionList size="large" col={1} title="文件信息" style={{ marginBottom: 32 }}>
           <Description term="文件名称">{itemData.name}</Description>
-          <Description term="文件描述">{itemData.description}</Description>
+          {/*<Description term="文件描述">{itemData.description}</Description>*/}
         </DescriptionList>
         <DescriptionList size="large" title="数据调用记录" style={{ marginBottom: 32 }}>
           <StandardTableNoCheck
@@ -163,6 +163,7 @@ export default class ResourceClassify extends PureComponent {
     expandForm: false,
     selectedRows: [],
     formValues: {},
+    tblFormValues: {},
     listItemData: {},
     testList: [],
     isFileDetail: false,
@@ -216,7 +217,7 @@ export default class ResourceClassify extends PureComponent {
 
   handleStandardTableChangeDetail = (pagination, filtersArg, sorter) => {
     const { dispatch } = this.props;
-    const { formValues } = this.state;
+    const { tblFormValues } = this.state;
 
     const filters = Object.keys(filtersArg).reduce((obj, key) => {
       const newObj = { ...obj };
@@ -227,7 +228,7 @@ export default class ResourceClassify extends PureComponent {
     const params = {
       pageNum: pagination.current,
       pageSize: pagination.pageSize,
-      ...formValues,
+      ...tblFormValues,
       ...filters,
     };
     if (sorter.field) {
@@ -435,6 +436,15 @@ export default class ResourceClassify extends PureComponent {
     const { dispatch, form } = this.props;
     form.validateFields((err, fieldsValue) => {
       if (err) return;
+
+      const values = {
+        ...fieldsValue,
+      };
+      this.setState({
+        tblFormValues: values,
+      });
+
+
       dispatch({
         type: 'centersource/fetchFile',
         payload: {
@@ -445,7 +455,16 @@ export default class ResourceClassify extends PureComponent {
     });
   };
   download = (index) => {
-    window.open( '/datasource/download?id='+index.id);
+    // e.preventDefault();
+    const { dispatch } = this.props;
+    // window.open( '/datasource/download?id='+index.id);
+    dispatch({
+      type: 'resource_file/downloadfile',
+      payload: {
+        id: index.id,
+        fileName: index.name,
+      },
+    });
     // var xmlhttp = new XMLHttpRequest();
     // xmlhttp.open('get', '/datasource/download?id=' + index.id, true);
     // xmlhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded; charset=UTF-8');
@@ -502,7 +521,7 @@ export default class ResourceClassify extends PureComponent {
       centersource: { data, lifelist, orgList },
       loading,
       classify: { treeData },
-      catalog: { catalogItem, field, tableAndField, operateLog },
+      catalog: { catalogItem, field, tableAndField, logdata },
       form,
     } = this.props;
     const { selectedRows, modalVisible, lifelistlistItemData, testModalVisible, isFileDetail } = this.state;
@@ -552,11 +571,11 @@ export default class ResourceClassify extends PureComponent {
                 this.getFileDetailHandle(text, true);
               }}>查看</a>
               <Divider type="vertical"/>
-              {/*<a onClick={() => {*/}
-                {/*this.download(text);*/}
-              {/*}}>下载</a>*/}
+              <a onClick={() => {
+                this.download(text);
+              }}>下载</a>
               {/*<Divider type="vertical"/>*/}
-              <a href={"/datasource/download?id="+text.id}>下载</a>
+              {/*<a href={"/datasource/download?id="+text.id}>下载</a>*/}
               {/*<Divider type="vertical"/>*/}
               {/*<a onClick={() => {*/}
               {/*this.download1(text);*/}
@@ -632,7 +651,7 @@ export default class ResourceClassify extends PureComponent {
       testHandleAdd: this.testHandleAdd,
     };
     const parentMethodsResource = {
-      operateLog: operateLog,
+      operateLog: logdata,
       handleModalVisible: this.handleModalVisible,
     };
     const { getFieldDecorator } = form;
@@ -696,10 +715,10 @@ export default class ResourceClassify extends PureComponent {
                       {getFieldDecorator('file')(
                         < Select placeholder='请选择数据源类型' style={{ width: '100%' }}>
                           <Option value='all'>全选</Option>
-                          <Option value='ftp'>普通文件系统/ftp</Option>
-                          <Option value="sftp">普通文件系统/sftp</Option>
-                          <Option value='local'>普通文件系统/本地磁盘</Option>
-                          <Option value="share">普通文件系统/共享文件夹</Option>
+                          <Option value='ftp'>文件系统/ftp</Option>
+                          <Option value="sftp">文件系统/sftp</Option>
+                          <Option value='local'>文件系统/本地磁盘</Option>
+                          <Option value="share">文件系统/共享文件夹</Option>
                         </Select>,
                       )}
                     </FormItem>

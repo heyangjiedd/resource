@@ -1,4 +1,4 @@
-import { Table, Input, Button, Popconfirm, Form, Row, Col, Select } from 'antd';
+import { Table, Input, Button, Popconfirm, Form, Row, Col, Select, message } from 'antd';
 import React, { Fragment } from 'react';
 import SimpleTree from '../SimpleTree';
 import moment from 'moment/moment';
@@ -209,6 +209,8 @@ class EditableTable extends React.Component {
   searchhandle = ()=>{
     const { selectItemFeild, search } = this.props;
     const { dataSource, andOr } = this.state;
+    console.log( dataSource );
+    let validSearch = false;
     const arr = dataSource.map(item =>{
       let str = '';
       switch (item.condition) {
@@ -224,11 +226,30 @@ class EditableTable extends React.Component {
         case '$and':str = '是';break;
         case '$or':str = '不是';break;
       }
-      return '"'+item.field + '"'+ str + '"'+ item.value+ '"'
+      if( item.field !== '' && str !== '' && item.value !== '' ) {
+        validSearch = true;
+        return '"' + item.field + '"' + str + '"' + item.value + '"'
+      } else {
+        return '';
+      }
     })
-    let description =  arr.join('，'+(andOr=='$and'?'全部':'任何')+'，')
-    this.setState({ description:description });
-    search(dataSource, andOr);
+
+    //去掉空
+    let newDataSource = [];
+    for( let i=0; i<dataSource.length; i++ ) {
+      let item = dataSource[i];
+      if( item.field !== '' && item.condition !== '' && item.value !== '' ) {
+        newDataSource.push(item);
+      }
+    }
+
+    if( validSearch || dataSource.length == 0 ) {
+      let description = arr.join('，' + (andOr == '$and' ? '全部' : '任何') + '，')
+      this.setState({ description: description });
+      search(newDataSource, andOr);
+    } else {
+      message.error("请完善条件内容");
+    }
   }
 
   save = (text, record) => {

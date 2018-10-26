@@ -1,6 +1,6 @@
 import {
-  catalogList, catalogListTree, querycatalogItem, tableField, itemField,operateLog,
-  catalogApi, catalogCollection, catalogFile, catalogTableAndTableField,catalogTable
+  catalogList, catalogListTree, querycatalogItem, tableField, itemField,operateLogApi,
+  catalogApi, catalogCollection, catalogFile, catalogTableAndTableField,catalogTable,sourceTableField
 } from '../services/api';
 
 export default {
@@ -18,11 +18,12 @@ export default {
       sourceTable:{},
       tableFieldList:[]
     }],
-    operateLog:{
+    logdata:{
       list: [],
       pagination: {},
     },
-    catTable:[]
+    catTable:[],
+    sourceTableField:[],
   },
 
   effects: {
@@ -48,6 +49,13 @@ export default {
         payload: response,
       });
     },
+    * sourceTable({ payload }, { call, put }){
+      const response = yield call(sourceTableField, payload);
+      yield put({
+        type: 'sourceTablePut',
+        payload: response,
+      });
+    },
     * tableField({ payload }, { call, put }) {
       const response = yield call(tableField, payload);
       yield put({
@@ -56,7 +64,7 @@ export default {
       });
     },
     * operateLog({ payload }, { call, put }) {
-      const response = yield call(operateLog, payload);
+      const response = yield call(operateLogApi, payload);
       yield put({
         type: 'log',
         payload: response,
@@ -124,6 +132,12 @@ export default {
   },
 
   reducers: {
+    sourceTablePut(state, action) {
+      return {
+        ...state,
+        sourceTableField: action.payload,
+      };
+    },
     catTable(state, action) {
       return {
         ...state,

@@ -127,7 +127,8 @@ class EditableTable extends React.Component {
   handleDelete = (key) => {
     const dataSource = [...this.state.dataSource];
     const { selectedRowKeys } = this.state;
-    this.setState({ dataSource: dataSource.filter(item => !selectedRowKeys.includes(item.key)) });
+    this.setState({ dataSource:dataSource.filter(item => !selectedRowKeys.includes(item.key)) });
+    this.props.transMsg(dataSource.filter(item => !selectedRowKeys.includes(item.key)) );
     // this.setState({ dataSource: dataSource.filter(item => item.key !== key) });
   }
 

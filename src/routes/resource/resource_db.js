@@ -288,6 +288,7 @@ export default class ResourceClassify extends PureComponent {
     expandForm: false,
     selectedRows: [],
     formValues: {},
+    tblFormValues: {},
     testList: [],
     testSuccess: 0,
     testFail: 0,
@@ -348,8 +349,8 @@ export default class ResourceClassify extends PureComponent {
     // });
   };
   handleStandardTableChangeDetail = (pagination, filtersArg, sorter) => {
-    const { dispatch } = this.props;
-    const { formValues } = this.state;
+    const { dispatch, form } = this.props;
+    const { tblFormValues } = this.state;
 
     const filters = Object.keys(filtersArg).reduce((obj, key) => {
       const newObj = { ...obj };
@@ -360,12 +361,13 @@ export default class ResourceClassify extends PureComponent {
     const params = {
       pageNum: pagination.current,
       pageSize: pagination.pageSize,
-      ...formValues,
+      ...tblFormValues,
       ...filters,
     };
     if (sorter.field) {
       params.sorter = `${sorter.field}_${sorter.order}`;
     }
+
     dispatch({
       type: 'centersource/fetchTablePage',
       payload: { ...params, id: listItemData.id },
@@ -461,9 +463,17 @@ export default class ResourceClassify extends PureComponent {
     const { dispatch, form } = this.props;
     form.validateFields((err, fieldsValue) => {
       if (err) return;
+
+      const values = {
+        ...fieldsValue,
+      };
+      this.setState({
+        tblFormValues: values,
+      });
+
       dispatch({
         type: 'centersource/fetchTablePage',
-        payload: { tableId: listItemData.id ,name:fieldsValue.name},
+        payload: { id: listItemData.id ,name:fieldsValue.name},
       });
     });
   };
@@ -664,6 +674,11 @@ export default class ResourceClassify extends PureComponent {
         dataIndex: 'content',
       },
       // {
+      //   title: '字段数',
+      //   width:'150px',
+      //   dataIndex: 'fieldNum',
+      // },
+      // {
       //   title: '所属组织机构',
       //   width:'150px',
       //   dataIndex: 'orgId',
@@ -737,7 +752,78 @@ export default class ResourceClassify extends PureComponent {
       {
         title: '数据源类型',
         width:'150px',
-        render: (text, record, index) => <span>{listItemData.sourceType}</span>,
+        render: (text, record, index) => <span>{listItemData.sourceType=='mongo'?'非关系型数据库/MongoDB':'非关系型数据库/hbase'}</span>,
+      },
+      {
+        title: '数据源类型',
+        width:'150px',
+        render: (text, record, index) => <span>集合</span>,
+      },
+      // {
+      //   title: '表类型',
+      //   width:'150px',
+      //   dataIndex: 'type',
+      // },
+      // {
+      //   title: '字段数',
+      //   width:'150px',
+      //   dataIndex: 'selectedFieldNum',
+      // },
+      {
+        title: '操作',
+        width:'150px',
+        render: (text, record, index) => {
+          return (
+            <Fragment>
+              <a onClick={() => {
+                this.getFileDetailHandle(text, true);
+              }}>查看</a>
+            </Fragment>
+          );
+        },
+      },
+    ];
+    const detailColumns1 = [
+      {
+        title: '序号',
+        width:'150px',
+        render: (text, record, index) => <span>{index + 1}</span>,
+      },
+      {
+        title: '表名',
+        width:'150px',
+        dataIndex: 'name',
+      },
+      {
+        title: '表描述',
+        width:'150px',
+        dataIndex: 'description',
+      },
+      {
+        title: '所属数据源',
+        width:'150px',
+        render: (text, record, index) => <span>{listItemData.sourceName}</span>,
+      },
+      {
+        title: '数据源类型',
+        width:'150px',
+        render: (text, record, index) =>
+          {
+            // BUG #57779
+            let sourceType = '关系型数据库/MySql';
+            if(listItemData.sourceType=='mongo') {
+              sourceType = '非关系型数据库/MongoDB';
+            } else if(listItemData.sourceType=='hbase') {
+              sourceType = '非关系型数据库/HBase';
+          } else if(listItemData.sourceType=='mysql') {
+              sourceType = '关系型数据库/MySql';
+          } else if(listItemData.sourceType=='oracle') {
+              sourceType = '关系型数据库/Oracle';
+          } else if(listItemData.sourceType=='sqlserver') {
+              sourceType = '关系型数据库/SqlServer';
+          }
+          return <span>{sourceType}</span>
+          }
       },
       {
         title: '表类型',
@@ -747,7 +833,7 @@ export default class ResourceClassify extends PureComponent {
       {
         title: '字段数',
         width:'150px',
-        dataIndex: 'selectedFieldNum',
+        dataIndex: 'fieldNum',
       },
       {
         title: '操作',
@@ -839,7 +925,7 @@ export default class ResourceClassify extends PureComponent {
                 selectedRows={[]}
                 loading={loading}
                 data={dataListPage}
-                columns={detailColumns}
+                columns={(listItemData.sourceType == 'mongo'||listItemData.sourceType == 'hbase')?detailColumns:detailColumns1}
                 onSelectRow={this.handleSelectRows}
                 onChange={this.handleStandardTableChangeDetail}
               />

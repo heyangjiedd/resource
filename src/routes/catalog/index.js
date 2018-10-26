@@ -328,7 +328,7 @@ const CreateForm = Form.create()(props => {
   const {
     modalVisible, form, handleAdd, handleModalVisible, data, handleItem, item, catalogItem, dataList, handleItemSearch,
     searchHandle, getListBuyId, choiseFeild, choiseList, type, handleType, choiceFeild, choiceFeildCount,choicelist, catalogItemChange,
-    selectHttpItem, httpItem, lifelist, handleStandardTableChange,
+    selectHttpItem, httpItem, lifelist, handleStandardTableChange,sourceTableField
   } = props;
   const { getFieldDecorator } = form;
   const columns = [
@@ -520,7 +520,11 @@ const CreateForm = Form.create()(props => {
   };
   const submitHandle = () => {
     if (item == 2) {
-      if(choiceFeildCount>=2){
+      if(choiceFeildCount == 0){
+        message.error('请先选择字段');
+        return
+      }
+      if(choiceFeildCount>=2&&setTableRows.length==0){
         message.error('请先设置表间关系');
         return
       }
@@ -532,6 +536,10 @@ const CreateForm = Form.create()(props => {
       }
       handleAdd(fgxxsjkHandleSelectRows);
     } else if (item == 4) {
+      if( fileTableSelectedRows.length === 0 ) {
+        message.error('请先勾选数据');
+        return
+      }
       handleAdd(fileTableSelectedRows);
     } else if (item == 5) {
       handleAdd();
@@ -749,7 +757,7 @@ const CreateForm = Form.create()(props => {
         {/*</Row>*/}
         <Row>
           <StandardTableNothing
-            data={dataList}
+            data={sourceTableField}
             scroll={{ y: 180 }}
             columns={columnsdataList}
           />
@@ -835,11 +843,11 @@ const CreateForm = Form.create()(props => {
         </Row>
       </div> : <div>
         <DescriptionList size="large" title="详情" style={{ marginBottom: 32 }}>
-          <Description term="服务名称">{httpItem.sourceName}</Description>
+          <Description term="服务名称">{httpItem.interfaceName}</Description>
           <Description term="所属数据源">{httpItem.sourceName}</Description>
           <Description term="接口类型">{httpItem.interfaceType}</Description>
           <Description term="数据格式">{httpItem.content}</Description>
-          <Description term="服务类型">{httpItem.interfaceName}</Description>
+          <Description term="服务类型">代理接口</Description>
           <Description term="服务地址">{httpItem.interfaceUrl}</Description>
         </DescriptionList>
       </div>}
@@ -947,27 +955,27 @@ const ResourceDetail = Form.create()(props => {
     {
       title: '文件名称',
       width:'150px',
-      dataIndex: 'content',
+      dataIndex: 'fileId',
     }, {
       title: '服务调用用户',
       width:'150px',
-      dataIndex: 'content',
+      dataIndex: 'userName',
     }, {
       title: '最近一次数据调用开始时间',
       width:'150px',
-      dataIndex: 'content',
+      dataIndex: 'startTime',
     }, {
       title: '最近一次数据调用结束时间',
       width:'150px',
-      dataIndex: 'content',
+      dataIndex: 'endTime',
     }, {
       title: '累积调用次数',
       width:'150px',
-      dataIndex: 'content',
+      dataIndex: 'num',
     }, {
       title: '调用方式',
       width:'150px',
-      dataIndex: 'content',
+      dataIndex: 'type',
     }];
   const fgxxsjkdatacolumns = [
     {
@@ -989,11 +997,12 @@ const ResourceDetail = Form.create()(props => {
       title: '文件类型',
       width:'150px',
       dataIndex: 'type',
-    }, {
-      title: '文件描述',
-      width:'150px',
-      dataIndex: 'description',
     },
+    // {
+    //   title: '文件描述',
+    //   width:'150px',
+    //   dataIndex: 'description',
+    // },
   ];
   let indexList = [];
   let indexAndOr = '';
@@ -1095,11 +1104,12 @@ const ResourceDetail = Form.create()(props => {
         </div> : detailType == 3 ?
           <div>
             <DescriptionList size="large" col={2} title="基本信息详情" style={{ marginBottom: 32 }}>
-              <Description term="服务名称">{httpItem.sourceName}</Description>
+              <Description term="服务名称">{httpItem.interfaceName}</Description>
               <Description term="所属数据源">{httpItem.sourceName}</Description>
+              <Description term="调用数量">{operateLog.total||0}</Description>
               <Description term="接口类型">{httpItem.interfaceType}</Description>
               <Description term="数据格式">{httpItem.content}</Description>
-              <Description term="服务类型">{httpItem.interfaceName}</Description>
+              <Description term="服务类型">代理接口</Description>
               <Description term="服务地址">{httpItem.interfaceUrl}</Description>
             </DescriptionList>
             <DescriptionList size="large" title="接口调用记录" style={{ marginBottom: 32 }}>
@@ -1181,6 +1191,7 @@ export default class ResourceClassify extends PureComponent {
     const { dispatch } = this.props;
     dispatch({
       type: 'catalog/fetch',
+      payload: {classifyId:307024003},
     });
     // dispatch({
     //   type: 'catalog/tree',
@@ -1550,9 +1561,14 @@ export default class ResourceClassify extends PureComponent {
         payload: { catalogId: listItemData.id },
       });
       dispatch({
-        type: 'centersource/fetchTable',
-        payload: { id: data.id },
+        type: 'catalog/sourceTable',
+        payload: { catalogId: listItemData.id,
+          dataSourceId:data.id },
       });
+      // dispatch({
+      //   type: 'centersource/fetchTable',
+      //   payload: { id: data.id },
+      // });
     }
     if (index == 4) {
       dispatch({
@@ -1774,7 +1790,7 @@ export default class ResourceClassify extends PureComponent {
 
   render() {
     const {
-      catalog: { data, catalogItem, field, tableAndField, operateLog, catTable },
+      catalog: { data, catalogItem, field, tableAndField, logdata, catTable,sourceTableField },
       loading,
       centersource: { sqlList, data: formData, dataList, lifelist: { list: lifelist }, httpItem },
       form,
@@ -1798,6 +1814,7 @@ export default class ResourceClassify extends PureComponent {
       modalVisible: modalVisible,
       type: type,
       handleType: this.handleType,
+      sourceTableField:sourceTableField,
       choiceFeild: choiceFeild,
       choicelist:choicelist,
       choiceFeildCount: choiceFeildCount,
@@ -1816,7 +1833,7 @@ export default class ResourceClassify extends PureComponent {
     const parentMethodsResource = {
       handleAdd: this.handleAddResource,
       radioSwitcHandle: this.radioSwitcHandle,
-      operateLog: operateLog,
+      operateLog: logdata,
       sqlList: sqlList,
       excSql: this.excSql,
       excSqlTableChange:this.excSqlTableChange,
@@ -1903,12 +1920,12 @@ export default class ResourceClassify extends PureComponent {
               <Form onSubmit={this.handleSearch}>
                 {/*<div className={styles.tableListForm}>{this.renderForm()}</div>*/}
                 <Row>
-                  <Col md={14} sm={24}>
+                  <Col offset={8} md={14} sm={24}>
                     <FormItem {...formItemLayout} label="信息资源名称">
                       {getFieldDecorator('name')(<Input placeholder="请输入信息资源名称"/>)}
                     </FormItem>
                   </Col>
-                  <Col md={4} sm={24}>
+                  <Col md={2} sm={24}>
                     <FormItem>
                       <Button type="primary" htmlType="submit">
                         查询

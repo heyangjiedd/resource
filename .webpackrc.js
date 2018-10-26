@@ -10,7 +10,9 @@ export default {
   },
   proxy: {
     "/": {
-      target: "http://120.77.155.17:8011/",
+      // target: "http://120.77.155.17:8011/",
+      target: "http://192.168.13.204/",
+      // target: "http://127.0.0.1/",
       changeOrigin: true,
       pathRewrite: { "^/" : "" }
     }
