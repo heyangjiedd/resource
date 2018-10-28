@@ -77,7 +77,7 @@ const ChoiceList = Form.create()(props => {
   } = props;
   const okHandle = () => {
     setChoicedaraListItem(selectedRows);
-    handleChoiceFeild(selectedRows);
+    // handleChoiceFeild(selectedRows);
     handleModalVisible();
   };
   let selectedRows = [];
@@ -141,7 +141,7 @@ const CreateForm = Form.create()(props => {
     modalVisible, form, handleAdd, handleModalVisible, data, handleItem, item, catalogItem, dataList, handleItemSearch,
     searchHandle, getListBuyId, choiseFeild, choiseList, type, handleType, choiceFeild, choicelist, catalogItemChange,
     selectHttpItem, httpItem, lifelist, handleStandardTableChange, handleStandardTableChangeFile, selectChange, selectItem,
-    tableSelectedRows, tableSelectedRowsHandle, onChangeRadioGroup,
+    tableSelectedRows, tableSelectedRowsHandle, onChangeRadioGroup,choicedataList,
   } = props;
   const { getFieldDecorator } = form;
   const columns = [
@@ -340,6 +340,13 @@ const CreateForm = Form.create()(props => {
   let setTableRows = [];
   let fgxxsjkHandleSelectRows = [];
   let fileTableSelectedRows = [];
+  let tableLength = choicedataList.filter(item=>{return item.selectArray.length>0}).length;
+  let feildLength = choicedataList.reduce((total,item)=>{
+    return item.selectArray.length+total
+  },0)
+  let felds = choicedataList.reduce((total,item)=>{
+    return total.concat(item.selectArray);
+  },[])
   const getSelectRows = (data) => {
     setTableRows = data;
   };
@@ -358,11 +365,11 @@ const CreateForm = Form.create()(props => {
       };
       if (item == 2) {
         if (selectItem == 1) {
-          if (choicelist.length >= 2 && setTableRows.length == 0) {
+          if (tableLength >= 2 && setTableRows.length == 0) {
             message.error('请先设置表间关系');
             return;
           }
-          if (choicelist.length == 0) {
+          if (tableLength == 0) {
             message.error('请先选择字段');
             return;
           }
@@ -594,7 +601,7 @@ const CreateForm = Form.create()(props => {
         {selectItem == 1 ? <div>
             <Row>
               <StandardTableNothing
-                data={dataList}
+                data={choicedataList}
                 scroll={{ y: 180 }}
                 columns={columnsdataList}
               />
@@ -602,7 +609,7 @@ const CreateForm = Form.create()(props => {
             <Row>
               <Col>
             <span>
-              已选字段：<span>{choiceFeild.map(item => {
+              已选字段：<span>{felds.map(item => {
               return item.name;
             }).join(',')}</span>
             </span>
@@ -611,11 +618,11 @@ const CreateForm = Form.create()(props => {
             <Row>
               <Col>
             <span>
-              已选择<span>{choicelist.length}</span>张表，共<span>{choiceFeild.length}</span>个字段，需设置至少<span>{(choicelist.length || 1) - 1}</span>个表间关系
+              已选择<span>{tableLength}</span>张表，共<span>{feildLength}</span>个字段，需设置至少<span>{(tableLength|| 1) - 1}</span>个表间关系
             </span>
               </Col>
             </Row>
-            {choicelist.length > 1 ? <div><Row>
+            {tableLength > 1 ? <div><Row>
               <Col>
             <span>
               设置表间关系：
@@ -626,8 +633,9 @@ const CreateForm = Form.create()(props => {
                 <StandardTableEdit
                   selectedRows={addTableSelectedRows}
                   data={addTableRows}
-                  selectItemTable={choicelist}
-                  selectItemFeild={choiceFeild}
+                  // selectItemTable={choicelist}
+                  // selectItemFeild={choiceFeild}
+                  allData={choicedataList}
                   transMsg={getSelectRows}
                   scroll={{ y: 180 }}
                 />
@@ -1554,7 +1562,7 @@ export default class ResourceClassify extends PureComponent {
           let arr = res.map(item => {
             return { ...item, selectArray: [] };
           });
-          this.setState({ choicedataList: arr || [], choicedataListItems: [] });
+          this.setState({ choicedataList: arr || []});
         },
       });
     }
@@ -1727,7 +1735,8 @@ export default class ResourceClassify extends PureComponent {
       data: formData,
       catalogItem: catalogItem,
       catalogItemChange: this.catalogItemChange,
-      dataList: choicedataList,
+      dataList: dataList,
+      choicedataList:choicedataList,
       item: item,
       modalVisible: modalVisible,
       type: type,
