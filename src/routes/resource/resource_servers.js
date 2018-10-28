@@ -210,10 +210,10 @@ const ResourceDetail = Form.create()(props => {
         <DescriptionList size="large" col={2} title="基本信息详情" style={{ marginBottom: 32 }}>
           <Description term="服务名称">{httpItem.interfaceName}</Description>
           <Description term="所属数据源">{httpItem.sourceName}</Description>
+          <Description term="调用记录">{apilogcolumns.total||0}</Description>
           <Description term="接口类型">{httpItem.interfaceType}</Description>
           <Description term="数据格式">{httpItem.content}</Description>
           <Description term="服务类型">代理接口</Description>
-          <Description term="调用记录">0</Description>
           <Description term="服务地址">{httpItem.interfaceUrl}</Description>
         </DescriptionList>
         <DescriptionList size="large" title="接口调用记录" style={{ marginBottom: 32 }}>

@@ -23,7 +23,14 @@ class StandardTable extends PureComponent {
       needTotalList,
     };
   }
-
+  componentWillMount(){
+    const { defaultSelectRows } = this.props;
+    if(defaultSelectRows&&defaultSelectRows.length > 0){
+      this.setState({ selectedRowKeys:defaultSelectRows.map(item=>{
+          return item.id
+        })});
+    }
+  }
   componentWillReceiveProps(nextProps) {
     // clean state
     if (nextProps.selectedRows.length === 0) {
@@ -91,7 +98,7 @@ class StandardTable extends PureComponent {
       <div className={styles.standardTable}>
         <Table
           loading={loading}
-          rowKey={rowKey || 'key'}
+          rowKey={rowKey || 'id'}
           size='small'
           rowSelection={rowSelection}
           dataSource={list}

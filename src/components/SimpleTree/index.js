@@ -72,7 +72,7 @@ class SimpleTree extends PureComponent {
       searchValue: '',
       autoExpandParent: true,
       ss: { width: '220px' },
-      open:false
+      open: false,
     };
   }
 
@@ -84,7 +84,7 @@ class SimpleTree extends PureComponent {
   };
   toggle = (index) => {
     this.setState({
-      ss: { width: index?'25px':'220px' },
+      ss: { width: index ? '25px' : '220px' },
     });
     this.setState({
       open: !this.state.open,
@@ -92,8 +92,8 @@ class SimpleTree extends PureComponent {
   };
   groupTree = (data) => {
     let result = [];
-    let tree = data.map(item=>{
-       return {...item}
+    let tree = data.map(item => {
+      return { ...item };
     });
     for (let i = 0; i < tree.length; i++) {
       if (tree[i].parentId) {
@@ -112,43 +112,47 @@ class SimpleTree extends PureComponent {
   };
 
   render() {
-    const { searchValue, expandedKeys, autoExpandParent, ss, title ,open} = this.state;
+    const { searchValue, expandedKeys, autoExpandParent, ss, title, open, } = this.state;
     const { handleTree, data } = this.props;
     let treeData = this.groupTree(data);
     const loop = data => data.map((item) => {
       const title = <span>{item.name}</span>;
       if (item.children) {
         return (
-          <TreeNode key={item.id} title={title}  value={item.id}>
+          <TreeNode key={item.id} title={title} value={item.id}>
             {loop(item.children)}
           </TreeNode>
         );
       }
-      return <TreeNode key={item.id} title={title}  value={item.id}/>;
+      return <TreeNode key={item.id} title={title} value={item.id}/>;
     });
     return (
       <div className={styles.tree_back_ground} style={ss}>
         <div className={styles.tree_box}>
-        <div className={styles.tree_title}>{!open&&title}
-          {open?<Icon
-            className={styles.trigger}
-            type={'menu-unfold'}
-            onClick={()=>{this.toggle(false)}}
-          />:<Icon
-            className={styles.trigger}
-            type={'menu-fold'}
-            onClick={()=>{this.toggle(true)}}
-          />}
+          <div className={styles.tree_title}>{!open && title}
+            {open ? <Icon
+              className={styles.trigger}
+              type={'menu-unfold'}
+              onClick={() => {
+                this.toggle(false);
+              }}
+            /> : <Icon
+              className={styles.trigger}
+              type={'menu-fold'}
+              onClick={() => {
+                this.toggle(true);
+              }}
+            />}
           </div>
-        {/*<Search style={{ marginBottom: 8 }} placeholder="Search" onChange={this.onChange} />*/}
-        {!open&&<Tree
-          onSelect={handleTree}
-          onExpand={this.onExpand}
-          expandedKeys={expandedKeys}
-          autoExpandParent={autoExpandParent}
-        >
-          {loop(treeData)}
-        </Tree>}
+          {/*<Search style={{ marginBottom: 8 }} placeholder="Search" onChange={this.onChange} />*/}
+          {!open && <Tree
+            onSelect={handleTree}
+            onExpand={this.onExpand}
+            expandedKeys={expandedKeys}
+            autoExpandParent={autoExpandParent}
+          >
+            {loop(treeData)}
+          </Tree>}
         </div>
       </div>
     );

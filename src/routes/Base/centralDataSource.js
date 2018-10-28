@@ -48,6 +48,7 @@ let listItemData = {};
 let createItemData = {};
 let createItemDataCascader = [];
 let itemDataStatus = 1;
+let searchData = {};
 
 const CreateForm = Form.create()(props => {
   const {
@@ -61,8 +62,13 @@ const CreateForm = Form.create()(props => {
       handleAdd(fieldsValue);
     });
   };
-  const exHandle = (index) => {
+  const exHandle = (index,_is) => {
     form.validateFields((err, fieldsValue) => {
+      if(_is){
+        createItemData = { ...createItemData, ...fieldsValue };
+        handleItem(index);
+        return;
+      }
       if (err) return;
       if (index != 4) {
         if (index == 3) {
@@ -90,6 +96,7 @@ const CreateForm = Form.create()(props => {
         createItemData = { ...createItemData, ...fieldsValue };
       } else {
         createItemData = { ...createItemData, ...fieldsValue };
+        createItemDataCascader = [];
         handleAdd(createItemData);
       }
     });
@@ -147,8 +154,7 @@ const CreateForm = Form.create()(props => {
     <Row>
       <Col md={24} sm={24}>
         <Button onClick={() => {
-        handleItem(1);
-        // exHandle(1);
+        exHandle(1,true);
       }}
         >
         上一步
@@ -174,7 +180,7 @@ const CreateForm = Form.create()(props => {
     <Row>
       <Col md={24} sm={24}>
         <Button onClick={() => {
-        handleItem(2);
+          exHandle(2,true);
       }}
         >
         上一步
@@ -258,7 +264,7 @@ const CreateForm = Form.create()(props => {
             initialValue: `${createItemData.resourceId  }`,
           rules: [{ required: true, message: '请选择资源分类' }],
           })(
-            <Select placeholder="选择资源分类" style={{ width: '100%' }}>
+            <Select disabled placeholder="选择资源分类" style={{ width: '100%' }}>
               {treeData.map(r => {
                 return <Option key={r.id}>{r.name}</Option>;
               })}
@@ -485,6 +491,7 @@ const CreateForm = Form.create()(props => {
             })(<Input placeholder="请输入端口" />)}
       </FormItem>
 ):""}
+    {createItemData.sourceType !== 'local' ? <div>
     <FormItem {...formItemLayout} label="用户名">
       {form.getFieldDecorator('account', {
               rules: [{ required: true, message: '请输入用户名' }],
@@ -496,7 +503,7 @@ const CreateForm = Form.create()(props => {
               rules: [{ required: true, message: '请输入密码' }],
               initialValue: createItemData.password,
             })(<Input type='password' placeholder="请输入密码" />)}
-    </FormItem>
+    </FormItem></div>:''}
     <FormItem {...formItemLayout} label="根路径">
       {form.getFieldDecorator('path', {
               rules: [{ required: true, message: '请输入根路径' }],
@@ -613,10 +620,13 @@ const UpdateForm = Form.create()(props => {
     showDbName = styles.displaynone;  needDbName = false;
     showNamespace = styles.displayblock; needNamespace = true;
     showPath = styles.displayblock; needPath = true;
-
     if( listItemData.sourceType === 'local' || listItemData.sourceType === 'share' ) {
       showPort = styles.displaynone;
       needPort = false;
+    }
+    if(listItemData.sourceType === 'local'){
+      showDbUser = styles.displaynone; needDbUser = false;
+      showDbPassword = styles.displaynone; needDbPassword = false;
     }
   }
 
@@ -688,6 +698,7 @@ const UpdateForm = Form.create()(props => {
   </FormItem>
 )
       }
+
       <FormItem className={showDbUser} {...formItemLayout} label="用户名">
         {form.getFieldDecorator('account', {
           rules: [{ required: needDbUser, message: '请输入用户名' }],
@@ -723,7 +734,7 @@ const UpdateForm = Form.create()(props => {
           rules: [{ required: needServiceInterface, message: '请输入接口类型' }],
           initialValue: listItemData.interfaceType,
         })(
-          <Select className={showServiceInterface} placeholder="选择接口类型" style={{ width: '100%' }}>
+          <Select  disabled={itemDataStatus === 1} className={showServiceInterface} placeholder="选择接口类型" style={{ width: '100%' }}>
             <Option key="get">get</Option>
             <Option key="post">post</Option>
           </Select>,
@@ -837,6 +848,7 @@ export default class ResourceClassify extends PureComponent {
     createItemData = {};
     createItemDataCascader = [];
     itemDataStatus = 1;
+    searchData = {};
   }
 
   componentDidMount() {
@@ -847,15 +859,20 @@ export default class ResourceClassify extends PureComponent {
         dispatch({
           type: 'classify/tree',
           callback: () => {
-            dispatch({
-              type: 'centersource/fetch',
-            });
+            this.fecthApi()
           },
         });
       },
     });
   }
-
+  fecthApi = (data)=>{
+    const { dispatch } = this.props;
+    searchData = data || searchData;
+    dispatch({
+      type: 'centersource/fetch',
+      payload: searchData,
+    });
+  }
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
     const { dispatch } = this.props;
     const { formValues } = this.state;
@@ -875,11 +892,7 @@ export default class ResourceClassify extends PureComponent {
     if (sorter.field) {
       params.sorter = `${sorter.field}_${sorter.order}`;
     }
-
-    dispatch({
-      type: 'centersource/fetch',
-      payload: params,
-    });
+    this.fecthApi(params)
   };
 
   handleItem = (index) => {
@@ -908,10 +921,7 @@ export default class ResourceClassify extends PureComponent {
         unrelationDb: [],
       },
     });
-    dispatch({
-      type: 'centersource/fetch',
-      payload: {},
-    });
+    this.fecthApi({})
   };
 
   toggleForm = () => {
@@ -979,10 +989,7 @@ export default class ResourceClassify extends PureComponent {
         values.file = values.file.join(',');
       }
       values.sourceName = values.s_sourceName;
-      dispatch({
-        type: 'centersource/fetch',
-        payload: values,
-      });
+      this.fecthApi(values)
     });
   };
 
@@ -1070,9 +1077,7 @@ export default class ResourceClassify extends PureComponent {
               this.setState({
                 selectedRows: [],
               });
-              dispatch({
-                type: 'centersource/fetch',
-              });
+              this.fecthApi()
             },
           });
         } else {
@@ -1111,9 +1116,7 @@ export default class ResourceClassify extends PureComponent {
                   this.setState({
                     selectedRows: [],
                   });
-                  dispatch({
-                    type: 'centersource/fetch',
-                  });
+                  this.fecthApi()
                 },
               });
             } else {
@@ -1147,9 +1150,7 @@ export default class ResourceClassify extends PureComponent {
         this.setState({
           modalVisible: false,
         });
-        dispatch({
-          type: 'centersource/fetch',
-        });
+        this.fecthApi()
       },
     });
   };
@@ -1214,9 +1215,7 @@ export default class ResourceClassify extends PureComponent {
           }
 
           // 更新表格数据
-          dispatch({
-            type: 'centersource/fetch',
-          });
+          this.fecthApi()
         },
       });
     });
@@ -1228,14 +1227,12 @@ export default class ResourceClassify extends PureComponent {
       type: 'centersource/update',
       payload: { ...listItemData, ...fields },
       callback: () => {
-        dispatch({
-          type: 'centersource/fetch',
+        this.fecthApi()
+        message.success('修改成功');
+        this.setState({
+          updateModalVisible: false,
         });
       },
-    });
-    message.success('修改成功');
-    this.setState({
-      updateModalVisible: false,
     });
   };
 

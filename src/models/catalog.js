@@ -56,12 +56,13 @@ export default {
         payload: response,
       });
     },
-    * tableField({ payload }, { call, put }) {
+    * tableField({ payload,callback }, { call, put }) {
       const response = yield call(tableField, payload);
       yield put({
         type: 'field',
         payload: response,
       });
+      if (callback) callback(response);
     },
     * operateLog({ payload }, { call, put }) {
       const response = yield call(operateLogApi, payload);

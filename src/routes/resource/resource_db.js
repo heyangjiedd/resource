@@ -144,7 +144,7 @@ const ResourceDetail = Form.create()(props => {
     }, {
       title: '字段描述',
       width:'150px',
-      dataIndex: 'tableDesc',
+      dataIndex: 'description',
     }, {
       title: '类型',
       width:'150px',
@@ -153,10 +153,6 @@ const ResourceDetail = Form.create()(props => {
       title: '长度',
       width:'150px',
       dataIndex: 'len',
-    }, {
-      title: '所属表',
-      width:'150px',
-      dataIndex: 'tableName',
     }];
   const fgxxsjkdatacolumns = [
     {
@@ -244,7 +240,7 @@ const ResourceDetail = Form.create()(props => {
           <TabPane tab="表结构" key="2">
             {tableAndField.map(item => {
               return (<div>
-                <DescriptionList size="large" col={1} title="信息资源详情" style={{ marginBottom: 32 }}>
+                <DescriptionList size="large" col={1} title="表信息" style={{ marginBottom: 32 }}>
                   <Description term="表名">{itemData.name}</Description>
                   <Description term="表类型">{itemData.type}</Description>
                   <Description term="表注释">{itemData.description}</Description>
@@ -588,7 +584,7 @@ export default class ResourceClassify extends PureComponent {
   getFileDetailHandle = (index, flag) => {
     const { dispatch } = this.props;
     itemData = index;
-    if (listItemData.sourceType == 'hbase' || listItemData.sourceType == 'MongoDB') {
+    if (listItemData.sourceType == 'hbase' || listItemData.sourceType == 'mongo') {
       this.setState({
         detailType: 2,
       });
@@ -667,6 +663,23 @@ export default class ResourceClassify extends PureComponent {
         title: '数据源类型',
         width:'150px',
         dataIndex: 'sourceType',
+        render: (text, record, index) =>
+        {
+          // BUG #57779
+          let sourceType = '关系型数据库/MySql';
+          if(text=='mongo') {
+            sourceType = '非关系型数据库/MongoDB';
+          } else if(text=='hbase') {
+            sourceType = '非关系型数据库/HBase';
+          } else if(text=='mysql') {
+            sourceType = '关系型数据库/MySql';
+          } else if(text=='oracle') {
+            sourceType = '关系型数据库/Oracle';
+          } else if(text=='sqlserver') {
+            sourceType = '关系型数据库/SqlServer';
+          }
+          return <span>{sourceType}</span>
+        }
       },
       {
         title: '数据源描述',
@@ -735,7 +748,7 @@ export default class ResourceClassify extends PureComponent {
         render: (text, record, index) => <span>{index + 1}</span>,
       },
       {
-        title: '表名',
+        title: '集合名称',
         width:'150px',
         dataIndex: 'name',
       },
@@ -752,7 +765,23 @@ export default class ResourceClassify extends PureComponent {
       {
         title: '数据源类型',
         width:'150px',
-        render: (text, record, index) => <span>{listItemData.sourceType=='mongo'?'非关系型数据库/MongoDB':'非关系型数据库/hbase'}</span>,
+        render: (text, record, index) =>
+        {
+          // BUG #57779
+          let sourceType = '关系型数据库/MySql';
+          if(listItemData.sourceType=='mongo') {
+            sourceType = '非关系型数据库/MongoDB';
+          } else if(listItemData.sourceType=='hbase') {
+            sourceType = '非关系型数据库/HBase';
+          } else if(listItemData.sourceType=='mysql') {
+            sourceType = '关系型数据库/MySql';
+          } else if(listItemData.sourceType=='oracle') {
+            sourceType = '关系型数据库/Oracle';
+          } else if(listItemData.sourceType=='sqlserver') {
+            sourceType = '关系型数据库/SqlServer';
+          }
+          return <span>{sourceType}</span>
+        }
       },
       {
         title: '数据源类型',

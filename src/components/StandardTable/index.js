@@ -23,7 +23,6 @@ class StandardTable extends PureComponent {
       needTotalList,
     };
   }
-
   componentWillReceiveProps(nextProps) {
     // clean state
     if (nextProps.selectedRows.length === 0) {

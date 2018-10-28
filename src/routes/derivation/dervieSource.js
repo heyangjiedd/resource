@@ -59,11 +59,24 @@ let treeSelect = '';
 let selectValue = [];
 let modalListData = {};//弹窗第一页选择
 let choiseListItemData = {};//弹窗中弹窗选择
-let searchValue = { resourceId: '', relationDb: '', unrelationDb: '', api: '', files: ''}; //查询
+let choiceSelectedRowsDefault = [];
+let searchValue = {
+  sourceName: '',
+  resourceId: undefined,
+  cascader: [],
+  relationDb: '',
+  unrelationDb: '',
+  api: '',
+  files: '',
+}; //查询
 
 const ChoiceList = Form.create()(props => {
-  const { modalVisible, handleAdd, handleModalVisible, loadinhandleItemSearchg, data, columns, handleChoiceFeild, choiceFeild } = props;
+  const {
+    modalVisible, handleAdd, handleModalVisible, loadinhandleItemSearchg, data, columns, handleChoiceFeild, choiceFeild,
+    choicedataList, choicedataListItems, setChoicedaraListItem,
+  } = props;
   const okHandle = () => {
+    setChoicedaraListItem(selectedRows);
     handleChoiceFeild(selectedRows);
     handleModalVisible();
   };
@@ -71,17 +84,17 @@ const ChoiceList = Form.create()(props => {
   let columnsNoPage = [
     {
       title: '序号',
-      width:'150px',
+      width: '150px',
       render: (text, record, index) => <span>{index + 1}</span>,
     },
     {
       title: '字段',
-      width:'150px',
+      width: '150px',
       dataIndex: 'name',
     },
     {
       title: '备注',
-      width:'150px',
+      width: '150px',
       dataIndex: 'tableDesc',
     },
 
@@ -90,8 +103,10 @@ const ChoiceList = Form.create()(props => {
     selectedRows = data;
   };
   const handleStandardTableChange = () => {
-
   };
+  let defualtValue = choicedataList.filter(item=>{
+    return item.id == choiseListItemData.id
+  });
   return (
     <Modal
       title="选择字段"
@@ -104,9 +119,9 @@ const ChoiceList = Form.create()(props => {
     >
       <Row gutter={24}>
         <Col span={24}>
-          <span>已选字段：{selectedRows.map(item => {
-            return item.name;
-          }).join(',')}</span>
+          <span>已选字段：{choicedataListItems.map(item=>{
+            return item.name
+          }).join('，')}</span>
         </Col>
       </Row>
       <StandardTableNoPage
@@ -114,6 +129,7 @@ const ChoiceList = Form.create()(props => {
         data={data}
         scroll={{ y: 240 }}
         columns={columnsNoPage}
+        defaultSelectRows={choicedataListItems}
         onSelectRow={handleSelectRows}
         onChange={handleStandardTableChange}
       />
@@ -123,35 +139,68 @@ const ChoiceList = Form.create()(props => {
 const CreateForm = Form.create()(props => {
   const {
     modalVisible, form, handleAdd, handleModalVisible, data, handleItem, item, catalogItem, dataList, handleItemSearch,
-    searchHandle, getListBuyId, choiseFeild, choiseList, type, handleType, choiceFeild, choiceFeildCount,choicelist, catalogItemChange,
-    selectHttpItem, httpItem, lifelist, handleStandardTableChange, selectChange, selectItem,
+    searchHandle, getListBuyId, choiseFeild, choiseList, type, handleType, choiceFeild, choicelist, catalogItemChange,
+    selectHttpItem, httpItem, lifelist, handleStandardTableChange, handleStandardTableChangeFile, selectChange, selectItem,
+    tableSelectedRows, tableSelectedRowsHandle, onChangeRadioGroup,
   } = props;
   const { getFieldDecorator } = form;
   const columns = [
     {
       title: '数据源名称',
-      width:'150px',
+      width: '150px',
       dataIndex: 'sourceName',
     },
     {
       title: '数据源类型',
-      width:'150px',
+      width: '150px',
       dataIndex: 'sourceType',
+      render(val) {
+        let text = '关系型数据库/MySql';
+        if (val === 'mysql') {
+          text = '关系型数据库/MySql';
+        } else if (val === 'oracle') {
+          text = '关系型数据库/Oracle';
+        } else if (val === 'sqlserver') {
+          text = '关系型数据库/SqlServer';
+        } else if (val === 'mongo') {
+          text = '非关系型数据库/MongoDB';
+        } else if (val === 'hbase') {
+          text = '非关系型数据库/HBase';
+        } else if (val === 'local') {
+          text = '本地文件/Local';
+        } else if (val === 'ftp') {
+          text = '文件系统/FTP';
+        } else if (val === 'sftp') {
+          text = '普通文件系统/SFTP';
+        } else if (val === 'share') {
+          text = '共享文件系统/Share';
+        } else if (val === 'rest') {
+          text = 'API/REST';
+        } else if (val === 'https') {
+          text = 'API/HTTPS';
+        } else if (val === 'http') {
+          text = 'API/HTTP';
+        } else if (val === 'wsdl') {
+          text = 'API/WSDL';
+        }
+
+        return text;
+      },
     },
     {
       title: '数据源描述',
-      width:'150px',
+      width: '150px',
       dataIndex: 'content',
     },
     {
       title: '最近连接时间',
-      width:'150px',
+      width: '150px',
       dataIndex: 'createTime',
       render: val => <span>{val ? moment(val).format('YYYY-MM-DD HH:mm:ss') : '-'}</span>,
     },
     {
       title: '连接状态',
-      width:'150px',
+      width: '150px',
       dataIndex: 'linkStatus',
       render(val) {
         return <Badge status={val == 'on' ? 'success' : 'error'} text={val == 'on' ? '连通' : '未连通'}/>;
@@ -161,32 +210,37 @@ const CreateForm = Form.create()(props => {
   const columnsdataList = [
     {
       title: '序号',
-      width:'150px',
+      width: '150px',
       render: (text, record, index) => <span>{index + 1}</span>,
     },
     {
       title: '表名',
-      width:'150px',
+      width: '150px',
       dataIndex: 'name',
     },
     {
       title: '字段数',
-      width:'150px',
+      width: '150px',
       dataIndex: 'fieldNum',
     },
     {
       title: '表描述',
-      width:'150px',
+      width: '150px',
       dataIndex: 'description',
     },
     {
       title: '已选字段',
-      width:'150px',
-      dataIndex: 'selectedFieldNum',
+      width: '150px',
+      dataIndex: 'selectArray',
+      render: (text, record, index) => {
+        return (
+          <span>{text.length}</span>
+        );
+      },
     },
     {
       title: '选择字段',
-      width:'150px',
+      width: '150px',
       render: (text, record, index) => {
         return (
           <Fragment>
@@ -202,69 +256,83 @@ const CreateForm = Form.create()(props => {
   const columnscatalogItem = [
     {
       title: '序号',
-      width:'150px',
+      width: '150px',
       render: (text, record, index) => <span>{index + 1}</span>,
     },
     {
-      title: '信息项',
-      width:'150px',
-      dataIndex: 'name',
+      title: '表名',
+      width: '150px',
+      dataIndex: 'tableName',
     },
     {
-      title: '信息项描述',
-      width:'150px',
-      dataIndex: 'description',
+      title: '表类型',
+      width: '150px',
+      dataIndex: 'tableType',
     },
     {
       title: '信息项类型',
-      width:'150px',
+      width: '150px',
       dataIndex: 'type',
     },
     {
-      title: '信息项长度',
-      width:'150px',
+      title: '字段名',
+      width: '150px',
+      dataIndex: 'name',
+    },
+    {
+      title: '字段长度',
+      width: '150px',
       dataIndex: 'len',
+    },
+    {
+      title: '字段类型',
+      width: '150px',
+      dataIndex: 'type',
+    },
+    {
+      title: '字段描述',
+      width: '150px',
+      dataIndex: 'description',
     },
   ];
   const fgxxsjkcolumns = [
     {
       title: '序号',
-      width:'150px',
+      width: '150px',
       render: (text, record, index) => <span>{index + 1}</span>,
     }, {
       title: '集合',
-      width:'150px',
+      width: '150px',
       dataIndex: 'name',
 
     }];
   const filecolumns = [
     {
       title: '文件名称',
-      width:'150px',
+      width: '150px',
       dataIndex: 'name',
     }, {
       title: '文件类型',
-      width:'150px',
+      width: '150px',
       dataIndex: 'type',
     }];
   const tableColumnsNoPage = [
     {
       title: '序号',
-      width:'150px',
+      width: '150px',
       render: (text, record, index) => <span>{index + 1}</span>,
     },
     {
       title: '表名',
-      width:'150px',
+      width: '150px',
       dataIndex: 'name',
     },
     {
       title: '表描述',
-      width:'150px',
+      width: '150px',
       dataIndex: 'description',
     },
   ];
-  let tableSelectedRows = [];
   let choiceSelectedRows = [];
   let choiceFeildSelectedRows = [];
   let addTableSelectedRows = [];
@@ -272,13 +340,6 @@ const CreateForm = Form.create()(props => {
   let setTableRows = [];
   let fgxxsjkHandleSelectRows = [];
   let fileTableSelectedRows = [];
-  const okHandle = () => {
-    form.validateFields((err, fieldsValue) => {
-      if (err) return;
-      form.resetFields();
-      handleAdd(fieldsValue);
-    });
-  };
   const getSelectRows = (data) => {
     setTableRows = data;
   };
@@ -286,23 +347,40 @@ const CreateForm = Form.create()(props => {
     form.validateFields((err, fieldsValues) => {
       // return;
       if (err) return;
+      searchValue = {
+        sourceName: '',
+        resourceId: undefined,
+        cascader: [],
+        relationDb: '',
+        unrelationDb: '',
+        api: '',
+        files: '',
+      };
       if (item == 2) {
         if (selectItem == 1) {
-          if(choiceFeildCount>=2&&setTableRows.length==0){
+          if (choicelist.length >= 2 && setTableRows.length == 0) {
             message.error('请先设置表间关系');
-            return
+            return;
+          }
+          if (choicelist.length == 0) {
+            message.error('请先选择字段');
+            return;
           }
           handleAdd(catalogItem, setTableRows, fieldsValues);
         } else {
           handleAdd(tableSelectedRows, null, fieldsValues);
         }
       } else if (item == 3) {
-        if(fgxxsjkHandleSelectRows.length <= 0){
+        if (fgxxsjkHandleSelectRows.length <= 0) {
           message.error('请先勾选数据');
-          return
+          return;
         }
         handleAdd(fgxxsjkHandleSelectRows, null, fieldsValues);
       } else if (item == 4) {
+        if (fileTableSelectedRows.length <= 0) {
+          message.error('请先勾选数据');
+          return;
+        }
         handleAdd(fileTableSelectedRows, null, fieldsValues);
       } else if (item == 5) {
         handleAdd(null, null, fieldsValues);
@@ -326,26 +404,41 @@ const CreateForm = Form.create()(props => {
   const cancel = () => {
     handleItem(1);
     handleModalVisible(false);
+    form.resetFields();
+    choiceSelectedRowsDefault = [];
+    searchValue = {
+      sourceName: '',
+      resourceId: undefined,
+      cascader: [],
+      relationDb: '',
+      unrelationDb: '',
+      api: '',
+      files: '',
+    };
   };
   const firstFooter = (<Row>
     <Col md={24} sm={24}>
       <Button type="primary" onClick={() => {
-        if (!choiceSelectedRows || choiceSelectedRows.length == 0) {
-          message.error('请先勾选数据');
-          return;
-        }
-        if (choiceSelectedRows[0].sourceType === 'mysql' || choiceSelectedRows[0].sourceType === 'oracle' || choiceSelectedRows[0].sourceType === 'sqlserver'
-          || choiceSelectedRows[0].sourceType === 'db2') {
-          getListBuyId(choiceSelectedRows[0], 2);
-        } else if (choiceSelectedRows[0].sourceType === 'mongo' || choiceSelectedRows[0].sourceType === 'hbase') {
-          getListBuyId(choiceSelectedRows[0], 3);
-        } else if (choiceSelectedRows[0].sourceType === 'http' || choiceSelectedRows[0].sourceType === 'https' || choiceSelectedRows[0].sourceType === 'wsdl'
-          || choiceSelectedRows[0].sourceType === 'rest') {
-          getListBuyId(choiceSelectedRows[0], 5);
-        } else if (choiceSelectedRows[0].sourceType === 'ftp' || choiceSelectedRows[0].sourceType === 'sftp' || choiceSelectedRows[0].sourceType === 'local'
-          || choiceSelectedRows[0].sourceType === 'share') {
-          getListBuyId(choiceSelectedRows[0], 4);
-        }
+        form.validateFields((err, fieldsValue) => {
+          searchValue.sourceName = fieldsValue.sourceName;
+          choiceSelectedRows = choiceSelectedRowsDefault;
+          if (!choiceSelectedRows || choiceSelectedRows.length == 0) {
+            message.error('请先勾选数据');
+            return;
+          }
+          if (choiceSelectedRows[0].sourceType === 'mysql' || choiceSelectedRows[0].sourceType === 'oracle' || choiceSelectedRows[0].sourceType === 'sqlserver'
+            || choiceSelectedRows[0].sourceType === 'db2') {
+            getListBuyId(choiceSelectedRows[0], 2);
+          } else if (choiceSelectedRows[0].sourceType === 'mongo' || choiceSelectedRows[0].sourceType === 'hbase') {
+            getListBuyId(choiceSelectedRows[0], 3);
+          } else if (choiceSelectedRows[0].sourceType === 'http' || choiceSelectedRows[0].sourceType === 'https' || choiceSelectedRows[0].sourceType === 'wsdl'
+            || choiceSelectedRows[0].sourceType === 'rest') {
+            getListBuyId(choiceSelectedRows[0], 5);
+          } else if (choiceSelectedRows[0].sourceType === 'ftp' || choiceSelectedRows[0].sourceType === 'sftp' || choiceSelectedRows[0].sourceType === 'local'
+            || choiceSelectedRows[0].sourceType === 'share') {
+            getListBuyId(choiceSelectedRows[0], 4);
+          }
+        });
       }}>
         下一步
       </Button>
@@ -358,6 +451,7 @@ const CreateForm = Form.create()(props => {
     <Col md={24} sm={24}>
       <Button onClick={() => {
         handleItem(1);
+        tableSelectedRowsHandle([]);
       }}>
         上一步
       </Button>
@@ -370,6 +464,7 @@ const CreateForm = Form.create()(props => {
     </Col>
   </Row>);
   const onChange = (index) => {
+    searchValue.cascader = index;
     searchValue.relationDb = '';
     searchValue.unrelationDb = '';
     searchValue.api = '';
@@ -397,10 +492,8 @@ const CreateForm = Form.create()(props => {
   const fgxxsjkhandleSelectRows = (data) => {
     fgxxsjkHandleSelectRows = data;
   };
-  const tableSelectedRowsHandle = (data) => {
-    tableSelectedRows = data;
-  };
   const handleSelectRows = (data) => {
+    choiceSelectedRowsDefault = data;
     choiceSelectedRows = data;
   };
 
@@ -417,7 +510,7 @@ const CreateForm = Form.create()(props => {
     },
     wrapperCol: {
       xs: { span: 24 },
-      sm: { span: 18 },
+      sm: { span: 16 },
       md: { span: 18 },
     },
   };
@@ -436,12 +529,13 @@ const CreateForm = Form.create()(props => {
             <FormItem {...formItemLayout} label="资源分类">
               <SimpleSelectTree url={'classify/tree'} transMsg={(index) => {
                 searchValue.resourceId = index;
-              }}></SimpleSelectTree>
+              }} defaultValue={searchValue.resourceId}></SimpleSelectTree>
             </FormItem>
           </Col>
           <Col md={12} sm={12}>
             <FormItem {...formItemLayout} label="数据源类型"><Cascader style={{ width: 100 + '%' }} options={ARR.CASCADER}
                                                                   onChange={onChange}
+                                                                  defaultValue={searchValue.cascader}
                                                                   placeholder="请选择数据源/数据库"/>
             </FormItem>
           </Col>
@@ -449,7 +543,9 @@ const CreateForm = Form.create()(props => {
         <Row gutter={{ md: 4, lg: 12, xl: 24 }}>
           <Col md={12} sm={12}>
             <FormItem {...formItemLayout} label="数据源名称">
-              {getFieldDecorator('sourceName')(<Input placeholder="请输入数据源名称"/>)}
+              {getFieldDecorator('sourceName', {
+                initialValue: searchValue.sourceName,
+              })(<Input placeholder="请输入数据源名称"/>)}
             </FormItem>
           </Col>
           <Col md={4} sm={24}>
@@ -464,135 +560,141 @@ const CreateForm = Form.create()(props => {
       </Row></Form>
         <StandardTableRadio
           selectedRows={choiceSelectedRows}
+          defaultSelectRows={choiceSelectedRowsDefault}
           data={data}
           columns={columns}
           onSelectRow={handleSelectRows}
           onChange={handleStandardTableChange}
         /></div> : item === 2 ? <div>
         <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-        <Col md={12} sm={24}>
-        <FormItem style={{marginBottom:0}} {...formItemLayout} label="新增类型">
-        {getFieldDecorator('status')(
-        <Select placeholder="选择新增类型" onSelect={selectChange} style={{ width: '100%' }}>
-        <Option value="1">新增</Option>
-        <Option value="2">批量新增</Option>
-        </Select>,
-        )}
-        </FormItem>
-        </Col>
+          <Col md={12} sm={24}>
+            <FormItem style={{ marginBottom: 0 }} {...formItemLayout} label="新增类型">
+              {getFieldDecorator('status', {
+                rules: [{ required: true, message: '请输入新增类型.' }],
+                initialValue: 1,
+              })(
+                <Select placeholder="选择新增类型" onSelect={selectChange} style={{ width: '100%' }}>
+                  <Option value={1}>新增</Option>
+                  <Option value={2}>批量新增</Option>
+                </Select>,
+              )}
+            </FormItem>
+          </Col>
         </Row>
         <Row>
           <Col md={12} sm={24}>
-            <FormItem style={{ marginBottom: 0 }} {...formItemLayout} label="请选择表/视图">
-              <RadioGroup onChange={this.onChange}>
-                <Radio value='table'>表</Radio>
-                <Radio value='view'>视图</Radio>
+            <FormItem style={{ marginBottom: 0 }}  {...formItemLayout} label="请选择表/视图">
+              <RadioGroup onChange={onChangeRadioGroup} defaultValue={'TABLE'}>
+                <Radio value='TABLE' defaultChecked={true}>表</Radio>
+                <Radio value='VIEW'>视图</Radio>
               </RadioGroup>
             </FormItem>
           </Col>
         </Row>
         {selectItem == 1 ? <div>
-          <Row>
-            <StandardTableNothing
-              data={dataList}
-              scroll={{ y: 180 }}
-              columns={columnsdataList}
-            />
-          </Row>
-          <Row>
-            <Col>
+            <Row>
+              <StandardTableNothing
+                data={dataList}
+                scroll={{ y: 180 }}
+                columns={columnsdataList}
+              />
+            </Row>
+            <Row>
+              <Col>
             <span>
               已选字段：<span>{choiceFeild.map(item => {
               return item.name;
             }).join(',')}</span>
             </span>
-            </Col>
-          </Row>
-          <Row>
-            <Col>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
             <span>
-              已选择<span>{choiceFeildCount}</span>张表，共<span>{choiceFeild.length}</span>个字段，需设置至少<span>{(choiceFeildCount || 1) - 1}</span>个表间关系
+              已选择<span>{choicelist.length}</span>张表，共<span>{choiceFeild.length}</span>个字段，需设置至少<span>{(choicelist.length || 1) - 1}</span>个表间关系
             </span>
-            </Col>
-          </Row>
-          {choiceFeildCount > 1?<div>          <Row>
-            <Col>
+              </Col>
+            </Row>
+            {choicelist.length > 1 ? <div><Row>
+              <Col>
             <span>
               设置表间关系：
             </span>
-            </Col>
-          </Row>
-            <Row>
-              <StandardTableEdit
-                selectedRows={addTableSelectedRows}
-                data={addTableRows}
-                selectItemTable={choicelist}
-                selectItemFeild={choiceFeild}
-                transMsg={getSelectRows}
-                scroll={{ y: 180 }}
-              />
-            </Row></div>:''}
+              </Col>
+            </Row>
+              <Row>
+                <StandardTableEdit
+                  selectedRows={addTableSelectedRows}
+                  data={addTableRows}
+                  selectItemTable={choicelist}
+                  selectItemFeild={choiceFeild}
+                  transMsg={getSelectRows}
+                  scroll={{ y: 180 }}
+                />
+              </Row></div> : ''}
 
-          <Row>
-            <Col>
+            <Row>
+              <Col>
             <span>
               信息资源所含信息项一览：
             </span>
-            </Col>
-          </Row>
-          {
-            catalogItem.length>1?<Row>
-              <Col md={12} sm={24}>
-                <FormItem {...formItemLayout} style={{ marginBottom: 0 }} label="数据名称">
-                  {getFieldDecorator('name', {
-                    rules: [{ required: true, message: '请输入数据名称.' }],
-                  })(<Input placeholder="请输入数据名称"/>)}
-                </FormItem>
-              </Col>
-            </Row>:<Row>
-              <Col md={12} sm={24}>
-                <FormItem {...formItemLayout} style={{ marginBottom: 0 }} label="数据名称">
-                  {getFieldDecorator('name', {
-                    rules: [{ required: true, message: '请输入数据名称.' }],
-                    initialValue: columnscatalogItem[0]&&columnscatalogItem[0].name,
-                  })(<Input placeholder="请输入数据名称"/>)}
-                </FormItem>
               </Col>
             </Row>
-          }
-          {/*<Row>*/}
-            {/*<StandardTableNothing*/}
-              {/*data={catalogItem}*/}
-              {/*scroll={{ y: 180 }}*/}
-              {/*columns={columnscatalogItem}*/}
-            {/*/>*/}
-          {/*</Row>*/}
-          {/*<Row>*/}
-            {/*<Col>*/}
-              {/*<span>共{catalogItem.length}个信息项</span>*/}
-            {/*</Col>*/}
-          {/*</Row>*/}
+            {
+              catalogItem.length > 1 ? <Row>
+                <Col md={12} sm={24}>
+                  <FormItem {...formItemLayout} style={{ marginBottom: 0 }} label="数据名称">
+                    {getFieldDecorator('name', {
+                      rules: [{ required: true, message: '请输入数据名称.' }],
+                    })(<Input placeholder="请输入数据名称"/>)}
+                  </FormItem>
+                </Col>
+              </Row> : <Row>
+                <Col md={12} sm={24}>
+                  <FormItem {...formItemLayout} style={{ marginBottom: 0 }} label="数据名称">
+                    {getFieldDecorator('name', {
+                      rules: [{ required: true, message: '请输入数据名称.' }],
+                      initialValue: choiceFeild[0] && choiceFeild[0].tableName,
+                    })(<Input placeholder="请输入数据名称"/>)}
+                  </FormItem>
+                </Col>
+              </Row>
+            }
+            <Row>
+              <StandardTableNothing
+                data={choiceFeild}
+                scroll={{ y: 180 }}
+                columns={columnscatalogItem}
+              />
+            </Row>
+            <Row>
+              <Col>
+                <span>共{choiceFeild.length}个信息项</span>
+              </Col>
+            </Row>
           </div> :
           <div>
-          <StandardTableNoPage
-            selectedRows={tableSelectedRows}
-            data={dataList}
-            scroll={{ y: 240 }}
-            columns={tableColumnsNoPage}
-            onSelectRow={tableSelectedRowsHandle}
-          />
-          <Row>
-            <Col>
-              <span>已选择{tableSelectedRows.length}张表！</span>
-            </Col>
-          </Row>
-        </div>
+            <StandardTableNoPage
+              selectedRows={tableSelectedRows}
+              data={dataList}
+              scroll={{ y: 240 }}
+              columns={tableColumnsNoPage}
+              onSelectRow={tableSelectedRowsHandle}
+            />
+            <Row>
+              <Col>
+                <span>已选择{tableSelectedRows.length}张表！</span>
+              </Col>
+            </Row>
+          </div>
         }
       </div> : item === 3 ? <div>
         <Row>
-          <Col>
-            <FormItem>
-              {getFieldDecorator('name')(<Input placeholder="请输入数据名称"/>)}
+          <Col span={12}>
+            <FormItem {...formItemLayout} label="数据名称">
+              {getFieldDecorator('name', {
+                rules: [{ required: true, message: '请输入数据名称.' }],
+              })(<Input placeholder="请输入数据名称"/>)}
             </FormItem>
           </Col>
         </Row>
@@ -605,35 +707,41 @@ const CreateForm = Form.create()(props => {
         />
       </div> : item === 4 ? <div>
         <Row>
-          <Col>
-            <FormItem>
-              {getFieldDecorator('name')(<Input placeholder="请输入数据名称"/>)}
+          <Col span={12}>
+            <FormItem {...formItemLayout} label="数据名称">
+              {getFieldDecorator('name', {
+                rules: [{ required: true, message: '请输入数据名称.' }],
+              })(<Input placeholder="请输入数据名称"/>)}
             </FormItem>
           </Col>
         </Row>
         <Row>
-          <StandardTableNoPage
+          <StandardTable
             selectedRows={fileTableSelectedRows}
             data={lifelist}
             columns={filecolumns}
             onSelectRow={filehandleSelectRows}
-            scroll={{ y: 480 }}
+            onChange={handleStandardTableChangeFile}
           />
         </Row>
       </div> : <div>
         <Row>
-          <Col>
-            <FormItem>
-              {getFieldDecorator('name')(<Input placeholder="请输入数据名称"/>)}
+          <Col span={12}>
+            <FormItem {...formItemLayout} label="数据名称">
+              {getFieldDecorator('name', {
+                rules: [{ required: true, message: '请输入数据名称.' }],
+              })(<Input placeholder="请输入数据名称"/>)}
             </FormItem>
           </Col>
         </Row>
-        <DescriptionList size="large" title="详情" style={{ marginBottom: 32 }}>
+        <DescriptionList size="large" title="详情" col={2} style={{ marginBottom: 20 }}>
           <Description term="服务名称">{httpItem.interfaceName}</Description>
           <Description term="所属数据源">{httpItem.sourceName}</Description>
           <Description term="接口类型">{httpItem.interfaceType}</Description>
           <Description term="数据格式">{httpItem.content}</Description>
-          <Description term="服务类型">{httpItem.serviceType}</Description>
+        </DescriptionList>
+        <DescriptionList size="large" col={1} style={{ marginBottom: 32 }}>
+          <Description term="服务类型">代理接口</Description>
           <Description term="服务地址">{httpItem.interfaceUrl}</Description>
         </DescriptionList>
       </div>}
@@ -685,134 +793,130 @@ const ResourceDetail = Form.create()(props => {
   const gxxsjkfieldcolumns = [
     {
       title: '字段名',
-      width:'150px',
+      width: '150px',
       dataIndex: 'name',
     }, {
       title: '字段描述',
-      width:'150px',
+      width: '150px',
       dataIndex: 'tableDesc',
     }, {
       title: '类型',
-      width:'150px',
+      width: '150px',
       dataIndex: 'type',
     }, {
       title: '长度',
-      width:'150px',
+      width: '150px',
       dataIndex: 'len',
     }, {
       title: '所属表',
-      width:'150px',
+      width: '150px',
       dataIndex: 'tableName',
     }];
   const apifieldcolumns = [
     {
       title: '字段名称',
-      width:'150px',
+      width: '150px',
       dataIndex: 'content',
     }, {
       title: '字段别名',
-      width:'150px',
+      width: '150px',
       dataIndex: 'content',
     }, {
       title: '字段中文名',
-      width:'150px',
+      width: '150px',
       dataIndex: 'content',
     }, {
       title: '字段描述',
-      width:'150px',
+      width: '150px',
       dataIndex: 'content',
     }, {
       title: '来源数据表',
-      width:'150px',
+      width: '150px',
       dataIndex: 'content',
     }, {
       title: '来源数据库',
-      width:'150px',
+      width: '150px',
       dataIndex: 'content',
     }];
   const apilogcolumns = [
     {
       title: '序号',
-      width:'150px',
+      width: '150px',
       render: (text, record, index) => <span>{index + 1}</span>,
     },
     {
       title: '服务调用用户',
-      width:'150px',
+      width: '150px',
       dataIndex: 'content',
     }, {
       title: '最近一次接口调用开始时间',
-      width:'200px',
+      width: '200px',
       dataIndex: 'content',
     }, {
       title: '最近一次接口调用结束时间',
-      width:'200px',
+      width: '200px',
       dataIndex: 'content',
     }, {
       title: '累积调用次数',
-      width:'150px',
+      width: '150px',
       dataIndex: 'content',
     }, {
       title: '调用方式',
-      width:'150px',
+      width: '150px',
       dataIndex: 'content',
     },
   ];
   const filelogcolumns = [
     {
       title: '序号',
-      width:'150px',
+      width: '150px',
       render: (text, record, index) => <span>{index + 1}</span>,
     },
     {
       title: '文件名称',
-      width:'150px',
+      width: '150px',
       dataIndex: 'content',
     }, {
       title: '服务调用用户',
-      width:'150px',
+      width: '150px',
       dataIndex: 'content',
     }, {
       title: '最近一次数据调用开始时间',
-      width:'150px',
+      width: '150px',
       dataIndex: 'content',
     }, {
       title: '最近一次数据调用结束时间',
-      width:'150px',
+      width: '150px',
       dataIndex: 'content',
     }, {
       title: '累积调用次数',
-      width:'150px',
+      width: '150px',
       dataIndex: 'content',
     }, {
       title: '调用方式',
-      width:'150px',
+      width: '150px',
       dataIndex: 'content',
     }];
   const fgxxsjkdatacolumns = [
     {
       title: '集合名称',
-      width:'150px',
+      width: '150px',
       dataIndex: 'name',
     }, {
       title: '所属数据源',
-      width:'150px',
+      width: '150px',
       dataIndex: 'description',
     },
   ];
   const lifelistcolumns = [
     {
       title: '文件名称',
-      width:'150px',
+      width: '150px',
       dataIndex: 'name',
     }, {
       title: '文件类型',
-      width:'150px',
+      width: '150px',
       dataIndex: 'type',
-    }, {
-      title: '文件描述',
-      width:'150px',
-      dataIndex: 'description',
     },
   ];
   let indexList = [];
@@ -846,9 +950,9 @@ const ResourceDetail = Form.create()(props => {
                 scroll={{ y: 180 }}
                 search={searchHandle}
                 data={[]}
-                selectItemFeild={tableAndField.tableFieldList||[]}
+                selectItemFeild={tableAndField.tableFieldList || []}
                 transMsg={(index, andOr) => {
-                  console.log(index)
+                  console.log(index);
                   indexList = index;
                   indexAndOr = andOr;
                 }}
@@ -882,17 +986,17 @@ const ResourceDetail = Form.create()(props => {
           />
         </TabPane>
         <TabPane tab="表结构" key="2">
-              <DescriptionList size="large" col={1} title="表信息" style={{ marginBottom: 32 }}>
-                <Description term="表名">{tableAndField.name}</Description>
-                <Description term="表类型">{tableAndField.sourceType}</Description>
-                <Description term="表注释">{tableAndField.description}</Description>
-              </DescriptionList>
-              <DescriptionList size="large" title="字段信息" style={{ marginBottom: 32 }}>
-                <StandardTableNothing
-                  loading={loading}
-                  data={tableAndField.tableFieldList||[]}
-                  columns={gxxsjkfieldcolumns}
-                /></DescriptionList>
+          <DescriptionList size="large" col={1} title="数据信息" style={{ marginBottom: 32 }}>
+            <Description term="数据名称">{tableAndField.name}</Description>
+            <Description term="数据源类型">{tableAndField.dataSourceType}</Description>
+            {/*<Description term="表注释">{tableAndField.description}</Description>*/}
+          </DescriptionList>
+          <DescriptionList size="large" title="字段信息" style={{ marginBottom: 32 }}>
+            <StandardTableNothing
+              loading={loading}
+              data={tableAndField.tableFieldList || []}
+              columns={gxxsjkfieldcolumns}
+            /></DescriptionList>
         </TabPane>
       </Tabs></div> : detailType == 2 ?
         <div>
@@ -903,7 +1007,7 @@ const ResourceDetail = Form.create()(props => {
           <DescriptionList size="large" title="字段信息" style={{ marginBottom: 32 }}>
             <StandardTableNothing
               loading={loading}
-              data={tableAndField.tableFieldList||[]}
+              data={tableAndField.tableFieldList || []}
               columns={fgxxsjkdatacolumns}
             /></DescriptionList>
           {/*<StandardTableNoCheck*/}
@@ -916,7 +1020,7 @@ const ResourceDetail = Form.create()(props => {
             <DescriptionList size="large" col={2} title="基本信息详情" style={{ marginBottom: 32 }}>
               <Description term="服务名称">{httpItem.sourceName}</Description>
               <Description term="所属数据源">{httpItem.sourceName}</Description>
-              <Description term="调用数量">{apilogcolumns.total||0}</Description>
+              <Description term="调用数量">{apilogcolumns.total || 0}</Description>
               <Description term="接口类型">原生接口</Description>
               <Description term="数据格式">{httpItem.content}</Description>
               <Description term="服务类型">{httpItem.interfaceName}</Description>
@@ -933,7 +1037,7 @@ const ResourceDetail = Form.create()(props => {
           </div> :
           <div>
             <DescriptionList size="large" title="文件信息" style={{ marginBottom: 32 }}>
-              <StandardTableNothing
+              <StandardTableNoCheck
                 selectedRows={[]}
                 onSelectRow={[]}
                 loading={loading}
@@ -979,19 +1083,23 @@ export default class ResourceClassify extends PureComponent {
     type: 1,
     detailType: 1,
     choiceFeild: [],
-    choiceFeildCount: 0,
     radioSwitch: 'view',
     selectItem: 1,
+    tableSelectedRows: [],
+    choicedataList: [],
+    choicedataListItems:[],
   };
-  componentWillUnmount(){
-     itemDataStatus = 0;
-     listItemData = {};
-     treeSelect = '';
-     selectValue = [];
-     modalListData = {};//弹窗第一页选择
-     choiseListItemData = {};//弹窗中弹窗选择
-     searchValue = { resourceId: '', relationDb: '', unrelationDb: '', api: '', files: ''}; //查询
+
+  componentWillUnmount() {
+    itemDataStatus = 0;
+    listItemData = {};
+    treeSelect = '';
+    selectValue = [];
+    modalListData = {};//弹窗第一页选择
+    choiseListItemData = {};//弹窗中弹窗选择
+    searchValue = { resourceId: '', relationDb: '', unrelationDb: '', api: '', files: '' }; //查询
   }
+
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
@@ -1002,6 +1110,11 @@ export default class ResourceClassify extends PureComponent {
     });
   }
 
+  tableSelectedRowsHandle = (data) => {
+    this.setState({
+      tableSelectedRows: data,
+    });
+  };
   handleSubmit = () => {
     const { form, dispatch } = this.props;
     form.validateFields((err, fieldsValue) => {
@@ -1033,6 +1146,31 @@ export default class ResourceClassify extends PureComponent {
     }
     dispatch({
       type: 'centersource/fetch',
+      payload: params,
+    });
+  };
+  handleStandardTableChangeFile = (pagination, filtersArg, sorter) => {
+    const { dispatch } = this.props;
+    const { formValues } = this.state;
+
+    const filters = Object.keys(filtersArg).reduce((obj, key) => {
+      const newObj = { ...obj };
+      newObj[key] = getValue(filtersArg[key]);
+      return newObj;
+    }, {});
+
+    const params = {
+      pageNum: pagination.current,
+      pageSize: pagination.pageSize,
+      ...formValues,
+      ...filters,
+      id: modalListData.id,
+    };
+    if (sorter.field) {
+      params.sorter = `${sorter.field}_${sorter.order}`;
+    }
+    dispatch({
+      type: 'centersource/fetchFile',
       payload: params,
     });
   };
@@ -1148,16 +1286,16 @@ export default class ResourceClassify extends PureComponent {
         this.setState({
           modalVisibleResource: !!flag,
         });
-      }
+      },
     });
   };
   handleModalVisible = flag => {
     this.setState({
       modalVisible: !!flag,
       choiceFeild: [],
-      choicelist:[],
-      choiceFeildCount: 0,
+      choicelist: [],
       item: 1,
+      tableSelectedRowsHandle: [],
     });
   };
   handleModalCatlog = (item, status) => {
@@ -1182,7 +1320,7 @@ export default class ResourceClassify extends PureComponent {
       this.setState({
         detailType: 1,
       });
-    } else if (listItemData.dataSourceType === 'mongo'|| listItemData.dataSourceType === 'hbase') {
+    } else if (listItemData.dataSourceType === 'mongo' || listItemData.dataSourceType === 'hbase') {
       dispatch({
         type: 'dervieSource/get',
         payload: { id: listItemData.id },
@@ -1198,7 +1336,7 @@ export default class ResourceClassify extends PureComponent {
       });
       dispatch({
         type: 'catalog/operateLog',
-        payload: {  type: 'api' ,id: listItemData.dataSourceId},
+        payload: { type: 'api', id: listItemData.dataSourceId },
       });
       this.setState({
         detailType: 3,
@@ -1248,15 +1386,16 @@ export default class ResourceClassify extends PureComponent {
   };
   handleAdd = (catalogItem, addTableRows, fieldsValues) => {
     const { dispatch } = this.props;
+    choiceSelectedRowsDefault = [];
     const { choiceFeild } = this.state;
     dispatch({
       type: 'dervieSource/add',
       payload: {
         ...fieldsValues,
-        "classify_id": treeSelect[0],
-        "dataSourceId": modalListData.id,
-        "dataSourceName": modalListData.sourceName,
-        "dataSourceType": modalListData.sourceType,
+        'classify_id': treeSelect[0],
+        'dataSourceId': modalListData.id,
+        'dataSourceName': modalListData.sourceName,
+        'dataSourceType': modalListData.sourceType,
       },
       callback: (resp) => {
         if (this.state.item == 2) {
@@ -1300,7 +1439,7 @@ export default class ResourceClassify extends PureComponent {
           let itemFieldList = catalogItem.map(item => {
             return item.id;
           });
-          let params = { };
+          let params = {};
           params[resp] = itemFieldList;
           dispatch({
             type: 'dervieSource/collection',
@@ -1369,11 +1508,31 @@ export default class ResourceClassify extends PureComponent {
   };
   choiseFeild = (data) => {
     const { dispatch } = this.props;
-    this.handleModalVisibleChoice(true);
     dispatch({
       type: 'catalog/tableField',
       payload: { tableId: data.id },
+      callback:()=>{
+        this.setState({choicedataListItems:data.selectArray});
+        this.handleModalVisibleChoice(true);
+      }
     });
+  };
+  onChangeRadioGroup = (value) => {
+    const { dispatch } = this.props;
+    this.setState({ choiceFeild: [], choicelist: [] });
+    dispatch({
+      type: 'centersource/fetchTable',
+      payload: { id: modalListData.id, type: value.target.value },
+    });
+  };
+  setChoicedaraListItem = (data) => {
+    this.state.choicedataList.forEach(item => {
+      if (choiseListItemData.id == item.id) {
+        item.selectArray = data;
+      }
+    });
+    this.setState({ choicedataList: this.state.choicedataList});
+    // this.setState({  choicedataListItems: data });
   };
   getListBuyId = (data, index) => {
     this.handleItem(index);
@@ -1390,7 +1549,13 @@ export default class ResourceClassify extends PureComponent {
       // });
       dispatch({
         type: 'centersource/fetchTable',
-        payload: { id: data.id },
+        payload: { id: data.id, type: 'TABLE' },
+        callback: (res) => {
+          let arr = res.map(item => {
+            return { ...item, selectArray: [] };
+          });
+          this.setState({ choicedataList: arr || [], choicedataListItems: [] });
+        },
       });
     }
     if (index == 4) {
@@ -1414,7 +1579,7 @@ export default class ResourceClassify extends PureComponent {
         content: '删除数据不可恢复，请悉知！！！',
         okText: '确定',
         cancelText: '取消',
-        onOk:()=> {
+        onOk: () => {
           this.state.selectedRows.forEach((item, index) => {
             if (index === this.state.selectedRows.length - 1) {
               dispatch({
@@ -1441,11 +1606,11 @@ export default class ResourceClassify extends PureComponent {
             }
           });
         },
-        onCancel:()=> {
+        onCancel: () => {
         },
       });
-    }else{
-      message.error('请先选择数据')
+    } else {
+      message.error('请先选择数据');
     }
   };
 
@@ -1456,11 +1621,11 @@ export default class ResourceClassify extends PureComponent {
 
   handleTree = data => {
     treeSelect = data;
-    // const { dispatch } = this.props;
-    // dispatch({
-    //   type: 'dervieSource/fetch',
-    //   payload: data,
-    // });
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'dervieSource/fetch',
+      payload: { pid: data[0] },
+    });
   };
   addHandle = data => {
     if (!treeSelect) {
@@ -1475,12 +1640,9 @@ export default class ResourceClassify extends PureComponent {
     });
   };
   handleChoiceFeild = (list) => {
-    const { choiceFeild, choiceFeildCount,choicelist } = this.state;
+    const { choiceFeild, choicelist } = this.state;
     this.setState({
-      choiceFeildCount: choiceFeildCount + 1,
-    });
-    this.setState({
-      choicelist:choicelist.concat([{...choiseListItemData}]),
+      choicelist: choicelist.concat([{ ...choiseListItemData }]),
     });
     this.setState({
       choiceFeild: [...new Set(choiceFeild.concat(list))],
@@ -1538,20 +1700,23 @@ export default class ResourceClassify extends PureComponent {
 
   render() {
     const {
-      dervieSource: { data,detail },
+      dervieSource: { data, detail },
       dervieClassify: { treeData },
       catalog: { catalogItem, field, tableAndField, logdata },
-      centersource: { sqlList, data: formData, dataList, lifelist: { list: lifelist }, httpItem },
+      centersource: { sqlList, data: formData, dataList, lifelist, httpItem },
       form,
       loading,
     } = this.props;
     const {
-      selectedRows, modalVisible, modalVisibleCatlog, radioSwitch, modalVisibleResource,
-      modalVisibleChoice, item, type, choiceFeild, choiceFeildCount, choicelist,detailType, selectItem,
+      selectedRows, modalVisible, modalVisibleCatlog, radioSwitch, modalVisibleResource, choicedataList, choicedataListItems,
+      modalVisibleChoice, item, type, choiceFeild, choicelist, detailType, selectItem, tableSelectedRows,
     } = this.state;
     const parentMethods = {
+      tableSelectedRows: tableSelectedRows,
+      tableSelectedRowsHandle: this.tableSelectedRowsHandle,
       httpItem: httpItem,
       handleStandardTableChange: this.handleStandardTableChangeDataSource,
+      handleStandardTableChangeFile: this.handleStandardTableChangeFile,
       lifelist: lifelist,
       handleAdd: this.handleAdd,
       handleItem: this.handleItem,
@@ -1562,19 +1727,22 @@ export default class ResourceClassify extends PureComponent {
       data: formData,
       catalogItem: catalogItem,
       catalogItemChange: this.catalogItemChange,
-      dataList: dataList,
+      dataList: choicedataList,
       item: item,
       modalVisible: modalVisible,
       type: type,
       handleType: this.handleType,
       choiceFeild: choiceFeild,
-      choiceFeildCount: choiceFeildCount,
-      choicelist:choicelist,
+      choicelist: choicelist,
       selectChange: this.selectChange,
       selectItem: selectItem,
+      onChangeRadioGroup: this.onChangeRadioGroup,
     };
     const parentMethodsChoice = {
       data: field,
+      choicedataList: choicedataList,
+      choicedataListItems: choicedataListItems,
+      setChoicedaraListItem: this.setChoicedaraListItem,
       choiceFeild: choiceFeild,
       handleChoiceFeild: this.handleChoiceFeild,
       handleAdd: this.handleAddChoice,
@@ -1597,32 +1765,64 @@ export default class ResourceClassify extends PureComponent {
     const columns = [
       {
         title: '序号',
-        width:'150px',
+        width: '150px',
         render: (text, record, index) => <span>{index + 1}</span>,
       },
       {
         title: '数据名称',
-        width:'150px',
+        width: '150px',
         dataIndex: 'name',
       },
       {
         title: '所属数据源',
-        width:'150px',
+        width: '150px',
         dataIndex: 'dataSourceName',
       },
       {
         title: '数据源类型',
-        width:'150px',
+        width: '150px',
         dataIndex: 'dataSourceType',
+        render(val) {
+          let text = '关系型数据库/MySql';
+          if (val === 'mysql') {
+            text = '关系型数据库/MySql';
+          } else if (val === 'oracle') {
+            text = '关系型数据库/Oracle';
+          } else if (val === 'sqlserver') {
+            text = '关系型数据库/SqlServer';
+          } else if (val === 'mongo') {
+            text = '非关系型数据库/MongoDB';
+          } else if (val === 'hbase') {
+            text = '非关系型数据库/HBase';
+          } else if (val === 'local') {
+            text = '本地文件/Local';
+          } else if (val === 'ftp') {
+            text = '文件系统/FTP';
+          } else if (val === 'sftp') {
+            text = '普通文件系统/SFTP';
+          } else if (val === 'share') {
+            text = '共享文件系统/Share';
+          } else if (val === 'rest') {
+            text = 'API/REST';
+          } else if (val === 'https') {
+            text = 'API/HTTPS';
+          } else if (val === 'http') {
+            text = 'API/HTTP';
+          } else if (val === 'wsdl') {
+            text = 'API/WSDL';
+          }
+
+          return text;
+        },
       },
       {
         title: '数据来源',
-        width:'150px',
+        width: '150px',
         dataIndex: 'source',
       },
       {
         title: '操作',
-        width:'150px',
+        width: '150px',
         render: (text, record, index) => {
           return (
             <Fragment>

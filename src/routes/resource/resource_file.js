@@ -545,6 +545,19 @@ export default class ResourceClassify extends PureComponent {
         title: '数据源类型',
         dataIndex: 'dataSourceType',
         width:'150px',
+        render(val) {
+          let text = '本地文件/Local';
+          if( val === 'local' ) {
+            text = '本地文件/Local';
+          } else if( val === 'ftp' ) {
+            text = '文件系统/FTP';
+          } else if( val === 'sftp' ) {
+            text = '普通文件系统/SFTP';
+          } else if( val === 'share' ) {
+            text = '共享文件系统/Share';
+          }
+          return text;
+        },
       },
       {
         title: '文件储存路径',
@@ -595,6 +608,19 @@ export default class ResourceClassify extends PureComponent {
         title: '数据源类型',
         width:'150px',
         dataIndex: 'sourceType',
+        render(val) {
+          let text = '本地文件/Local';
+          if( val === 'local' ) {
+            text = '本地文件/Local';
+          } else if( val === 'ftp' ) {
+            text = '文件系统/FTP';
+          } else if( val === 'sftp' ) {
+            text = '普通文件系统/SFTP';
+          } else if( val === 'share' ) {
+            text = '共享文件系统/Share';
+          }
+          return text;
+        },
       },
       {
         title: '数据源描述',

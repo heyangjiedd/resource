@@ -15,7 +15,10 @@ export default {
     treeData: [],
     dataList: [],
     dataListPage: [],
-    lifelist: [],
+    lifelist: {
+      list: [],
+      pagination: {},
+    },
     httpItem: {},
     orgList: [],
     sqlList: [],
@@ -108,12 +111,13 @@ export default {
       });
       if (callback) callback();
     },
-    * fetchTable({ payload }, { call, put }) {
+    * fetchTable({ payload,callback }, { call, put }) {
       const response = yield call(tableList, payload);
       yield put({
         type: 'list',
         payload: response,
       });
+      if (callback) callback(response);
     },
     * fetchTablePage({ payload }, { call, put }) {
       const response = yield call(tableListPage, payload);

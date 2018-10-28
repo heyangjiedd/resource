@@ -37,6 +37,7 @@ let itemDataStatus = 1;
 let listItemData = {};
 let treeSelect = '';
 let treeSelectValue = '';
+let searchValue = {};
 
 const CreateForm = Form.create()(props => {
   const { modalVisible, form, handleAdd, handleModalVisible } = props;
@@ -67,9 +68,9 @@ const CreateForm = Form.create()(props => {
     }
     return value;
   };
-  let title = itemDataStatus===1?"编辑分类":itemDataStatus===2?"查看分类":"新增分类";
-  if( title === '新增分类' && listItemData.parentName) {
-    title = "新增子类";
+  let title = itemDataStatus===1?"编辑分类":itemDataStatus===2?"查看分类":"添加同级分类";
+  if( title === '添加同级分类' && listItemData.parentName) {
+    title = "添加下级分类";
   }
 
   const footer = (<Row>
@@ -94,12 +95,12 @@ const CreateForm = Form.create()(props => {
       onCancel={() => handleModalVisible()}
     >
 
-      {itemDataStatus==3||!listItemData.parentName?'':<FormItem {...formItemLayout} label="父级分类名称">
+      {listItemData.parentName?<FormItem {...formItemLayout} label="父级分类名称">
         {form.getFieldDecorator('parentName', {
           rules: [{  message: '请输入父级分类名称' }],
           initialValue: listItemData.parentName,
         })(<Input disabled/>)}
-      </FormItem>}
+      </FormItem>:''}
       <FormItem {...formItemLayout} label="分类名称">
         {form.getFieldDecorator('name', {
           rules: [{ required: true, message: '请输入分类名称' },{ max: 20, message: '最大长度不超过20' }], initialValue: listItemData.name,
@@ -107,7 +108,9 @@ const CreateForm = Form.create()(props => {
       </FormItem>
       <FormItem {...formItemLayout} label="排序号">
         {form.getFieldDecorator('sort', {
-          rules: [{ required: true, message: '请输入排序号' },{pattern:/^[1-9]+\d*$/,message:'输入正整数'},{ max: 9, message: '最大长度不超过9' }], initialValue: listItemData.sort+'',
+          rules: [{ required: true, message: '请输入排序号' },
+            {pattern:/^[1-9]+\d*$/,message:'输入正整数'},
+            { max: 9, message: '最大长度不超过9' }], initialValue: listItemData.sort&&(listItemData.sort+''),
         })(<Input type='number' disabled={itemDataStatus === 2} placeholder={itemDataStatus === 2?'':"请输入排序号"}/>)}
       </FormItem>
       <FormItem {...formItemLayout} label="分类描述">
@@ -143,6 +146,7 @@ export default class ResourceClassify extends PureComponent {
      itemDataStatus = 1;
      listItemData = {};
      treeSelect = '';
+    searchValue = {};
   }
   componentDidMount() {
     const { dispatch } = this.props;
@@ -168,11 +172,7 @@ export default class ResourceClassify extends PureComponent {
     if (sorter.field) {
       params.sorter = `${sorter.field}_${sorter.order}`;
     }
-
-    dispatch({
-      type: 'dervieClassify/fetch',
-      payload: params,
-    });
+    this.fetchAll(params);
   };
 
   handleFormReset = () => {
@@ -258,10 +258,12 @@ export default class ResourceClassify extends PureComponent {
       // });
     });
   };
-  fetchAll =()=>{
-    const { dispatch } = this.props;
+  fetchAll =(data)=>{
+    const { dispatch} = this.props;
+    searchValue = data || searchValue
     dispatch({
       type: 'dervieClassify/fetch',
+      payload: searchValue,
     });
     dispatch({
       type: 'dervieClassify/tree',
@@ -273,16 +275,28 @@ export default class ResourceClassify extends PureComponent {
     });
   };
   handleModal = (item,status) => {
-    listItemData = item;
     const {
       dervieClassify: { treeData },
     } = this.props;
-    treeData.forEach(item=>{
-      if(item.id == treeSelect){
-        listItemData.parentName = item.name
-        return
+    if(status==4){
+      let select = treeData.filter(r => {
+        return treeSelect == r.id;
+      });
+      item.parentName = select[0].name
+    }else{
+      let select = treeData.filter(r => {
+        return treeSelect == r.id;
+      });
+      if(select&&select.length>0) {
+        let select1 = treeData.filter(r => {
+          return select[0].parentId == r.id;
+        });
+        if(select1.length > 0){
+          item.parentName = select1[0].name;
+        }
       }
-    });
+    }
+    listItemData = item;
     itemDataStatus = status;
     this.handleModalVisible(true);
   };
@@ -318,22 +332,7 @@ export default class ResourceClassify extends PureComponent {
         payload: {...fields,parentId:parentId},
         callback: (res) => {
           message.success('添加成功');
-          if( parentId !== '' ) {
-            let params = {
-              pid: parentId,
-            };
-            dispatch({
-              type: 'dervieClassify/fetch',
-              payload: params,
-            });
-          } else {
-            dispatch({
-              type: 'dervieClassify/fetch',
-            });
-          }
-          dispatch({
-            type: 'dervieClassify/tree',
-          });
+          this.fetchAll();
           // if(res=='success'){
           //
           // }else{
@@ -412,10 +411,7 @@ export default class ResourceClassify extends PureComponent {
         return
       }
     });
-    dispatch({
-      type: 'dervieClassify/fetch',
-      payload: { pid: treeSelect },
-    });
+    this.fetchAll({ pid: treeSelect });
   };
 
   render() {

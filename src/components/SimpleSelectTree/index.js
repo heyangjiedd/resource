@@ -22,12 +22,13 @@ class SimpleTree extends PureComponent {
     };
   }
   componentDidMount() {
-    const { dispatch,url } = this.props;
+    const { dispatch,url ,defaultValue} = this.props;
     dispatch({
       type:url,
       callback: (list) => {
         this.setState({
           treeData:list,
+          value:defaultValue,
         });
       }
     });
