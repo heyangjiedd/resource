@@ -28,6 +28,7 @@ import StandardTable from 'components/StandardTable';
 import StandardTableNoCheck from 'components/StandardTableNoCheck';
 import StandardTableNothing from 'components/StandardTableNothing';
 import StandardTableNoPage from 'components/StandardTableNoPage';
+import StandardTableNoPage1 from 'components/StandardTableNoPage1';
 import StandardTableRadio from 'components/StandardTableRadio';
 import StandardTableEdit from 'components/StandardTableEdit';
 import SimpleTableEdit from 'components/SimpleTableEdit';
@@ -39,6 +40,7 @@ import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
 import styles from './index.less';
 import ARR from '../../assets/arr';
+import EditableTable1 from '../../components/StandardTableEdit1';
 
 const FormItem = Form.Item;
 const { Option } = Select;
@@ -266,7 +268,7 @@ const CatlogDetail = Form.create()(props => {
   );
 });
 const ChoiceList = Form.create()(props => {
-  const { modalVisible, handleAdd, handleModalVisible, loading, data, columns, handleChoiceFeild, choiceFeild } = props;
+  const { modalVisible, handleAdd, handleModalVisible, loading, data, columns, handleChoiceFeild, /*choiceFeild*/ selectedFields, curSelectedRowKeys} = props;
   const okHandle = () => {
     handleChoiceFeild(selectedRows);
     handleModalVisible();
@@ -306,16 +308,18 @@ const ChoiceList = Form.create()(props => {
       z-index={1001}
       onCancel={() => handleModalVisible()}
     >
-      <Row gutter={24}>
-        <Col span={24}>
-          <span>已选字段：{selectedRows.map(item => {
-            return item.name;
-          }).join(',')}</span>
-        </Col>
-      </Row>
-      <StandardTableNoPage
+      {/*<Row gutter={24}>*/}
+        {/*<Col span={24}>*/}
+          {/*<span>已选字段：{selectedRows.map(item => {*/}
+            {/*return item.name;*/}
+          {/*}).join(',')}</span>*/}
+        {/*</Col>*/}
+      {/*</Row>*/}
+      <StandardTableNoPage1
         selectedRows={selectedRows}
         data={data}
+        curSelectedRowKeys={curSelectedRowKeys}
+        rowKey='id'
         scroll={{ y: 240 }}
         columns={columnsNoPage}
         onSelectRow={handleSelectRows}
@@ -326,9 +330,9 @@ const ChoiceList = Form.create()(props => {
 });
 const CreateForm = Form.create()(props => {
   const {
-    modalVisible, form, handleAdd, handleModalVisible, data, handleItem, item, catalogItem, dataList, handleItemSearch,
-    searchHandle, getListBuyId, choiseFeild, choiseList, type, handleType, choiceFeild, choiceFeildCount,choicelist, catalogItemChange,
-    selectHttpItem, httpItem, lifelist, handleStandardTableChange,sourceTableField
+    dispatch, modalVisible, form, handleAdd, handleModalVisible, data, handleItem, item, catalogItem, dataList, handleItemSearch,
+    searchHandle, getListBuyId, choiseFeild, choiseList, type, handleType, /*choiceFeild, choiceFeildCount,*/choicelist, catalogItemChange,
+    selectHttpItem, httpItem, lifelist, handleStandardTableChange,sourceTableField, selDataSource,selDataSourceIds, selectedFields, selectedFieldsCount, relationships,
   } = props;
   const { getFieldDecorator } = form;
   const columns = [
@@ -479,7 +483,8 @@ const CreateForm = Form.create()(props => {
                        getPopupContainer={triggerNode => triggerNode.parentNode} onSelect={(select, current) => {
           save(text, record, index, select, current);
         }}>
-          {choiceFeild.map(item => {
+          {/*{choiceFeild.map(item => {*/}
+          {selectedFields.map(item => {
             return (
               <Option title={item.name} value={item.id}>{item.name}</Option>
             );
@@ -520,11 +525,13 @@ const CreateForm = Form.create()(props => {
   };
   const submitHandle = () => {
     if (item == 2) {
-      if(choiceFeildCount == 0){
+      // if(choiceFeildCount == 0){
+      if(selectedFields.length == 0){
         message.error('请先选择字段');
         return
       }
-      if(choiceFeildCount>=2&&setTableRows.length==0){
+      // if(choiceFeildCount>=2&&setTableRows.length==0){
+      if(selectedFields.length>=2&&setTableRows.length==0){
         message.error('请先设置表间关系');
         return
       }
@@ -546,7 +553,7 @@ const CreateForm = Form.create()(props => {
     }
   };
   const save = (text, record, index, select, current) => {
-    let params = choiceFeild.filter(item => {
+    let params = selectedFields.filter(item => {
       return item.id == select;
     })[0];
     record = {
@@ -635,7 +642,14 @@ const CreateForm = Form.create()(props => {
     fgxxsjkHandleSelectRows = data;
   };
   const handleSelectRows = (data) => {
+    // console.log(data);
+    // selDataSource
+    dispatch({
+      type: 'catalog/setSelDataSource',
+      payload: data,
+    });
     choiceSelectedRows = data;
+
   };
   const handleSubmit = () => {
     form.validateFields((err, fieldsValue) => {
@@ -695,7 +709,7 @@ const CreateForm = Form.create()(props => {
         </Row><Row gutter={{ md: 8, lg: 24, xl: 48 }}>
 
       </Row></Form><StandardTableRadio
-        selectedRows={choiceSelectedRows}
+        selectedRowKeys={selDataSourceIds}
         data={data}
         columns={columns}
         onSelectRow={handleSelectRows}
@@ -765,20 +779,26 @@ const CreateForm = Form.create()(props => {
         <Row>
           <Col>
             <span>
-              已选字段：<span>{choiceFeild.map(item => {
-              return item.name;
-            }).join(',')}</span>
+              {/*已选字段：<span>{choiceFeild.map(item => {*/}
+              已选字段：<span>{
+                selectedFields.map((item) => {
+                  let subitem = item.map(item0=>{
+                    return item0.tableName + '(' + item0.name + ')';
+                  }).join(',');
+                return subitem + ',';
+                })}</span>
             </span>
           </Col>
         </Row>
         <Row>
           <Col>
             <span>
-              已选择<span>{choiceFeildCount}</span>张表，共<span>{choiceFeild.length}</span>个字段，需设置至少<span>{(choiceFeildCount || 1) - 1}</span>个表间关系
+              {/*已选择<span>{choiceFeildCount}</span>张表，共<span>{choiceFeild.length}</span>个字段，需设置至少<span>{(choiceFeildCount || 1) - 1}</span>个表间关系*/}
+              已选择<span>{Object.keys(selectedFields).length}</span>张表，共<span>{selectedFieldsCount}</span>个字段，需设置至少<span>{(Object.keys(selectedFields).length || 1) - 1}</span>个表间关系
             </span>
           </Col>
         </Row>
-        {choiceFeildCount > 1?<div>        <Row>
+        {selectedFieldsCount > 1?<div>        <Row>
           <Col>
             <span>
               设置表间关系：
@@ -786,11 +806,12 @@ const CreateForm = Form.create()(props => {
           </Col>
         </Row>
           <Row>
-            <StandardTableEdit
-              selectedRows={addTableSelectedRows}
-              data={addTableRows}
-              selectItemTable={choicelist}
-              selectItemFeild={choiceFeild}
+            <EditableTable1
+              // selectedRows={addTableSelectedRows}
+              relationships={relationships}
+              dispatch={dispatch}
+              // selectItemTable={choicelist}
+              selectedFields={selectedFields}
               transMsg={getSelectRows}
               scroll={{ y: 180 }}
             />
@@ -1183,8 +1204,8 @@ export default class ResourceClassify extends PureComponent {
     item: 1,
     type: 1,
     detailType: 1,
-    choiceFeild: [],
-    choiceFeildCount: 0,
+    // choiceFeild: [],
+    // choiceFeildCount: 0,
     radioSwitch: 'view',
   };
   componentDidMount() {
@@ -1341,14 +1362,21 @@ export default class ResourceClassify extends PureComponent {
     });
   };
   handleModalVisible = flag => {
+    const {dispatch} = this.props;
     searchValue = { resourceId: '', relationDb: '', unrelationDb: '', api: '', files: '' };
     this.setState({
       modalVisible: !!flag,
-      choiceFeild: [],
-      choiceFeildCount: 0,
+      // choiceFeild: [],
+      // choiceFeildCount: 0,
       choicelist:[],
       item: 1,
     });
+
+    //清空所有选择
+    dispatch({
+      type: 'catalog/clearSelect',
+    });
+
   };
   handleModalCatlog = (item, status) => {
     listItemData = item;
@@ -1436,8 +1464,9 @@ export default class ResourceClassify extends PureComponent {
 
   };
   handleAdd = (catalogItem, addTableRows) => {
-    const { dispatch } = this.props;
-    const { choiceFeild } = this.state;
+    const { dispatch, catalog } = this.props;
+    // const { choiceFeild } = this.state;
+    const { selectedFields } = catalog;
     if (this.state.item == 2) {
       let itemFieldList = catalogItem.map(item => {
         return {
@@ -1453,7 +1482,8 @@ export default class ResourceClassify extends PureComponent {
           'rightTableId': item.name2,
         };
       });
-      let fieldIds = choiceFeild.map(item => {
+      // let fieldIds = choiceFeild.map(item => {
+      let fieldIds = selectedFields.map(item => {
         return item.id;
       }).join(',');
       let params = {
@@ -1537,9 +1567,19 @@ export default class ResourceClassify extends PureComponent {
     }
   };
   handleItem = (index) => {
+    // const { dispatch } = this.props;
+    // const {
+    //   catalog: { selDataSource },
+    // } = this.props;
+
     this.setState({
       item: index,
     });
+
+    // dispatch({
+    //   type: 'catalog/setSelDataSource',
+    //   payload: selDataSource,
+    // });
   };
   handleType = (index) => {
     this.setState({
@@ -1549,6 +1589,12 @@ export default class ResourceClassify extends PureComponent {
   choiseFeild = (data) => {
     const { dispatch } = this.props;
     this.handleModalVisibleChoice(true);
+    // console.log(data);
+    dispatch({
+      type: 'catalog/saveCurrentTable',
+      payload: data,
+    });
+
     dispatch({
       type: 'catalog/tableField',
       payload: { tableId: data.id },
@@ -1712,15 +1758,24 @@ export default class ResourceClassify extends PureComponent {
     });
   };
   handleChoiceFeild = (list) => {
-    const { choiceFeild, choiceFeildCount ,choicelist} = this.state;
-    this.setState({
-      choiceFeildCount: choiceFeildCount + 1,
-    });
+    const { dispatch } = this.props;
+    // const { choiceFeild, choiceFeildCount ,choicelist} = this.state;
+    const {choicelist} = this.state;
+    // console.log("handleChoiceFeild");
+    // console.log( list );
+    // this.setState({
+    //   choiceFeildCount: choiceFeildCount + 1,
+    // });
     this.setState({
       choicelist:choicelist.concat([{...choiseListItemData}]),
     });
-    this.setState({
-      choiceFeild: [...new Set(choiceFeild.concat(list))],
+    // this.setState({
+    //   choiceFeild: [...new Set(choiceFeild.concat(list))],
+    // });
+
+    dispatch({
+      type: 'catalog/selectField',
+      payload: list,
     });
   };
   catalogItemChange = (index) => {
@@ -1793,13 +1848,16 @@ export default class ResourceClassify extends PureComponent {
 
   render() {
     const {
-      catalog: { data, catalogItem, field, tableAndField, logdata, catTable,sourceTableField },
+      catalog: { data, catalogItem, field, tableAndField, logdata, catTable,sourceTableField, selDataSource, selDataSourceIds, curSelectedRowKeys, selectedFields, selectedFieldsCount, relationships },
       loading,
       centersource: { sqlList, data: formData, dataList, lifelist: { list: lifelist }, httpItem },
       form,
+      dispatch,
     } = this.props;
-    const { selectedRows, modalVisible, modalVisibleCatlog, radioSwitch, modalVisibleResource, modalVisibleChoice, item, type, choiceFeild, choiceFeildCount,choicelist, detailType } = this.state;
+    const { selectedRows, modalVisible, modalVisibleCatlog, radioSwitch, modalVisibleResource, modalVisibleChoice, item, type /*choiceFeild, choiceFeildCount*/,choicelist, detailType } = this.state;
+
     const parentMethods = {
+      dispatch: dispatch,
       httpItem: httpItem,
       handleStandardTableChange: this.handleStandardTableChangeDataSource,
       lifelist: lifelist,
@@ -1814,17 +1872,24 @@ export default class ResourceClassify extends PureComponent {
       catalogItemChange: this.catalogItemChange,
       dataList: dataList,
       item: item,
+      relationships: relationships,
       modalVisible: modalVisible,
       type: type,
       handleType: this.handleType,
       sourceTableField:sourceTableField,
-      choiceFeild: choiceFeild,
+      selectedFields: selectedFields,
+      selectedFieldsCount: selectedFieldsCount,
+      // choiceFeild: choiceFeild,
       choicelist:choicelist,
-      choiceFeildCount: choiceFeildCount,
+      // choiceFeildCount: choiceFeildCount,
+      selDataSource: selDataSource,
+      selDataSourceIds: selDataSourceIds,
     };
     const parentMethodsChoice = {
       data: field,
-      choiceFeild: choiceFeild,
+      curSelectedRowKeys: curSelectedRowKeys,
+      // choiceFeild: choiceFeild,
+      selectedFields: selectedFields,
       handleChoiceFeild: this.handleChoiceFeild,
       handleAdd: this.handleAddChoice,
       handleModalVisible: this.handleModalVisibleChoice,
@@ -1833,6 +1898,7 @@ export default class ResourceClassify extends PureComponent {
       handleAdd: this.handleAddCatlog,
       handleModalVisible: this.handleModalVisibleCatlog,
     };
+
     const parentMethodsResource = {
       handleAdd: this.handleAddResource,
       radioSwitcHandle: this.radioSwitcHandle,

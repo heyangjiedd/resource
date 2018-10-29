@@ -15,14 +15,15 @@ function initTotalList(columns) {
 class StandardTable extends PureComponent {
   constructor(props) {
     super(props);
-    const { columns } = props;
+    const { columns, selectedRowKeys } = props;
     const needTotalList = initTotalList(columns);
 
     this.state = {
-      selectedRowKeys: [],
+      selectedRowKeys: selectedRowKeys || [],
       needTotalList,
     };
   }
+
   componentWillMount(){
     const { defaultSelectRows } = this.props;
     if(defaultSelectRows&&defaultSelectRows.length > 0){
@@ -31,15 +32,30 @@ class StandardTable extends PureComponent {
         })});
     }
   }
+
   componentWillReceiveProps(nextProps) {
-    // clean state
-    if (nextProps.selectedRows.length === 0) {
+    console.log("componentWillReceiveProps");
+
+    if( nextProps.columns && nextProps.selectedRowKeys ) {
       const needTotalList = initTotalList(nextProps.columns);
       this.setState({
-        selectedRowKeys: [],
+        selectedRowKeys: nextProps.selectedRowKeys || [],
         needTotalList,
       });
     }
+
+    // clean state
+    // if (nextProps.selectedRows.length === 0) {
+    //   const needTotalList = initTotalList(nextProps.columns);
+    //   this.setState({
+    //     selectedRowKeys: [],
+    //     needTotalList,
+    //   });
+    // } else {
+    //   this.setState({
+    //     selectedRowKeys: nextProps.selectedRows,
+    //   });
+    // }
   }
 
   handleRowSelectChange = (selectedRowKeys, selectedRows) => {
@@ -63,11 +79,13 @@ class StandardTable extends PureComponent {
   };
 
   handleTableChange = (pagination, filters, sorter) => {
+    console.log("handleTableChange");
     const { onChange } = this.props;
     onChange(pagination, filters, sorter);
   };
 
   cleanSelectedKeys = () => {
+    console.log("cleanSelectedKeys");
     this.handleRowSelectChange([], []);
   };
 
@@ -79,10 +97,10 @@ class StandardTable extends PureComponent {
       columns,
       rowKey,
     } = this.props;
-    let pagination = {
+    const pagination = {
       current:pageNum,
-      total:total,
-      pageSize:pageSize,
+      total,
+      pageSize,
     };
     const paginationProps = {
       showTotal:(total, range)=>{

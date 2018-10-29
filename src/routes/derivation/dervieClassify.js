@@ -333,7 +333,12 @@ export default class ResourceClassify extends PureComponent {
       dispatch({
         type: 'dervieClassify/add',
         payload: {...fields,parentId:parentId},
-        callback: (res) => {
+        callback: (response) => {
+          // console.log( res );
+          if( response.code !== 200 ) {
+            message.error(response.error);
+            return;
+          }
           message.success('添加成功');
           this.fetchAll();
           // if(res=='success'){
@@ -341,12 +346,13 @@ export default class ResourceClassify extends PureComponent {
           // }else{
           //   message.error('添加失败');
           // }
+          this.setState({
+            modalVisible: false,
+          });
         },
       });
     }
-    this.setState({
-      modalVisible: false,
-    });
+
   };
 
   renderForm() {

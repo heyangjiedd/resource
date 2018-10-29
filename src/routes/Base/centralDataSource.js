@@ -575,6 +575,8 @@ const UpdateForm = Form.create()(props => {
   let needPort = true;
   let showDbName = styles.displayblock;
   let needDbName = true;
+  let showSid = styles.displaynone;
+  let needSid = false;
   let showDbUser = styles.displayblock;
   let needDbUser = true;
   let showDbPassword = styles.displayblock;
@@ -594,6 +596,19 @@ const UpdateForm = Form.create()(props => {
     listItemData.resourceType = '关系型数据库';
     resourceTypeLabel = '数据库类型';
     resourceTypeHolder = '请输入数据库类型';
+
+    if( listItemData.sourceType === 'oracle' ) {
+      showDbName = styles.displaynone;
+      needDbName = false;
+      if (listItemData.dbName && listItemData.dbName !== '' && listItemData.dbName !== 'null') {
+        showDbName = styles.displayblock;
+        needDbName = true;
+      }
+      if (listItemData.sid && listItemData.sid !== '' && listItemData.sid !== 'null') {
+        showSid = styles.displayblock;
+        needSid = true;
+      }
+    }
   } else if (listItemData.sourceType === 'mongo' || listItemData.sourceType === 'hbase') {
     listItemData.resourceType = '非关系型数据库';
     resourceTypeLabel = '数据库类型';
@@ -687,17 +702,18 @@ const UpdateForm = Form.create()(props => {
         })(<Input className={showPort} disabled={itemDataStatus === 1} placeholder="请输入端口" />)}
       </FormItem>
       {
-        listItemData.sourceType!=='oracle'||listItemData.dbName? (
+        // listItemData.sourceType!=='oracle'|| listItemData.dbName? (
+        listItemData.sourceType!=='oracle'|| (listItemData.dbName !=='' && listItemData.dbName !== 'null' )? (
           <FormItem className={showDbName} {...formItemLayout} label="数据库名称/SID">
             {form.getFieldDecorator('dbName', {
             rules: [{ required: needDbName, message: '请输入数据库名称/SID' }], initialValue: listItemData.dbName,
           })(<Input className={showDbName} disabled={itemDataStatus === 1} placeholder="请输入数据库名称/SID" />)}
           </FormItem>
 ):(
-  <FormItem className={showDbName} {...formItemLayout} label="数据库名称/SID">
+  <FormItem className={showSid} {...formItemLayout} label="数据库名称/SID">
     {form.getFieldDecorator('sid', {
-            rules: [{ required: needDbName, message: '请输入数据库名称/SID' }], initialValue: listItemData.sid,
-          })(<Input className={showDbName} disabled={itemDataStatus === 1} placeholder="请输入数据库名称/SID" />)}
+            rules: [{ required: needSid, message: '请输入数据库名称/SID' }], initialValue: listItemData.sid,
+          })(<Input className={showSid} disabled={itemDataStatus === 1} placeholder="请输入数据库名称/SID" />)}
   </FormItem>
 )
       }
@@ -1117,7 +1133,11 @@ export default class ResourceClassify extends PureComponent {
                 type: 'centersource/remove',
                 payload: {
                   id: item.id,
-                }, callback: () => {
+                }, callback: (resp) => {
+                  if( resp.code != 200 ) {
+                    message.error( resp.error );
+                    return;
+                  }
                   message.success('删除成功');
                   this.setState({
                     selectedRows: [],
@@ -1130,8 +1150,17 @@ export default class ResourceClassify extends PureComponent {
                 type: 'centersource/remove',
                 payload: {
                   id: item.id,
-                },
-              });
+                },callback: (resp) => {
+                if( resp.code != 200 ) {
+                  message.error( resp.error );
+                  return;
+                }
+                message.success('删除成功');
+                this.setState({
+                  selectedRows: [],
+                });
+                this.fecthApi()
+              }});
             }
           });
         },

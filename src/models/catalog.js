@@ -1,6 +1,6 @@
 import {
   catalogList, catalogListTree, querycatalogItem, tableField, itemField,operateLogApi,
-  catalogApi, catalogCollection, catalogFile, catalogTableAndTableField,catalogTable,sourceTableField
+  catalogApi, catalogCollection, catalogFile, catalogTableAndTableField,catalogTable,sourceTableField,
 } from '../services/api';
 
 export default {
@@ -14,9 +14,11 @@ export default {
     treeData: [],
     catalogItem: [],
     field: [],
+    selectedFields:[], /* 当前已经选中的字段 */
+    selectedFieldsCount:0,
     tableAndField: [{
       sourceTable:{},
-      tableFieldList:[]
+      tableFieldList:[],
     }],
     logdata:{
       list: [],
@@ -24,6 +26,13 @@ export default {
     },
     catTable:[],
     sourceTableField:[],
+
+    selDataSource:[], /* 选择的数据源 */
+    selDataSourceIds:[], /* 选择的数据源 */
+    currentTable:{}, /* 当前选中的表 */
+    curSelectedRowKeys:[], /* 当前表选中的字段 */
+
+    relationships:[], /* 表间关系 */
   },
 
   effects: {
@@ -113,7 +122,7 @@ export default {
     * querycatalogItemCopy({ payload, callback }, { call, put }) {
       yield put({
         type: 'catalogItemCopy',
-        payload: payload,
+        payload,
       });
     },
     * catalogTableAndTableField({ payload, callback }, { call, put }) {
@@ -176,9 +185,82 @@ export default {
       };
     },
     field(state, action) {
+      // 判断是否已经被选中
+      // console.log( action );
+      // console.log( state.selectedFields );
+      const newFields = action.payload.map(item=>{
+        const item0 = item;
+        item0.checked = false;
+        const id = item.id;
+        const tableId = item.tableId;
+        if( state.selectedFields[tableId] ) {
+          const existed = state.selectedFields[tableId].some((item1) => {
+            return item1.id===id // 结果为true
+          });
+          if( existed ) {
+            item0.checked = true;
+          }
+        }
+        return item0;
+      });
+
+      // console.log( newFields );
+
       return {
         ...state,
-        field: action.payload,
+        field: newFields,
+      };
+    },
+    selectField(state, action) {
+      let selectedFields = state.selectedFields;
+      const tableId = state.currentTable.id;
+      selectedFields[tableId] = [];
+      selectedFields[tableId] = action.payload;
+
+
+      // console.log( Object.keys(selectedFields) );
+      let selectedFieldsCount = 0;
+      selectedFields.map(item=>{
+        item.map(item0=>{
+          selectedFieldsCount++;
+        });
+      });
+      return {
+        ...state,
+        selectedFields: selectedFields,
+        selectedFieldsCount: selectedFieldsCount,
+      };
+    },
+    clearSelect(state, action) {
+      return {
+        ...state,
+        selectedFields: [],
+        selectedFieldsCount: 0,
+        selDataSource: [],
+        selDataSourceIds: [],
+        currentTable: {},
+        curSelectedRowKeys: [],
+      };
+    },
+    saveCurrentTable(state, action) {
+      let tableId = action.payload.id;
+      let selectedFields = state.selectedFields;
+      // console.log(action);
+      // console.log(action.payload);
+      // console.log(tableId);
+      let curSelectedRowKeys = [];
+      if( selectedFields[tableId] ) {
+        // console.log(selectedFields[tableId]);
+          curSelectedRowKeys = selectedFields[tableId].map(item => {
+          return item.id;
+        });
+      }
+
+      // console.log( curSelectedRowKeys );
+      return {
+        ...state,
+        currentTable: action.payload,
+        curSelectedRowKeys: curSelectedRowKeys,
       };
     },
     treeData(state, action) {
@@ -191,6 +273,49 @@ export default {
       return {
         ...state,
         treeData: action.payload,
+      };
+    },
+
+    addRelationShip(state, action) {
+      let relationships = state.relationships;
+      relationships.push( action.payload );
+
+      console.log(relationships);
+      return {
+        ...state,
+        relationships: relationships,
+      };
+    },
+
+    delRelationShip(state, action) {
+      console.log(action.payload);
+      let keys = action.payload;
+      console.log(keys);
+      let relationships = state.relationships.filter(item => {
+        let check = keys.some(item0=>{
+          return item0 == item.key;
+        });
+        return !check;
+      });
+      console.log( relationships );
+      // let relationships = state.relationships;
+      return {
+        ...state,
+        relationships: relationships,
+      };
+    },
+
+    setSelDataSource(state, action) {
+      const selDataSourceIds = action.payload.map(item=>{
+        return item.id;
+      });
+
+      // console.log( "setSelDataSource=" );
+      // console.log( selDataSourceIds );
+      return {
+        ...state,
+        selDataSource: action.payload,
+        selDataSourceIds,
       };
     },
   },
