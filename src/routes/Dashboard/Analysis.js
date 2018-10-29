@@ -25,7 +25,7 @@ import {
   Pie,
   TimelineChart,
 } from 'components/Charts';
-import { Link } from 'dva/router';
+import { Link, routerRedux } from 'dva/router';
 import Trend from 'components/Trend';
 import NumberInfo from 'components/NumberInfo';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
@@ -48,6 +48,7 @@ import {
 } from 'bizcharts';
 
 import styles from './Analysis.less';
+import { stringify } from 'qs';
 
 const { TabPane } = Tabs;
 const { RangePicker } = DatePicker;
@@ -83,6 +84,9 @@ export default class Analysis extends Component {
   componentDidMount() {
     const { dispatch } = this.props;
     //1
+    if(!localStorage.getItem('token_str')){
+      return
+    }
     dispatch({
       type: 'charts/fetchCatlog1',
       payload: { fid: '1' },

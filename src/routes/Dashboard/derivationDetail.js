@@ -61,6 +61,9 @@ export default class DerivationDetail extends PureComponent {
     // dispatch({
     //   type: 'dervieClassify/derivechildybyid',
     // });
+    if(!localStorage.getItem('token_str')){
+      return
+    }
     dispatch({
       type: 'charts/deriveClassify',
     });

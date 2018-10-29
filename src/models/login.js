@@ -16,6 +16,8 @@ export default {
   effects: {
     *login({ payload }, { call, put }) {
       const response = yield call(fakeAccountLogin, payload);
+      localStorage.setItem('token_str', response.token_type+response.access_token);
+      console.log('login',localStorage.getItem('token_str'))
       const {dispatch } = store
       yield put({
         type: 'changeLoginStatus',
@@ -25,7 +27,6 @@ export default {
       if (response){
         // reloadAuthorized();
         localStorage.setItem('antd-pro-authority','admin');
-        localStorage.setItem('token_str', response.token_type+response.access_token);
         dispatch(routerRedux.push('/'));
       }
       return
@@ -58,6 +59,16 @@ export default {
         },
       });
       reloadAuthorized();
+      yield put(
+        routerRedux.push({
+          pathname: '/user/login',
+          search: stringify({
+            redirect: window.location.href,
+          }),
+        })
+      );
+    },
+    *logout1(_, { put }) {
       yield put(
         routerRedux.push({
           pathname: '/user/login',

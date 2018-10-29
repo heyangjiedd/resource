@@ -170,6 +170,9 @@ export default class ResourceClassify extends PureComponent {
   };
 
   componentDidMount() {
+    if(!localStorage.getItem('token_str')){
+      return
+    }
     const { dispatch } = this.props;
     dispatch({
       type: 'centersource/fetchOrgList',

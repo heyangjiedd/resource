@@ -385,18 +385,18 @@ const CreateForm = Form.create()(props => {
     {/* initialValue: createItemData.sid, */}
     {/* })(<Input placeholder="请输入SID"/>)} */}
     {/* </FormItem> */}
-    <FormItem {...formItemLayout} label="数据库名称">
+    {createItemData.sourceType === 'hbase'?'':<div><FormItem {...formItemLayout} label="数据库名称">
       {form.getFieldDecorator('dbName', {
               rules: [{ required: true, message: '请输入数据库名称' }],
               initialValue: createItemData.dbName,
             })(<Input placeholder="请输入数据库名称" />)}
     </FormItem>
-    <FormItem {...formItemLayout} label="数据库版本号">
-      {form.getFieldDecorator('dbVersion', {
-              rules: [{ required: true, message: '请输入数据库版本号' }],
-              initialValue: createItemData.dbVersion,
-            })(<Input placeholder="请输入数据库版本号" />)}
-    </FormItem>
+      <FormItem {...formItemLayout} label="数据库版本号">
+    {form.getFieldDecorator('dbVersion', {
+      rules: [{ required: true, message: '请输入数据库版本号' }],
+      initialValue: createItemData.dbVersion,
+    })(<Input placeholder="请输入数据库版本号" />)}
+      </FormItem></div>}
     <FormItem {...formItemLayout} label="用户名">
       {form.getFieldDecorator('account', {
               rules: [{ message: '请输入用户名' }],
@@ -600,6 +600,9 @@ const UpdateForm = Form.create()(props => {
     resourceTypeHolder = '请输入数据库类型';
     needDbUser = false;
     needDbPassword = false;
+    if(createItemData.sourceType === 'hbase'){
+      showDbName = styles.displaynone;  needDbName = false;
+    }
   } else if (listItemData.sourceType === 'http' || listItemData.sourceType === 'https' || listItemData.sourceType === 'wsdl'
     || listItemData.sourceType === 'rest') {
     listItemData.resourceType = 'API';
@@ -852,6 +855,9 @@ export default class ResourceClassify extends PureComponent {
   }
 
   componentDidMount() {
+    if(!localStorage.getItem('token_str')){
+      return
+    }
     const { dispatch } = this.props;
     dispatch({
       type: 'centersource/fetchOrgList',

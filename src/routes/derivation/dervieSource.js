@@ -635,7 +635,7 @@ const CreateForm = Form.create()(props => {
                   data={addTableRows}
                   // selectItemTable={choicelist}
                   // selectItemFeild={choiceFeild}
-                  allData={choicedataList}
+                  allData={choicedataList.filter((item)=>{return item.selectArray.length > 0})}
                   transMsg={getSelectRows}
                   scroll={{ y: 180 }}
                 />
@@ -670,7 +670,9 @@ const CreateForm = Form.create()(props => {
             }
             <Row>
               <StandardTableNothing
-                data={choiceFeild}
+                data={choicedataList.reduce((total,item)=>{
+                  return total.concat(item.selectArray);
+                },[])}
                 scroll={{ y: 180 }}
                 columns={columnscatalogItem}
               />
@@ -1109,6 +1111,9 @@ export default class ResourceClassify extends PureComponent {
   }
 
   componentDidMount() {
+    if(!localStorage.getItem('token_str')){
+      return
+    }
     const { dispatch } = this.props;
     dispatch({
       type: 'dervieSource/fetch',

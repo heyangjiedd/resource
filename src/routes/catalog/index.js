@@ -1188,6 +1188,9 @@ export default class ResourceClassify extends PureComponent {
     radioSwitch: 'view',
   };
   componentDidMount() {
+    if(!localStorage.getItem('token_str')){
+      return
+    }
     const { dispatch } = this.props;
     dispatch({
       type: 'catalog/fetch',
