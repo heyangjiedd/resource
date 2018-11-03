@@ -52,7 +52,6 @@ export default function request(url, options) {
     credentials: 'include',
   };
   const newOptions = { ...defaultOptions, ...options};
-  console.log('headers',localStorage.getItem('token_str'))
   newOptions.headers={Authorization:localStorage.getItem('token_str')};
   if (
     newOptions.method === 'POST' ||

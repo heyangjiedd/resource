@@ -17,7 +17,7 @@ export default {
     *login({ payload }, { call, put }) {
       const response = yield call(fakeAccountLogin, payload);
       localStorage.setItem('token_str', response.token_type+response.access_token);
-      console.log('login',localStorage.getItem('token_str'))
+      localStorage.setItem('username', payload.username);
       const {dispatch } = store
       yield put({
         type: 'changeLoginStatus',

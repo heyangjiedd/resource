@@ -118,6 +118,12 @@ export default class GlobalHeader extends PureComponent {
             >
               <Icon type="environment-o" /><span className={styles.location}>内江市</span>
             </span>
+            <span
+              rel="noopener noreferrer"
+              className={styles.action}
+            >
+              {localStorage.getItem('username')}
+            </span>
             <a
               href="#user/login"
               rel="noopener noreferrer"

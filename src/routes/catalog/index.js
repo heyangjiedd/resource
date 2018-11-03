@@ -476,19 +476,30 @@ const CreateForm = Form.create()(props => {
       dataIndex: 'len',
     }, {
       title: '字段名',
-      width:'150px',
+      width:'250px',
       dataIndex: 'feild_name',
       render: (text, record, index) => {
-        return <Select placeholder={'请选择'} style={{ width: 120 }}
+        return <Select placeholder={'请选择'} style={{ width: 200 }}
                        getPopupContainer={triggerNode => triggerNode.parentNode} onSelect={(select, current) => {
           save(text, record, index, select, current);
         }}>
           {/*{choiceFeild.map(item => {*/}
-          {selectedFields.map(item => {
-            return (
-              <Option title={item.name} value={item.id}>{item.name}</Option>
-            );
-          })}
+          {
+
+            Object.keys(selectedFields).map(key=>{
+              // console.log("---------------------------------------");
+              // console.log(selectedFields);
+              // console.log(selectedFields[key]);
+              // console.log("---------------------------------------");
+              let options = selectedFields[key].map(item => {
+                // console.log(item);
+                return (
+                  <Option title={item.tableName + "/" +　item.name} value={item.id}>{item.tableName + "/" +　item.name}</Option>
+                );
+              });
+              return options;
+            })
+          }
         </Select>;
       },
     }, {
@@ -526,16 +537,29 @@ const CreateForm = Form.create()(props => {
   const submitHandle = () => {
     if (item == 2) {
       // if(choiceFeildCount == 0){
-      if(selectedFields.length == 0){
+      if(Object.keys(selectedFields).length == 0){
         message.error('请先选择字段');
         return
       }
       // if(choiceFeildCount>=2&&setTableRows.length==0){
-      if(selectedFields.length>=2&&setTableRows.length==0){
+      console.log(selectedFields);
+      console.log(Object.keys(selectedFields));
+      console.log(Object.keys(selectedFields).length);
+      if(Object.keys(selectedFields).length>=2&&relationships.length==0){
         message.error('请先设置表间关系');
         return
       }
-      handleAdd(catalogItem, setTableRows);
+
+      //目数关联
+      console.log( catalogItem );
+      if( !catalogItem.some(item=>{
+        console.log( item.feild_id );
+          return item.feild_id !== 'undefined';
+      }) ) {
+        message.error('请先设置目数关联');
+        return
+      }
+      handleAdd(catalogItem, relationships);
     } else if (item == 3) {
       if(fgxxsjkHandleSelectRows.length <= 0){
         message.error('请先勾选数据');
@@ -553,9 +577,14 @@ const CreateForm = Form.create()(props => {
     }
   };
   const save = (text, record, index, select, current) => {
-    let params = selectedFields.filter(item => {
-      return item.id == select;
-    })[0];
+    let params = Object.keys(selectedFields).map(key=>{
+      let selField = selectedFields[key].filter(item=>{
+        return item.id == select;
+      });
+      return selField;
+    })[0][0];
+    console.log( params );
+
     record = {
       ...record, ...{
         feild_description: params.description,
@@ -1209,9 +1238,6 @@ export default class ResourceClassify extends PureComponent {
     radioSwitch: 'view',
   };
   componentDidMount() {
-    if(!localStorage.getItem('token_str')){
-      return
-    }
     const { dispatch } = this.props;
     dispatch({
       type: 'catalog/fetch',
@@ -1463,7 +1489,7 @@ export default class ResourceClassify extends PureComponent {
   handleAddChoice = (data, index) => {
 
   };
-  handleAdd = (catalogItem, addTableRows) => {
+  handleAdd = (catalogItem, relationships) => {
     const { dispatch, catalog } = this.props;
     // const { choiceFeild } = this.state;
     const { selectedFields } = catalog;
@@ -1474,18 +1500,24 @@ export default class ResourceClassify extends PureComponent {
           'itemId': item.id,
         };
       });
-      let tableRelationList = addTableRows.map(item => {
+      let tableRelationList = relationships.map(item => {
         return {
-          'leftFieldId': item.feils1,
-          'leftTableId': item.name1,
-          'rightFieldId': item.feils2,
-          'rightTableId': item.name2,
+          'leftFieldId': item.field1,
+          'leftTableId': item.tableName1,
+          'rightFieldId': item.field2,
+          'rightTableId': item.tableName2,
         };
       });
+
       // let fieldIds = choiceFeild.map(item => {
-      let fieldIds = selectedFields.map(item => {
-        return item.id;
+      let fieldIds = Object.keys(selectedFields).map(key => {
+        let ids = selectedFields[key].map(item=>{
+          return item.id;
+        });
+        return ids.join(',');
       }).join(',');
+
+
       let params = {
         fieldIds: fieldIds,
         dataSourceId: modalListData.id,
@@ -1493,6 +1525,12 @@ export default class ResourceClassify extends PureComponent {
         itemFieldList: itemFieldList,
         tableRelationList: tableRelationList,
       };
+
+      console.log("params");
+      console.log(params);
+
+      // if( true )
+      //   return;
       dispatch({
         type: 'catalog/add',
         payload: params,
@@ -1786,7 +1824,7 @@ export default class ResourceClassify extends PureComponent {
       return item;
     });
     dispatch({
-      type: 'catalog/querycatalogItemCopy',
+      type: 'catalog/catalogItemCopy',
       payload: list,
     });
   };

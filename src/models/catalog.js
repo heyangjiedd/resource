@@ -179,6 +179,7 @@ export default {
       };
     },
     catalogItemCopy(state, action) {
+      // console.log( action );
       return {
         ...state,
         catalogItem: action.payload,
@@ -212,11 +213,14 @@ export default {
       };
     },
     selectField(state, action) {
-      let selectedFields = state.selectedFields;
+      const selectedFields = state.selectedFields;
       const tableId = state.currentTable.id;
-      selectedFields[tableId] = [];
-      selectedFields[tableId] = action.payload;
-
+      if( action.payload.length > 0 ) {
+        selectedFields[tableId] = [];
+        selectedFields[tableId] = action.payload;
+      } else {
+        delete selectedFields[tableId];
+      }
 
       // console.log( Object.keys(selectedFields) );
       let selectedFieldsCount = 0;
@@ -227,8 +231,8 @@ export default {
       });
       return {
         ...state,
-        selectedFields: selectedFields,
-        selectedFieldsCount: selectedFieldsCount,
+        selectedFields,
+        selectedFieldsCount,
       };
     },
     clearSelect(state, action) {
@@ -240,11 +244,12 @@ export default {
         selDataSourceIds: [],
         currentTable: {},
         curSelectedRowKeys: [],
+        relationships: [],
       };
     },
     saveCurrentTable(state, action) {
-      let tableId = action.payload.id;
-      let selectedFields = state.selectedFields;
+      const tableId = action.payload.id;
+      const selectedFields = state.selectedFields;
       // console.log(action);
       // console.log(action.payload);
       // console.log(tableId);
@@ -260,7 +265,7 @@ export default {
       return {
         ...state,
         currentTable: action.payload,
-        curSelectedRowKeys: curSelectedRowKeys,
+        curSelectedRowKeys,
       };
     },
     treeData(state, action) {
@@ -277,22 +282,22 @@ export default {
     },
 
     addRelationShip(state, action) {
-      let relationships = state.relationships;
+      const relationships = state.relationships;
       relationships.push( action.payload );
 
       console.log(relationships);
       return {
         ...state,
-        relationships: relationships,
+        relationships,
       };
     },
 
     delRelationShip(state, action) {
       console.log(action.payload);
-      let keys = action.payload;
+      const keys = action.payload;
       console.log(keys);
-      let relationships = state.relationships.filter(item => {
-        let check = keys.some(item0=>{
+      const relationships = state.relationships.filter(item => {
+        const check = keys.some(item0=>{
           return item0 == item.key;
         });
         return !check;
@@ -301,7 +306,25 @@ export default {
       // let relationships = state.relationships;
       return {
         ...state,
-        relationships: relationships,
+        relationships,
+      };
+    },
+    changeRelationShip(state, action) {
+      console.log(action.payload);
+      const row = action.payload;
+
+      const relationships = state.relationships.map(item => {
+          if( item.key === row.key ) {
+            return row;
+          } else {
+            return item;
+          }
+      });
+      console.log( relationships );
+      // let relationships = state.relationships;
+      return {
+        ...state,
+        relationships,
       };
     },
 

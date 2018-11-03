@@ -622,7 +622,8 @@ const CreateForm = Form.create()(props => {
             </span>
               </Col>
             </Row>
-            {tableLength > 1 ? <div><Row>
+            {tableLength > 1 ?
+              <div><Row>
               <Col>
             <span>
               设置表间关系：
@@ -679,7 +680,9 @@ const CreateForm = Form.create()(props => {
             </Row>
             <Row>
               <Col>
-                <span>共{choiceFeild.length}个信息项</span>
+                <span>共{choicedataList.reduce((total,item)=>{
+                  return total.concat(item.selectArray);
+                },[]).length}个信息项</span>
               </Col>
             </Row>
           </div> :
